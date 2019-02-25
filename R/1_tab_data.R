@@ -88,22 +88,22 @@ summary(crop_price[grep(crops[i], names(crop_price))])
 i <- i + 1
 # drop total, cotton, potato, cocoa, coffee, mate, wheat
 
-drop <- unlist(
-  sapply(c("total", "cotton", "potato", "cocoa", "coffee", "mate", "wheat"), 
-         grep, names(crop_ton)))
+drop <- c(sapply(c("total", "cotton_a", "potato", "cocoa", "coffee", "mate", "wheat"), 
+                 grep, names(crop_ton)))
 crop_ton <- crop_ton[-drop]
 
-drop <- unlist(
-  sapply(c("total", "cotton", "potato", "cocoa", "coffee", "mate", "wheat"), 
-         grep, names(crop_price)))
+drop <- c(sapply(c("total", "cotton_a", "potato", "cocoa", "coffee", "mate", "wheat"), 
+                 grep, names(crop_price)))
 crop_price <- crop_price[-drop]
 
 names(crop_ton) <- gsub("banana", "ton_ban", names(crop_ton))
+names(crop_ton) <- gsub("cotton_b", "ton_cot", names(crop_ton))
 names(crop_ton) <- gsub("sugarcane", "ton_sug", names(crop_ton))
 names(crop_ton) <- gsub("soy", "ton_soy", names(crop_ton))
 names(crop_ton) <- gsub("sorghum", "ton_sor", names(crop_ton))
 
 names(crop_price) <- gsub("banana", "pr_ban", names(crop_price))
+names(crop_price) <- gsub("cotton_b", "pr_cot", names(crop_price))
 names(crop_price) <- gsub("sugarcane", "pr_sug", names(crop_price))
 names(crop_price) <- gsub("soy", "pr_soy", names(crop_price))
 names(crop_price) <- gsub("sorghum", "pr_sor", names(crop_price))

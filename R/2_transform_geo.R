@@ -4,7 +4,7 @@ mt <- which(as.integer(shp$CD_GEOCMU) %in% gdp$id)
 shp[mt, ] %>% select(NM_MUNICIP) %>% 
   plot(label = NM_MUNICIP)
 
-geo_merged_df <- readRDS("data/geo_merged_df_wide.rds")
+geo_merged_df <- readRDS("data/geo/geo_merged_df_wide.rds")
 geo_merged_df$code <- shp[geo_merged_df$id, ]$CD_GEOCMU
 
 shp2 <- right_join(shp, geo_merged_df, by = c("CD_GEOCMU" = "code"))
