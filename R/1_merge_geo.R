@@ -1,5 +1,8 @@
 library(dplyr)
 
+
+# merge shape & raster data ----------------------------------------------
+
 crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
 
 tifs <- list.files("data/landsat", "[.]tif$")
@@ -15,7 +18,7 @@ for(i in seq_along(tifs)) {
   extr_vals[[i]] <- raster::extract(r, shp, df = TRUE)
 }
 names(extr_vals) <- paste0("y", formatC(1:17, width = 2, flag = "0"))
-saveRDS(extr_vals, "data/geo_merged_raw.rds")
+saveRDS(extr_vals, "data/geo/geo_merged_raw.rds")
 
 # kick out NAs and change to integer and factor
 vals <- lapply(extr_vals, function(x) x[!is.na(x[[2]]), ])
@@ -49,9 +52,11 @@ names(occ) <- unique(df_vals[[1]])
 id_filter <- as.integer(names(occ[occ < 1000]))
 
 df <- df_vals[!df_vals$id %in% id_filter, ]
-saveRDS(df, "data/geo_merged_df.rds")
+# store the results
+saveRDS(df, "data/geo/geo_merged_df.rds")
 
 
+# transform to more usable format -----------------------------------------
 
 pull_vars <- function(x, form, date = FALSE) {
   
@@ -99,7 +104,7 @@ df_wide <- as_tibble(cbind(
   df09[-1], df10[-1], df11[-1], df12[-1], df13[-1], df14[-1], df15[-1], df16[-1],
   df17[-1]
 ))
-saveRDS(df_wide, "data/geo_merged_df_wide.rds")
+saveRDS(df_wide, "data/geo/geo_merged_df_wide.rds")
 
 df01 <- pull_vars(df, id ~ y01, date = TRUE)
 df02 <- pull_vars(df, id ~ y02, date = TRUE)
@@ -123,31 +128,5 @@ df_date <- as_tibble(rbind(
   df01, df02, df03, df04, df05, df06, df07, df08, df09,
   df10, df11, df12, df13, df14, df15, df16, df17
 ))
-saveRDS(df_date, "data/geo_merged_df_date.rds")
+saveRDS(df_date, "data/geo/geo_merged_df_date.rds")
 
-
-# 
-# # continue with sf
-# shp <- sf::st_read(dsn = "data/municipios")
-# shp <- sf::st_transform(shp, crs = crs_sin)
-# 
-# # cut down to non NAs with more than 1000 tiles inside
-# extr <- extr_raw[!is.na(extr_raw[2]), ]
-# id_matches <- extr %>% group_by(ID) %>% 
-#   count() %>% 
-#   dplyr::filter(n > 1000) %>% 
-#   dplyr::select(ID)
-# extr <- extr %>% dplyr::filter(ID %in% id_matches$ID)
-# 
-# # filter the shapefile
-# shp <- shp[id_matches$ID, ]
-# shp$ID <- id_matches$ID
-# 
-# # add a name to the factor
-# extr$mt_2005 <- factor(x = extr$mt_2005, 
-#                        labels = c("cerrado", "fallow_cotton", "forest", 
-#                                   "pasture", "soy_corn", "soy_cotton",
-#                                   "soy_fallow", "soy_millet", "soy_sunflower",
-#                                   "sugarcane", "urban", "water"))
-# 
-# extr %>% count(ID, mt_2005)
