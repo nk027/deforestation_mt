@@ -97,16 +97,36 @@ drop <- c(sapply(c("total", "cotton_a", "potato", "cocoa", "coffee", "mate", "wh
 crop_price <- crop_price[-drop]
 
 names(crop_ton) <- gsub("banana", "ton_ban", names(crop_ton))
-names(crop_ton) <- gsub("cotton_b", "ton_cot", names(crop_ton))
 names(crop_ton) <- gsub("sugarcane", "ton_sug", names(crop_ton))
 names(crop_ton) <- gsub("soy", "ton_soy", names(crop_ton))
 names(crop_ton) <- gsub("sorghum", "ton_sor", names(crop_ton))
 
 names(crop_price) <- gsub("banana", "pr_ban", names(crop_price))
-names(crop_price) <- gsub("cotton_b", "pr_cot", names(crop_price))
 names(crop_price) <- gsub("sugarcane", "pr_sug", names(crop_price))
 names(crop_price) <- gsub("soy", "pr_soy", names(crop_price))
 names(crop_price) <- gsub("sorghum", "pr_sor", names(crop_price))
 
 crop <- left_join(crop_ton, crop_price, by = c("id", "name"))
 saveRDS(crop, "data/crop.rds")
+
+long_cat <- function(x, variable) {
+  x <- x[c(1, grep(variable, names(x)))]
+  x <- reshape2::melt(x, id.vars = "code", stringsAsFactors = FALSE)
+  x$variable <- as.character(x$variable)
+  x$date <- 2000 + as.integer(substr(x$variable,
+                                     nchar(x$variable) - 1,
+                                     nchar(x$variable)))
+  names(x)[names(x) == "value"] <- substr(x$variable, 1, nchar(x$variable) - 2)[1]
+  x$variable <- NULL
+  x
+}
+
+variables <- c(paste0("pr_", c("ban", "sug", "soy", "sor")),
+               paste0("ton_", c("ban", "sug", "soy", "sor")))
+
+long <- vector("list", length(variables))
+for(i in seq_along(variables)) {
+  long[[i]] <- long_cat(crop, variables[i])
+}
+
+x <- Reduce(function(df1, df2) left_join(df1, df2, by = c("code", "date")), long)
