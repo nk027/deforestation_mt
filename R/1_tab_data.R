@@ -129,4 +129,27 @@ for(i in seq_along(variables)) {
   long[[i]] <- long_cat(crop, variables[i])
 }
 
-x <- Reduce(function(df1, df2) left_join(df1, df2, by = c("code", "date")), long)
+crop_long <- Reduce(function(df1, df2) {
+  left_join(df1, df2, by = c("code", "date"))}, long)
+saveRDS(crop_long, "data/crop_long.rds")
+
+
+variables <- paste0("pop", formatC(c(1:6, 8:9, 11:18), width = 2, flag = "0"))
+long <- vector("list", length(variables))
+for(i in seq_along(variables)) {
+  long[[i]] <- long_cat(pop, variables[i])
+}
+
+pop_long <- Reduce(function(df1, df2) {
+  rbind(df1, df2)}, long)
+saveRDS(pop_long, "data/pop_long.rds")
+
+variables <- paste0("gdp", formatC(2:16, width = 2, flag = "0"))
+long <- vector("list", length(variables))
+for(i in seq_along(variables)) {
+  long[[i]] <- long_cat(gdp, variables[i])
+}
+
+gdp_long <- Reduce(function(df1, df2) {
+  rbind(df1, df2)}, long)
+saveRDS(gdp_long, "data/gdp_long.rds")
