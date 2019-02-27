@@ -1,17 +1,29 @@
-shp <- sf::read_sf("data/municipios/")
+library(dplyr)
 
-mt <- which(as.integer(shp$CD_GEOCMU) %in% gdp$id)
-shp[mt, ] %>% select(NM_MUNICIP) %>% 
-  plot(label = NM_MUNICIP)
+shp <- sf::read_sf("data/municipios/") %>% 
+  transmute(name = NM_MUNICIP, code = as.integer(CD_GEOCMU))
 
-geo_merged_df <- readRDS("data/geo/geo_merged_df_wide.rds")
-geo_merged_df$code <- shp[geo_merged_df$id, ]$CD_GEOCMU
+geo_df <- readRDS("data/geo/geo_merged_df_date.rds")
+geo_df$code <- shp$code[geo_df$id]
+
+pop <- readRDS("data/sidra/pop_long.rds")
+gdp <- readRDS("data/sidra/gdp_long.rds")
+crop <- readRDS("data/sidra/crop_long.rds")
+
+x <- full_join(gdp, pop, by = c("date", "code"))
+y <- full_join(x, crop, by = c("date", "code"))
+df <- full_join(y, geo_df, by = c("code", "date")); rm(x, y)
+
 
 shp2 <- right_join(shp, geo_merged_df, by = c("CD_GEOCMU" = "code"))
 
 shp2 %>% 
   select(y01_for, y10_for, y17_for) %>% 
   plot()
+
+mt <- which(as.integer(shp$CD_GEOCMU) %in% gdp$id)
+shp[mt, ] %>% select(NM_MUNICIP) %>% 
+  plot(label = NM_MUNICIP)
 
 # 
 # # continue with sf
