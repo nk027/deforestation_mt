@@ -15,7 +15,9 @@ centr <- cbind(centr, st_coordinates(st_centroid(shp$geometry)))
 # area == m² -> area/1e6 == km²
 shp <- shp %>% 
   mutate(gdp_c = gdp / pop, pop_d = log(pop / as.double(area) * 1e6), 
-         for_d = forest / as.double(area) * 1e6, cro_d = crop / as.double(area) * 1e6)
+         for_d = forest / 16 / as.double(area) * 1e6, 
+         pas_d = pasture / 16 / as.double(area) * 1e6, 
+         cro_d = crop / 16 / as.double(area) * 1e6)
 
 
 # GDP per Capita
@@ -101,6 +103,27 @@ for(year in 2002:2017) {
 }
 plot_grid(plotlist = x, ncol = 4)
 ggsave("plots/crop_density.pdf", width = 16, height = 12)
+
+# Pasture
+x <- vector("list", length(2002:2017))
+i <- 1
+for(year in 2002:2017) {
+  x[[i]] <- shp %>% 
+    filter(date %in% year) %>% 
+    ggplot() +
+    ggtitle(year) +
+    geom_sf(aes(fill = pas_d)) +
+    scale_fill_viridis_c() +
+    theme(text = element_text(family = "DejaVu Sans Mono"), 
+          axis.line = element_blank(), axis.ticks = element_blank(),
+          axis.text.x = element_blank(), axis.text.y = element_blank(), 
+          axis.title.x = element_blank(), axis.title.y = element_blank(), 
+          panel.background = element_blank(), panel.border = element_blank(), 
+          plot.background = element_blank())
+  i <- i + 1
+}
+plot_grid(plotlist = x, ncol = 4)
+ggsave("plots/pasture_density.pdf", width = 16, height = 12)
 
 
 lapply(shp, summary)
