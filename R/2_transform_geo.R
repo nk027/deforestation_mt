@@ -22,16 +22,4 @@ df <- as_tibble(df)
 
 shp_df <- full_join(shp, df, by = "code")
 
-centr <- st_centroid(shp_df)
-centr <- cbind(centr, st_coordinates(st_centroid(shp_df$geometry)))
-
-library(ggplot2)
-
-shp_df %>% 
-  filter(date %in% c(2005)) %>% 
-  mutate(gdp_cap = gdp / pop, pop_dens = pop / area, date) %>% 
-  ggplot() +
-  geom_sf(aes(fill = gdp)) +
-#  geom_text(data = centr, aes(x = X, y = Y, label = name),
-#            color = "gray", fontface = "bold", check_overlap = TRUE) +
-  theme_minimal() 
+saveRDS(shp_df, "data/data.rds")
