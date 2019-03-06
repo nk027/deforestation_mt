@@ -130,19 +130,35 @@ ggsave("plots/pasture_density.pdf", width = 16, height = 12)
 # Line --------------------------------------------------------------------
 
 
-df_date <- readRDS("data/geo_merged_df_date.rds")
+df_date <- readRDS("data/geo/geo_merged_df_date.rds")
 
 x <- df_date %>% 
   group_by(date) %>% 
-  summarise(forest = sum(forest), crop = sum(crop), 
-            other = sum(other), pasture = sum(pasture))
+  summarise(forest = sum(forest), 
+            crop = sum(crop),
+            soy = sum(soy_corn + soy_cotton + soy_fallow + soy_millet + soy_sunflower), 
+            soy_corn = sum(soy_corn),
+            soy_cotton = sum(soy_cotton),
+            soy_fallow = sum(soy_fallow),
+            soy_millet = sum(soy_millet),
+            soy_sunflower = sum(soy_sunflower),
+            other = sum(other), 
+            pasture = sum(pasture),
+            urban = sum(urban),
+            cerrado = sum(cerrado),
+            water = sum(water))
 
 ggplot(x, aes(x = date)) +
-  geom_line(aes(y = forest), colour = colour["forest"]) +
-  geom_line(aes(y = crop), colour = colour["soy_corn"]) +
-  geom_line(aes(y = other), colour = colour["urban"]) +
-  geom_line(aes(y = pasture), colour = colour["pasture"]) +
-  ggthemes::theme_base()
+  # geom_line(aes(y = forest), colour = colour["forest"]) +
+  # geom_line(aes(y = soy), colour = colour["soy_corn"]) +
+  # geom_line(aes(y = crop), colour = colour["sugarcane"]) +
+  # geom_line(aes(y = other), colour = colour["urban"]) +
+  # geom_line(aes(y = pasture), colour = colour["pasture"]) +
+  # geom_line(aes(y = soy_corn), colour = colour["soy_corn"]) +
+  geom_line(aes(y = soy_cotton), colour = colour["soy_cotton"]) +
+  geom_line(aes(y = soy_fallow), colour = colour["soy_fallow"]) +
+  # geom_line(aes(y = soy_millet), colour = colour["soy_millet"]) +
+  geom_line(aes(y = soy_sunflower), colour = colour["soy_sunflower"])
 
 y <- df_date %>% 
   mutate(size = (forest + pasture + crop + other)) %>% 
@@ -150,23 +166,20 @@ y <- df_date %>%
 
 ggplot(y, aes(x = log(forest), y = log(pasture), colour = date, group = id)) +
   geom_path() + 
-  viridis::scale_colour_viridis() +
-  ggthemes::theme_base()
+  viridis::scale_colour_viridis()
 
 cowplot::plot_grid(
   ggplot(x, aes(x = log(forest), y = log(pasture), colour = date)) +
     geom_path() + 
-    viridis::scale_colour_viridis() +
-    ggthemes::theme_base(),
+    viridis::scale_colour_viridis(),
   ggplot(x, aes(x = log(forest), y = log(crop), colour = date)) +
     geom_path() + 
-    ggplot2::scale_colour_viridis_c() +
-    ggthemes::theme_base()
+    ggplot2::scale_colour_viridis_c()
 )
 
 ggplot(y, aes(y = forest, x = pasture, colour = id)) +
   geom_point() +
-  ggplot2::scale_color_viridis_d() +
+  scale_color_viridis_c() +
   facet_grid(. ~ date)
 
 ggplot(y, aes(y = forest, x = pasture, colour = date)) +
