@@ -69,6 +69,16 @@ pull_vars <- function(x, form, date = FALSE) {
     id = y$id,
     forest = y$forest,
     pasture = y$pasture,
+    fallow_cotton = y$fallow_cotton, 
+    soy_corn = y$soy_corn,
+    soy_cotton = y$soy_cotton, 
+    soy_fallow = y$soy_fallow,
+    soy_millet = y$soy_millet,
+    soy_sunflower = y$soy_sunflower,
+    sugarcane = y$sugarcane,
+    cerrado = y$cerrado,
+    urban = y$urban,
+    water = y$water,
     crop = y$fallow_cotton + y$soy_corn + y$soy_cotton + 
       y$soy_fallow + y$soy_millet + y$soy_sunflower + y$sugarcane,
     other = y$cerrado + y$urban + y$water
@@ -76,7 +86,7 @@ pull_vars <- function(x, form, date = FALSE) {
   if(date)
     z$date <- as.integer(substr(year, 2, 3)) + 2000L
   else
-    names(z) <- c("id", paste(year, c("for", "pas", "cro", "oth"), sep = "_"))
+    names(z) <- c("id", paste(year, names(z)[-1], sep = "_"))
   
   z
 }
