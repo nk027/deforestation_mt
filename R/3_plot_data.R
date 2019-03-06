@@ -7,10 +7,9 @@ library(cowplot)
 library(extrafonts)
 extrafont::loadfonts()
 
-shp <- readRDS("data/data.rds")
+source("R/settings.R")
 
-centr <- st_centroid(shp)
-centr <- cbind(centr, st_coordinates(st_centroid(shp$geometry)))
+shp <- readRDS("data/data.rds")
 
 # area == m² -> area/1e6 == km²
 shp <- shp %>% 
@@ -19,6 +18,8 @@ shp <- shp %>%
          pas_d = pasture / 16 / as.double(area) * 1e6, 
          cro_d = crop / 16 / as.double(area) * 1e6)
 
+
+# Maps --------------------------------------------------------------------
 
 # GDP per Capita
 x <- vector("list", length(c(2002:2006, 2008:2009, 2011:2016)))
@@ -126,7 +127,54 @@ plot_grid(plotlist = x, ncol = 4)
 ggsave("plots/pasture_density.pdf", width = 16, height = 12)
 
 
-lapply(shp, summary)
+# Line --------------------------------------------------------------------
 
-# geom_text(data = centr, aes(x = X, y = Y, label = name),
-#           color = "gray", fontface = "bold", check_overlap = TRUE) +
+
+df_date <- readRDS("data/geo_merged_df_date.rds")
+
+x <- df_date %>% 
+  group_by(date) %>% 
+  summarise(forest = sum(forest), crop = sum(crop), 
+            other = sum(other), pasture = sum(pasture))
+
+ggplot(x, aes(x = date)) +
+  geom_line(aes(y = forest), colour = colour["forest"]) +
+  geom_line(aes(y = crop), colour = colour["soy_corn"]) +
+  geom_line(aes(y = other), colour = colour["urban"]) +
+  geom_line(aes(y = pasture), colour = colour["pasture"]) +
+  ggthemes::theme_base()
+
+y <- df_date %>% 
+  mutate(size = (forest + pasture + crop + other)) %>% 
+  filter(size > quantile(size, 0.95))
+
+ggplot(y, aes(x = log(forest), y = log(pasture), colour = date, group = id)) +
+  geom_path() + 
+  viridis::scale_colour_viridis() +
+  ggthemes::theme_base()
+
+cowplot::plot_grid(
+  ggplot(x, aes(x = log(forest), y = log(pasture), colour = date)) +
+    geom_path() + 
+    viridis::scale_colour_viridis() +
+    ggthemes::theme_base(),
+  ggplot(x, aes(x = log(forest), y = log(crop), colour = date)) +
+    geom_path() + 
+    ggplot2::scale_colour_viridis_c() +
+    ggthemes::theme_base()
+)
+
+ggplot(y, aes(y = forest, x = pasture, colour = id)) +
+  geom_point() +
+  ggplot2::scale_color_viridis_d() +
+  facet_grid(. ~ date)
+
+ggplot(y, aes(y = forest, x = pasture, colour = date)) +
+  geom_path() +
+  ggplot2::scale_color_viridis_c() +
+  facet_grid(. ~ id, scales = "free")
+
+
+# Other -------------------------------------------------------------------
+
+lapply(shp, summary)
