@@ -15,14 +15,15 @@ shp <- shp %>%
   filter(code %in% geo_df$code)
 shp$area <- sf::st_area(shp)
 
-
-pop <- readRDS("data/sidra/pop_long.rds")
+pop <- readRDS("data/sidra/pop_long_full.rds")
 gdp <- readRDS("data/sidra/gdp_long.rds")
 crop <- readRDS("data/sidra/crop_long.rds")
+forestry <- readRDS("data/sidra/forestry_long.rds")
 
 x <- full_join(gdp, pop, by = c("date", "code"))
 y <- full_join(x, crop, by = c("date", "code"))
-df <- full_join(y, geo_df, by = c("code", "date")); rm(x, y)
+z <- full_join(y, forestry, by = c("date", "code"))
+df <- full_join(z, geo_df, by = c("code", "date")); rm(x, y, z)
 df <- as_tibble(df)
 
 shp_df <- full_join(shp, df, by = "code")

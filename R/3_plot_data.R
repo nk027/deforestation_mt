@@ -23,9 +23,9 @@ shp <- shp %>%
 # Maps --------------------------------------------------------------------
 
 # GDP per Capita
-x <- vector("list", length(c(2002:2006, 2008:2009, 2011:2016)))
+x <- vector("list", length(c(2002:2016)))
 i <- 1
-for(year in c(2002:2006, 2008:2009, 2011:2016)) {
+for(year in c(2002:2016)) {
   x[[i]] <- shp %>% 
     filter(date %in% year) %>% 
     ggplot() +
@@ -44,9 +44,9 @@ plot_grid(plotlist = x, ncol = 4)
 ggsave("plots/gdp_per_capita.pdf", width = 16, height = 12)
 
 # Population density
-x <- vector("list", length(c(2001:2006, 2008:2009, 2011:2018)))
+x <- vector("list", length(c(2001:2018)))
 i <- 1
-for(year in c(2002:2006, 2008:2009, 2011:2018)) {
+for(year in c(2002:2018)) {
   x[[i]] <- shp %>% 
     filter(date %in% year) %>% 
     ggplot() +

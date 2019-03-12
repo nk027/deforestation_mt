@@ -49,7 +49,7 @@ crop_price <- readRDS("data/sidra/crop_price.rds")
 
 get_state <- function(x, pattern = "[(]MT[)]") {
   out <- grep(pattern, x$name)
-  cat("Matches in order:", all(out == out [1]:out[length(out)]), "\n")
+  cat("Matches in order:", all(out == out[1]:out[length(out)]), "\n")
   out
 }
 

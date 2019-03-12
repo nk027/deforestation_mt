@@ -1,3 +1,5 @@
+# PANGEA file for 2016 is faulty - replace with the one provided by the authors
+
 
 path <- "data/landsat/"
 link <- "http://store.pangaea.de/Publications/Camara-etal_2018/MatoGrosso-LandCover-"

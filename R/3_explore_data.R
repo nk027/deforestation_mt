@@ -31,9 +31,9 @@ shp %>% select(code, date, forest, crop, pasture) %>%
   group_by(code)
 
 # Forest changes
-x <- vector("list", length(2003:2015))
+x <- vector("list", length(2003:2017))
 i <- 1
-for(year in 2003:2015) {
+for(year in 2003:2017) {
   x[[i]] <- shp %>% 
     group_by(code) %>%
     mutate(delta = (forest - lag(forest)) / lag(forest)) %>% 
@@ -42,7 +42,9 @@ for(year in 2003:2015) {
     ggplot() +
     ggtitle(year) +
     geom_sf(aes(fill = delta)) +
-    scale_fill_viridis_c(limits = c(-1, 2), na.value = "white") +
+    # scale_fill_viridis_c(limits = c(-1, 2), na.value = "white") +
+    scale_fill_gradient2(low = "#440154FF", mid = "#FFFFFF", high = "#FDE725FF",
+                         limits = c(-1, 3)) +
     theme(axis.line = element_blank(), axis.ticks = element_blank(),
           axis.text.x = element_blank(), axis.text.y = element_blank(), 
           axis.title.x = element_blank(), axis.title.y = element_blank(), 
@@ -54,9 +56,9 @@ plot_grid(plotlist = x, ncol = 4)
 ggsave("plots/forest_change_pct.pdf", width = 16, height = 12)
 
 # Forest changes
-x <- vector("list", length(2003:2015))
+x <- vector("list", length(2003:2017))
 i <- 1
-for(year in 2003:2015) {
+for(year in 2003:2017) {
   x[[i]] <- shp %>% 
     group_by(code) %>%
     mutate(delta = forest - lag(forest)) %>% 
@@ -65,7 +67,9 @@ for(year in 2003:2015) {
     ggplot() +
     ggtitle(year) +
     geom_sf(aes(fill = delta)) +
-    scale_fill_viridis_c(limits = c(-100000, 100000)) +
+    # scale_fill_viridis_c(limits = c(-100000, 100000)) +
+    scale_fill_gradient2(low = "#440154FF", mid = "#FFFFFF", high = "#FDE725FF",
+                         limits = c(-100000, 100000)) +
     theme(axis.line = element_blank(), axis.ticks = element_blank(),
           axis.text.x = element_blank(), axis.text.y = element_blank(), 
           axis.title.x = element_blank(), axis.title.y = element_blank(), 
@@ -75,3 +79,20 @@ for(year in 2003:2015) {
 }
 plot_grid(plotlist = x, ncol = 4)
 ggsave("plots/forest_change.pdf", width = 16, height = 12)
+
+shp %>% 
+  group_by(code) %>%
+  filter(date %in% c(2003, 2017)) %>% 
+  mutate(delta = forest - lag(forest)) %>% 
+  filter(date %in% year) %>% 
+  select(delta, date, code) %>%
+  ggplot() +
+  ggtitle(2017) +
+  geom_sf(aes(fill = delta)) +
+  # scale_fill_viridis_c() +
+  scale_fill_gradient2(low = "#440154FF", mid = "#FFFFFF", high = "#FDE725FF") +
+  theme(axis.line = element_blank(), axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.text.y = element_blank(), 
+        axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        panel.background = element_blank(), panel.border = element_blank(), 
+        plot.background = element_blank())

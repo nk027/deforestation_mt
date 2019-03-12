@@ -6,6 +6,7 @@ library(dplyr)
 crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
 
 tifs <- list.files("data/landsat", "[.]tif$")
+tifs <- tifs[!grepl("^mt_2016_v3[.]tif$", tifs)]
 
 # sp for raster::extract to work
 shp <- rgdal::readOGR(dsn = "data/municipios")
@@ -139,4 +140,3 @@ df_date <- as_tibble(rbind(
   df10, df11, df12, df13, df14, df15, df16, df17
 ))
 saveRDS(df_date, "data/geo/geo_merged_df_date.rds")
-
