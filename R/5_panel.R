@@ -1,25 +1,28 @@
 library(splm)
+library(spdep)
+library(sf)
 
-knear <- knearneigh(cbind(centr$X, centr$Y), k = 7)
+shp <- readRDS("data/data.rds")
+nb <- shp %>% dplyr::filter(date == 2017) %>% 
+  as_Spatial()
 
-spml(forest ~ pasture + crop, 
-     df[-2], listw = nb2listw(knn2nb(knear)))
+qu_nb <- poly2nb(nb, row.names = nb$code, queen = TRUE)
+w_qu_nb <- nb2listw(qu_nb, style = "W", zero.policy = TRUE)
+w_queen <- listw2mat(w_qu_nb)
 
+# we can also plot weights matrices
+plot(nb)
+plot(qu_nb, coordinates(nb), add = TRUE, col = "green", cex = 0.5)
 
-data(Produc, package = "plm")
-data(usaww)
-fm <- log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp
-## the two standard specifications (SEM and SAR) one with FE
-## and the other with RE:
-## fixed effects panel with spatial errors
-fespaterr <- spml(fm, data = Produc, 
-                  listw = mat2listw(usaww), model="within", 
-                  spatial.error="b", Hess = FALSE)
+shp_sel <- shp %>% dplyr::filter(date %in% 2005:2016)
 
-summary(fespaterr)
-## random effects panel with spatial lag
-respatlag <- spml(fm, data = Produc, listw = mat2listw(usaww),model="random", spatial.error="none", lag=TRUE)
-summary(respatlag)
-## calculate impact measures
-impac1 <- impacts(respatlag, listw = mat2listw(usaww, style = "W"), time = 17)
-summary(impac1, zstats=TRUE, short=TRUE)
+x <- spml(forest ~ pasture + crop + gdp + pop + area, data = shp_sel, 
+          index = c("code", "date"), listw = w_qu_nb)
+summary(x)
+x <- spml(forest ~ pasture + crop + gdp + pop + area, data = shp_sel, 
+          index = c("code", "date"), listw = w_qu_nb, spatial.error = "b")
+summary(x)
+x <- spml(forest ~ pasture + crop + gdp + pop + area, data = shp_sel, 
+          index = c("code", "date"), listw = w_qu_nb, model = "random", 
+          spatial.error = "none", lag = TRUE)
+summary(x)
