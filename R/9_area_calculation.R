@@ -1,3 +1,5 @@
+shp <- readRDS("data/data.rds")
+
 shp %>% filter(date == 2015) %>% 
   group_by(code) %>%
   transmute(v = as.double(area), 

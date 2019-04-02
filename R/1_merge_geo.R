@@ -1,38 +1,53 @@
+
 library(dplyr)
 
-
-# merge shape & raster data ----------------------------------------------
-
 crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
+crs_sirgas <- "+proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 
-tifs <- list.files("data/landsat", "[.]tif$")
-tifs <- tifs[!grepl("^mt_2016_v3[.]tif$", tifs)]
+# Merge vector & raster data ----------------------------------------------
 
-# sp for raster::extract to work
+tifs <- paste0("data/landsat/", list.files("data/landsat", "[.]tif$"))
 shp <- rgdal::readOGR(dsn = "data/municipios")
-shp <- sp::spTransform(shp, crs_sin)
+shp <- sp::spTransform(shp, crs_sin) # raster::extract works with sp, not sf
 
-# merge shp & r, takes very long
-extr_vals <- vector("list", length(tifs))
-for(i in seq_along(tifs)) {
-  r <- raster::raster(paste0("data/landsat/", tifs[i]))
-  extr_vals[[i]] <- raster::extract(r, shp, df = TRUE)
-}
+
+# Extract (computationally intensive) -------------------------------------
+
+# Parallel
+library(parallel)
+n_cores <- detectCores() - 2
+cl <- makeCluster(n_cores)
+start <- Sys.time()
+extr_vals <- parLapply(cl, tifs, function(x, shp) {
+  raster::extract(raster::raster(x), shp, df = TRUE)
+}, shp)
+cat("Calculation finished after", format(Sys.time() - start))
+stopCluster(cl)
+
+# Iterative
+# extr_vals <- vector("list", length(tifs))
+# for(i in seq_along(tifs)) {
+#   r <- raster::raster(paste0("data/landsat/", tifs[i]))
+#   extr_vals[[i]] <- raster::extract(r, shp, df = TRUE)
+# }
+
 names(extr_vals) <- paste0("y", formatC(1:17, width = 2, flag = "0"))
-saveRDS(extr_vals, "data/geo/geo_merged_raw.rds")
+saveRDS(extr_vals, "data/geo/geo_extract_raw.rds")
 
-# kick out NAs and change to integer and factor
+
+# Transform raw extracted values ------------------------------------------
+
 vals <- lapply(extr_vals, function(x) x[!is.na(x[[2]]), ])
+# Change the format to integer / factor
+# Version 3 adds a level called "Secondary Vegetation"
 vals <- lapply(vals, function(x) {
-  tibble(
-    id = as.integer(x[[1]]), 
-    use = factor(x[[2]], 
-                 levels = 1:12,
-                 labels = c("cerrado", "fallow_cotton", "forest", 
-                            "pasture", "soy_corn", "soy_cotton", 
-                            "soy_fallow", "soy_millet", "soy_sunflower",
-                            "sugarcane", "urban", "water"))
-  )
+  tibble(id = as.integer(x[[1]]), 
+         use = factor(x[[2]], levels = 1:13,
+                      labels = c("cerrado", "fallow_cotton", "forest", 
+                                 "pasture", "soy_corn", "soy_cotton", 
+                                 "soy_fallow", "soy_millet", "soy_sunflower",
+                                 "sugarcane", "urban", "water", 
+                                 "sec_veg")))
 })
 
 df_vals <- tibble(
@@ -45,16 +60,14 @@ df_vals <- tibble(
   y16 = vals$y16$use, y17 = vals$y17$use
 )
 
-hist(df_vals[[1]], breaks = 161)
-
 occ <- sapply(unique(df_vals[[1]]), function(x) sum(df_vals[[1]] == x))
 names(occ) <- unique(df_vals[[1]])
-# these have a few tiles in non Mato Grosso municipalities (1125 total)
+# Exclude gridcells in municipalities other than Mato Grosso (1125 total)
 id_filter <- as.integer(names(occ[occ < 1000]))
 
 df <- df_vals[!df_vals$id %in% id_filter, ]
-# store the results
-saveRDS(df, "data/geo/geo_merged_df.rds")
+
+saveRDS(df, "data/geo/geo_extract.rds")
 
 
 # transform to more usable format -----------------------------------------
@@ -80,15 +93,15 @@ pull_vars <- function(x, form, date = FALSE) {
     cerrado = y$cerrado,
     urban = y$urban,
     water = y$water,
+    sec_veg = y$sec_veg,
     crop = y$fallow_cotton + y$soy_corn + y$soy_cotton + 
-      y$soy_fallow + y$soy_millet + y$soy_sunflower + y$sugarcane,
-    other = y$cerrado + y$urban + y$water
+      y$soy_fallow + y$soy_millet + y$soy_sunflower + y$sugarcane
   )
-  if(date)
+  if(date) {
     z$date <- as.integer(substr(year, 2, 3)) + 2000L
-  else
+  } else {
     names(z) <- c("id", paste(year, names(z)[-1], sep = "_"))
-  
+  }
   z
 }
 
