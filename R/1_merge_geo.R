@@ -2,7 +2,6 @@
 library(dplyr)
 
 crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
-crs_sirgas <- "+proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 
 # Merge vector & raster data ----------------------------------------------
 
@@ -70,7 +69,7 @@ df <- df_vals[!df_vals$id %in% id_filter, ]
 saveRDS(df, "data/geo/geo_extract.rds")
 
 
-# transform to more usable format -----------------------------------------
+# Create tables from extracted values -------------------------------------
 
 pull_vars <- function(x, form, date = FALSE) {
   
@@ -128,7 +127,7 @@ df_wide <- as_tibble(cbind(
   df09[-1], df10[-1], df11[-1], df12[-1], df13[-1], df14[-1], df15[-1], df16[-1],
   df17[-1]
 ))
-saveRDS(df_wide, "data/geo/geo_merged_df_wide.rds")
+saveRDS(df_wide, "data/geo/geo_df_wide.rds")
 
 df01 <- pull_vars(df, id ~ y01, date = TRUE)
 df02 <- pull_vars(df, id ~ y02, date = TRUE)
@@ -152,4 +151,4 @@ df_date <- as_tibble(rbind(
   df01, df02, df03, df04, df05, df06, df07, df08, df09,
   df10, df11, df12, df13, df14, df15, df16, df17
 ))
-saveRDS(df_date, "data/geo/geo_merged_df_date.rds")
+saveRDS(df_date, "data/geo/geo_df_long.rds")
