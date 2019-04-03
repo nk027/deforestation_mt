@@ -10,7 +10,7 @@ read_sidra <- function(path, sheet = 1, skip = 0) {
   x <- as_tibble(read_ods(path, sheet, skip, col_names = FALSE, col_types = NA))
 }
 
-crop_planted_1 <- as_tibble(read_ods("data/sidra/crop_area_2.ods", sheet = 1,
+crop_planted_1 <- as_tibble(read_ods("data/sidra/crop_area_4.ods", sheet = 1,
                                      skip = 3, col_names = FALSE, col_types = NA))
 
 
