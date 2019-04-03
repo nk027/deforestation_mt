@@ -1,7 +1,6 @@
 library(dplyr)
 
 crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
-crs_sirgas <- "+proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 
 shp <- sf::read_sf("data/municipios/") %>% 
   transmute(name = NM_MUNICIP, code = as.integer(CD_GEOCMU))

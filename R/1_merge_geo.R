@@ -20,7 +20,7 @@ start <- Sys.time()
 extr_vals <- parLapply(cl, tifs, function(x, shp) {
   raster::extract(raster::raster(x), shp, df = TRUE)
 }, shp)
-cat("Calculation finished after", format(Sys.time() - start))
+cat("Calculation finished after", format(Sys.time() - start), "\n")
 stopCluster(cl)
 
 # Iterative
@@ -61,7 +61,7 @@ df_vals <- tibble(
 
 occ <- sapply(unique(df_vals[[1]]), function(x) sum(df_vals[[1]] == x))
 names(occ) <- unique(df_vals[[1]])
-# Exclude gridcells in municipalities other than Mato Grosso (1125 total)
+# Exclude gridcells in municipalities other than Mato Grosso (1085 total)
 id_filter <- as.integer(names(occ[occ < 1000]))
 
 df <- df_vals[!df_vals$id %in% id_filter, ]

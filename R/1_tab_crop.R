@@ -1,37 +1,18 @@
+
 library(dplyr)
+library(readODS)
+source("R/1_functions.R")
 
-
-# read in
-
-pop <- as_tibble(readODS::read_ods("data/sidra/pop.ods", skip = 4, 
-                                   col_names = FALSE, col_types = NA))
-names(pop) <- c("code", "name", 
-                paste0("pop", formatC(c(1:6, 8:9, 11:18), width = 2, flag = "0")))
-pop <- pop[-nrow(pop), ]
-for(int in c(1, 3:ncol(pop))) class(pop[[int]]) <- "integer"
-saveRDS(pop, "data/sidra/pop.rds")
-
-gdp <- as_tibble(readODS::read_ods("data/sidra/gdp.ods", skip = 4,
-                                   col_names = FALSE, col_types = NA))
-names(gdp) <- c("code", "name", 
-                paste0("gdp", formatC(c(2:16), width = 2, flag = "0")))
-gdp <- gdp[-nrow(gdp), ]
-class(gdp[[1]]) <- "integer"
-for(dbl in 3:ncol(gdp)) {
-  gdp[[dbl]] <- gsub("^([0-9]+),([0-9]+)$", "\\1.\\2", gdp[[dbl]])
-  class(gdp[[dbl]]) <- "double"
-}
-saveRDS(gdp, "data/sidra/gdp.rds")
 
 crop_ton <- as_tibble(readODS::read_ods("data/sidra/crop.ods", sheet = 3, skip = 5,
                                         col_names = FALSE, col_types = NA))
 crop_price <- as_tibble(readODS::read_ods("data/sidra/crop.ods", sheet = 5, skip = 5,
                                           col_names = FALSE, col_types = NA))
 names(crop_ton) <- names(crop_price) <- c("code", "name", 
-  paste0(c("total", "cotton_a", "cotton_b", "banana",
-           "potato", "cocoa", "coffee", "sugarcane",
-           "mate", "soy", "sorghum", "wheat"),
-         formatC(rep(0:17, each = 12), width = 2, flag = "0")))
+                                          paste0(c("total", "cotton_a", "cotton_b", "banana",
+                                                   "potato", "cocoa", "coffee", "sugarcane",
+                                                   "mate", "soy", "sorghum", "wheat"),
+                                                 formatC(rep(0:17, each = 12), width = 2, flag = "0")))
 crop_ton <- crop_ton[-nrow(crop_ton), ]
 crop_price <- crop_price[-nrow(crop_price), ]
 for(int in c(1, 3:ncol(crop_ton))) class(crop_ton[[int]]) <- "integer"
@@ -42,19 +23,10 @@ saveRDS(crop_price, "data/sidra/crop_price.rds")
 
 # transform
 
-pop <- readRDS("data/sidra/pop.rds")
-gdp <- readRDS("data/sidra/gdp.rds")
 crop_ton <- readRDS("data/sidra/crop_ton.rds")
 crop_price <- readRDS("data/sidra/crop_price.rds")
 
-get_state <- function(x, pattern = "[(]MT[)]") {
-  out <- grep(pattern, x$name)
-  cat("Matches in order:", all(out == out[1]:out[length(out)]), "\n")
-  out
-}
 
-pop <- pop[get_state(pop), ]
-gdp <- gdp[get_state(gdp), ]
 crop_ton <- crop_ton[get_state(crop_ton), ]
 crop_price <- crop_price[get_state(crop_price), ]
 
@@ -70,8 +42,8 @@ x$date <- 2000 + c(1:6, 8:9, 11:18)
 
 i <- 1
 x[c(((i + 1) * 18 - 35):min((i * 18), 141), 142)] %>% 
-reshape2::melt(id.vars = "date") %>% 
-ggplot2::ggplot(ggplot2::aes(x = date, colour = variable, y = value)) +
+  reshape2::melt(id.vars = "date") %>% 
+  ggplot2::ggplot(ggplot2::aes(x = date, colour = variable, y = value)) +
   ggplot2::geom_line()
 i <- i + 1
 # gdp:
@@ -114,15 +86,6 @@ saveRDS(crop, "data/sidra/crop.rds")
 
 # move data to long format
 
-long_cat <- function(x, variable) {
-  x <- x[c(1, grep(variable, names(x)))]
-  x <- reshape2::melt(x, id.vars = "code", stringsAsFactors = FALSE)
-  x$variable <- as.character(x$variable)
-  x$date <- 2000L + as.integer(substr(x$variable, nchar(x$variable) - 1, nchar(x$variable)))
-  names(x)[names(x) == "value"] <- substr(x$variable, 1, nchar(x$variable) - 2)[1]
-  x$variable <- NULL
-  x
-}
 
 variables <- c(paste0("pr_", c("ban", "sug", "soy", "sor", "cot")),
                paste0("ton_", c("ban", "sug", "soy", "sor", "cot")))
@@ -136,20 +99,28 @@ crop_long <- Reduce(function(df1, df2) {
   left_join(df1, df2, by = c("code", "date"))}, long)
 saveRDS(crop_long, "data/sidra/crop_long.rds")
 
-variables <- paste0("pop", formatC(c(1:6, 8:9, 11:18), width = 2, flag = "0"))
-long <- vector("list", length(variables))
-for(i in seq_along(variables)) {
-  long[[i]] <- long_cat(pop, variables[i])
-}
-pop_long <- Reduce(function(df1, df2) {
-  rbind(df1, df2)}, long)
-saveRDS(pop_long, "data/sidra/pop_long.rds")
+# Forestry ----------------------------------------------------------------
 
-variables <- paste0("gdp", formatC(2:16, width = 2, flag = "0"))
-long <- vector("list", length(variables))
-for(i in seq_along(variables)) {
-  long[[i]] <- long_cat(gdp, variables[i])
+forestry <- as_tibble(read_ods("data/sidra/forestry.ods", sheet = 2, skip = 5,
+                               col_names = FALSE, col_types = NULL))
+names(forestry) <- c("code", "name", 
+                     paste0("forestry", formatC(0:17, width = 2, flag = "0")))
+forestry <- forestry[-nrow(forestry), ]
+for(int in c(1, 3:ncol(forestry))) class(forestry[[int]]) <- "integer"
+
+forestry <- forestry[get_state(forestry$name), ]
+
+long_cat <- function(x, variable) {
+  x <- x[c(1, grep(variable, names(x)))]
+  x <- reshape2::melt(x, id.vars = "code", stringsAsFactors = FALSE)
+  x$variable <- as.character(x$variable)
+  x$date <- 2000L + as.integer(substr(x$variable, nchar(x$variable) - 1, nchar(x$variable)))
+  names(x)[names(x) == "value"] <- substr(x$variable, 1, nchar(x$variable) - 2)[1]
+  x$variable <- NULL
+  x
 }
-gdp_long <- Reduce(function(df1, df2) {
-  rbind(df1, df2)}, long)
-saveRDS(gdp_long, "data/sidra/gdp_long.rds")
+
+variables <- "forestry"
+
+forestry_long <- long_cat(forestry, variables)
+saveRDS(forestry_long, "data/sidra/forestry_long.rds")
