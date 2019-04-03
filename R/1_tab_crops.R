@@ -4,6 +4,16 @@ library(readODS)
 source("R/1_functions.R")
 
 
+# Crop area ---------------------------------------------------------------
+
+read_sidra <- function(path, sheet = 1, skip = 0) {
+  x <- as_tibble(read_ods(path, sheet, skip, col_names = FALSE, col_types = NA))
+}
+
+crop_planted_1 <- as_tibble(read_ods("data/sidra/crop_area_2.ods", sheet = 1,
+                                     skip = 3, col_names = FALSE, col_types = NA))
+
+
 crop_ton <- as_tibble(readODS::read_ods("data/sidra/crop.ods", sheet = 3, skip = 5,
                                         col_names = FALSE, col_types = NA))
 crop_price <- as_tibble(readODS::read_ods("data/sidra/crop.ods", sheet = 5, skip = 5,
@@ -22,10 +32,6 @@ saveRDS(crop_price, "data/sidra/crop_price.rds")
 
 
 # transform
-
-crop_ton <- readRDS("data/sidra/crop_ton.rds")
-crop_price <- readRDS("data/sidra/crop_price.rds")
-
 
 crop_ton <- crop_ton[get_state(crop_ton), ]
 crop_price <- crop_price[get_state(crop_price), ]

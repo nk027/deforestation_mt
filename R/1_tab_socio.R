@@ -83,4 +83,4 @@ saveRDS(pop, "data/tab/pop_long.rds")
 
 pop10$pop_ind <- pop10_ind$pop
 saveRDS(pop10[c("code", "pop", "pop_urb", "pop_rur", "pop_ind")], 
-        "data/tab/pop_detail.rds")
+        "data/tab/pop_details.rds")
