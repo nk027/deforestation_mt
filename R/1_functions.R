@@ -10,10 +10,10 @@ long_cat <- function(x, variable) {
 }
 
 
-get_state <- function(x, pattern = "[(]MT[)]") {
+get_state <- function(x, pattern = "[(]MT[)]", v = FALSE) {
   out <- grep(pattern, x)
-  suppressWarnings(cat("Matches in order:", 
-                       all(out == out[1]:out[length(out)]), "\n"))
+  if(v) suppressWarnings(cat("Matches in order:", 
+                             all(out == out[1]:out[length(out)]), "\n"))
   out
 }
 
@@ -71,7 +71,7 @@ read_sidra <- function(
   
   out <- data.frame(code = rep(code, length(years)),
                     name = rep(name, length(years)),
-                    year = rep(years, each = length(keep)),
+                    date = rep(years, each = length(keep)),
                     as.data.frame(z),
                     stringsAsFactors = FALSE)
   names(out)[4:ncol(out)] <- var_names
@@ -79,4 +79,36 @@ read_sidra <- function(
   attr(out, "variable") <- variable
   
   out
+}
+
+pull_vars <- function(x, formula, date = TRUE) {
+  
+  year <- as.character(formula[3])
+  y <- reshape2::dcast(x, formula, value.var = year, fun.aggregate = length)
+  
+  if(is.null(y$sugarcane)) y$sugarcane <- 0
+  if(is.null(y$sec_veg)) y$sec_veg <- 0
+  
+  z <- tibble(
+    id = y$id,
+    forest = y$forest,
+    pasture = y$pasture,
+    fallow_cotton = y$fallow_cotton, 
+    soy_corn = y$soy_corn,
+    soy_cotton = y$soy_cotton, 
+    soy_fallow = y$soy_fallow,
+    soy_millet = y$soy_millet,
+    soy_sunflower = y$soy_sunflower,
+    sugarcane = y$sugarcane,
+    cerrado = y$cerrado,
+    urban = y$urban,
+    water = y$water,
+    sec_veg = y$sec_veg
+  )
+  if(date) {
+    z$date <- as.integer(substr(year, 2, 3)) + 2000L
+  } else {
+    names(z) <- c("id", paste(year, names(z)[-1], sep = "_"))
+  }
+  z
 }

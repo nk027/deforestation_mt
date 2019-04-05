@@ -1,7 +1,9 @@
 
 library(dplyr)
+source("R/1_functions.R")
 
 crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
+
 
 # Merge vector & raster data ----------------------------------------------
 
@@ -71,64 +73,33 @@ saveRDS(df, "data/geo/geo_extract.rds")
 
 # Create tables from extracted values -------------------------------------
 
-pull_vars <- function(x, form, date = FALSE) {
-  
-  year <- as.character(form[3])
-  y <- reshape2::dcast(x, form, value.var = year, fun.aggregate = length)
-  
-  if(is.null(y$sugarcane)) y$sugarcane <- 0
-  
-  z <- tibble(
-    id = y$id,
-    forest = y$forest,
-    pasture = y$pasture,
-    fallow_cotton = y$fallow_cotton, 
-    soy_corn = y$soy_corn,
-    soy_cotton = y$soy_cotton, 
-    soy_fallow = y$soy_fallow,
-    soy_millet = y$soy_millet,
-    soy_sunflower = y$soy_sunflower,
-    sugarcane = y$sugarcane,
-    cerrado = y$cerrado,
-    urban = y$urban,
-    water = y$water,
-    sec_veg = y$sec_veg,
-    # crop = y$fallow_cotton + y$soy_corn + y$soy_cotton + 
-    #   y$soy_fallow + y$soy_millet + y$soy_sunflower + y$sugarcane
-  )
-  if(date) {
-    z$date <- as.integer(substr(year, 2, 3)) + 2000L
-  } else {
-    names(z) <- c("id", paste(year, names(z)[-1], sep = "_"))
-  }
-  z
-}
+# Wide
+# df01 <- pull_vars(df, id ~ y01, date = FALSE)
+# df02 <- pull_vars(df, id ~ y02, date = FALSE)
+# df03 <- pull_vars(df, id ~ y03, date = FALSE)
+# df04 <- pull_vars(df, id ~ y04, date = FALSE)
+# df05 <- pull_vars(df, id ~ y05, date = FALSE)
+# df06 <- pull_vars(df, id ~ y06, date = FALSE)
+# df07 <- pull_vars(df, id ~ y07, date = FALSE)
+# df08 <- pull_vars(df, id ~ y08, date = FALSE)
+# df09 <- pull_vars(df, id ~ y09, date = FALSE)
+# df10 <- pull_vars(df, id ~ y10, date = FALSE)
+# df11 <- pull_vars(df, id ~ y11, date = FALSE)
+# df12 <- pull_vars(df, id ~ y12, date = FALSE)
+# df13 <- pull_vars(df, id ~ y13, date = FALSE)
+# df14 <- pull_vars(df, id ~ y14, date = FALSE)
+# df15 <- pull_vars(df, id ~ y15, date = FALSE)
+# df16 <- pull_vars(df, id ~ y16, date = FALSE)
+# df17 <- pull_vars(df, id ~ y17, date = FALSE)
+# 
+# df_wide <- as_tibble(cbind(
+#   df01, df02[-1], df03[-1], df04[-1], df05[-1], df06[-1], df07[-1], df08[-1],
+#   df09[-1], df10[-1], df11[-1], df12[-1], df13[-1], df14[-1], df15[-1], df16[-1],
+#   df17[-1]
+# ))
+# saveRDS(df_wide, "data/geo/geo_df_wide.rds")
 
-df01 <- pull_vars(df, id ~ y01)
-df02 <- pull_vars(df, id ~ y02)
-df03 <- pull_vars(df, id ~ y03)
-df04 <- pull_vars(df, id ~ y04)
-df05 <- pull_vars(df, id ~ y05)
-df06 <- pull_vars(df, id ~ y06)
-df07 <- pull_vars(df, id ~ y07)
-df08 <- pull_vars(df, id ~ y08)
-df09 <- pull_vars(df, id ~ y09)
-df10 <- pull_vars(df, id ~ y10)
-df11 <- pull_vars(df, id ~ y11)
-df12 <- pull_vars(df, id ~ y12)
-df13 <- pull_vars(df, id ~ y13)
-df14 <- pull_vars(df, id ~ y14)
-df15 <- pull_vars(df, id ~ y15)
-df16 <- pull_vars(df, id ~ y16)
-df17 <- pull_vars(df, id ~ y17)
-
-df_wide <- as_tibble(cbind(
-  df01, df02[-1], df03[-1], df04[-1], df05[-1], df06[-1], df07[-1], df08[-1],
-  df09[-1], df10[-1], df11[-1], df12[-1], df13[-1], df14[-1], df15[-1], df16[-1],
-  df17[-1]
-))
-saveRDS(df_wide, "data/geo/geo_df_wide.rds")
-
+# Long
 df01 <- pull_vars(df, id ~ y01, date = TRUE)
 df02 <- pull_vars(df, id ~ y02, date = TRUE)
 df03 <- pull_vars(df, id ~ y03, date = TRUE)

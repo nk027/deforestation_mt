@@ -76,11 +76,11 @@ pop <- rbind(pop_long,
              pop07[c("code", "pop", "date")],
              pop10[c("code", "pop", "date")])
 
-saveRDS(pop, "data/tab/pop_long.rds")
+saveRDS(pop, "data/tab/pop.rds")
 
 
 # Indigenous and urban/rural ----------------------------------------------
 
 pop10$pop_ind <- pop10_ind$pop
-saveRDS(pop10[c("code", "pop", "pop_urb", "pop_rur", "pop_ind")], 
+saveRDS(pop10[c("code", "pop", "date", "pop_urb", "pop_rur", "pop_ind")], 
         "data/tab/pop_details.rds")
