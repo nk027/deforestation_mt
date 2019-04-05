@@ -24,8 +24,14 @@ na_locf <- function(x) {
 }
 
 
-read_sidra <- function(file, sheet = 1, categories = FALSE) {
+read_sidra <- function(
+  file, sheet = 1, 
+  grep_vars = c("^\\b(?!Total).*$" = "1", 
+                "^[0-9]+ - .*$" = "2", 
+                "^[0-9]+[.][0-9]+ - .*$" = "3")) {
   
+  grep_vars <- names(match.arg(grep_vars))
+
   x <- readODS::read_ods(file, sheet, col_names = FALSE, col_types = NA)
   
   table <- x[[1]][1]
@@ -36,7 +42,6 @@ read_sidra <- function(file, sheet = 1, categories = FALSE) {
   
   if(is.na(x[[1]][5])) {
     vars <- as.character(x[5, year_cols[1]:(year_cols[2] - 1)])
-    grep_vars <- if(categories) "^[0-9]+ - .*$" else "^\\b(?!Total).*$"
     
     # total <- grep("^Total", vars)
     var_pos <- grep(grep_vars, vars, perl = TRUE)
@@ -66,7 +71,7 @@ read_sidra <- function(file, sheet = 1, categories = FALSE) {
   
   out <- data.frame(code = rep(code, length(years)),
                     name = rep(name, length(years)),
-                    date = rep(years, each = length(keep)),
+                    year = rep(years, each = length(keep)),
                     as.data.frame(z),
                     stringsAsFactors = FALSE)
   names(out)[4:ncol(out)] <- var_names

@@ -68,18 +68,18 @@ saveRDS("data/tab/crop_harvested.rds")
 
 # Crop quantities ---------------------------------------------------------
 
-crop_ton_1 <- read_sidra("data/sidra/crop_quantities_2.ods", sheet = 1)
-crop_ton_2 <- read_sidra("data/sidra/crop_quantities_3.ods", sheet = 1)
-crop_ton_3 <- read_sidra("data/sidra/crop_quantities_4.ods", sheet = 1)
-crop_ton_4 <- read_sidra("data/sidra/crop_quantities_5.ods", sheet = 1)
+crop_quant_1 <- read_sidra("data/sidra/crop_quantities_2.ods", sheet = 1)
+crop_quant_2 <- read_sidra("data/sidra/crop_quantities_3.ods", sheet = 1)
+crop_quant_3 <- read_sidra("data/sidra/crop_quantities_4.ods", sheet = 1)
+crop_quant_4 <- read_sidra("data/sidra/crop_quantities_5.ods", sheet = 1)
 
-crop_ton <- rbind(crop_ton_1, crop_ton_2, crop_ton_3, crop_ton_4)
-rm(crop_ton_1, crop_ton_2, crop_ton_3, crop_ton_4)
+crop_quant <- rbind(crop_quant_1, crop_quant_2, crop_quant_3, crop_quant_4)
+rm(crop_quant_1, crop_quant_2, crop_quant_3, crop_quant_4)
 
-crop_ton <- crop_ton %>% 
+crop_quant <- crop_quant %>% 
   adj_batata() %>% adj_borracha() %>% adj_cafe()
-crop_ton <- as_tibble(crop_ton[get_state(crop_ton$name), ])
-saveRDS("data/tab/crop_ton.rds")
+crop_quant <- as_tibble(crop_quant[get_state(crop_quant$name), ])
+saveRDS("data/tab/crop_quant.rds")
 
 
 crop_value_1 <- read_sidra("data/sidra/crop_quantities_2.ods", sheet = 2)
