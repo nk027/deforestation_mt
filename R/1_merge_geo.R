@@ -93,8 +93,8 @@ pull_vars <- function(x, form, date = FALSE) {
     urban = y$urban,
     water = y$water,
     sec_veg = y$sec_veg,
-    crop = y$fallow_cotton + y$soy_corn + y$soy_cotton + 
-      y$soy_fallow + y$soy_millet + y$soy_sunflower + y$sugarcane
+    # crop = y$fallow_cotton + y$soy_corn + y$soy_cotton + 
+    #   y$soy_fallow + y$soy_millet + y$soy_sunflower + y$sugarcane
   )
   if(date) {
     z$date <- as.integer(substr(year, 2, 3)) + 2000L
