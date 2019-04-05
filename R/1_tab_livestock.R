@@ -23,6 +23,10 @@ milk_cows <- as_tibble(milk_cows[get_state(milk_cows$name), ])
 saveRDS(milk_cows, "data/tab/milk_cows.rds")
 
 herd_sizes <- read_sidra("data/sidra/herd_sizes.ods", sheet = 1)
+# Suíno and Galináceos appear multiple times
+
+# Of Suíno and Galináceos the total (in position 1) is kept
+herd_sizes <- herd_sizes %>% adj_first("Suíno") %>% adj_first("Galináceos")
 herd_sizes <- as_tibble(herd_sizes[get_state(herd_sizes$name), ])
 saveRDS(herd_sizes, "data/tab/herd_sizes.rds")
 

@@ -8,41 +8,14 @@ source("R/1_functions.R")
 
 # Batata, Borracha and Café appear multiple times
 
-adj_collapse <- function(x, grep_var) {
-  y <- x[, grep("grep_var", names(x))]
-  x <- x[, -grep("grep_var", names(x))]
-  x[[grep_var]] <- rowSums(y, na.rm = TRUE) + 
-    ifelse(Reduce(function(c1, c2) {c1 & c2}, lapply(y, is.na)), NA, 0)
-  x
-}
-  
 # Batata (-doce & -inglesa) is collapsed
-adj_batata <- function(x) {
-  adj_collapse(x, "Batata")
-  # batata <- x[, grep("Batata", names(x))]
-  # x <- x[, -grep("Batata", names(x))]
-  # x$Batata <- rowSums(batata, na.rm = TRUE) + 
-  #   ifelse(Reduce(function(c1, c2) {c1 & c2}, lapply(batata, is.na)), NA, 0)
-  # x
-}
+adj_batata <- function(x) adj_collapse(x, "Batata")
 
 # Borracha (látex coagulado & látex líquido) is collapsed
-adj_borracha <- function(x) {
-  adj_collapse(x, "Borracha")
-  # borracha <- x[, grep("Borracha", names(x))]
-  # x <- x[, -grep("Borracha", names(x))]
-  # x$Borracha <- rowSums(borracha, na.rm = TRUE) + 
-  #   ifelse(Reduce(function(c1, c2) {c1 & c2}, lapply(borracha, is.na)), NA, 0)
-  # x
-}
+adj_borracha <- function(x) adj_collapse(x, "Borracha")
 
 # Of Café (Total, Arábica & Canephora) the total (in position 1) is kept
-adj_cafe <- function(x) {
-  cafe <- x[, grep("Café", names(x))]
-  x <- x[, -grep("Café", names(x))]
-  x$Café <- cafe[[1]]
-  x
-}
+adj_cafe <- function(x) adj_first(x, "Café")
 
 
 # Crop area ---------------------------------------------------------------

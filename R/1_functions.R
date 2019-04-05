@@ -81,6 +81,24 @@ read_sidra <- function(
   out
 }
 
+
+adj_collapse <- function(x, grep_var) {
+  y <- x[, grep(grep_var, names(x))]
+  x <- x[, -grep(grep_var, names(x))]
+  x[[grep_var]] <- rowSums(y, na.rm = TRUE) + 
+    ifelse(Reduce(function(c1, c2) {c1 & c2}, lapply(y, is.na)), NA, 0)
+  x
+}
+
+
+adj_first <- function(x, grep_var) {
+  y <- x[, grep(grep_var, names(x))]
+  x <- x[, -grep(grep_var, names(x))]
+  x[[grep_var]] <- y[[1]]
+  x
+}
+
+
 pull_vars <- function(x, formula, date = TRUE) {
   
   year <- as.character(formula[3])
