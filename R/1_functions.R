@@ -33,6 +33,7 @@ read_sidra <- function(
   grep_vars <- names(match.arg(grep_vars))
 
   x <- readODS::read_ods(file, sheet, col_names = FALSE, col_types = NA)
+  stopifnot(x[[1]][3] == "Cód.", x[[2]][3] == "Município")
   
   table <- x[[1]][1]
   variable <- x[[1]][2]
@@ -60,7 +61,9 @@ read_sidra <- function(
   y <- x[keep, 3:ncol(x)]
   y[y == "-"] <- 0
   y[y == ".."] <- 0
-  y <- suppressWarnings(vapply(y, as.numeric, numeric(nrow(y))))
+  y <- if(is.data.frame(y) || is.matrix(y)) {
+    suppressWarnings(vapply(y, as.numeric, numeric(nrow(y))))
+  } else {as.matrix(as.numeric(y))}
   
   z <- matrix(NA, nrow = length(keep) * length(years), ncol = length(var_pos))
   for(i in seq_along(years)) {

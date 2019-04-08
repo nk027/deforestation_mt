@@ -13,7 +13,7 @@ saveRDS(animal_quant, "data/tab/animal_quant.rds")
 
 animal_value <- read_sidra("data/sidra/animal_products.ods", sheet = 2)
 animal_value <- as_tibble(animal_value[get_state(animal_value$name), ])
-saveRDS(forestry_quant, "data/tab/animal_value.rds")
+saveRDS(animal_value, "data/tab/animal_value.rds")
 
 
 # Herd size ---------------------------------------------------------------
