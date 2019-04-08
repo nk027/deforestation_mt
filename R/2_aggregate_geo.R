@@ -10,8 +10,7 @@ crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +uni
 shp <- read_sf("data/municipios/") %>% 
   transmute(code = as.integer(CD_GEOCMU)) %>% 
   st_transform(crs_sin)
-
-shp$area <- st_area(shp)
+shp$area_m2 <- as.numeric(st_area(shp))
 
 geo_df <- readRDS("data/geo/geo_df_long.rds")
 geo_df$code <- shp$code[geo_df$id]
