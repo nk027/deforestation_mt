@@ -82,10 +82,10 @@ crop <- full_join(full_join(full_join(
 
 forestry_quant <- readRDS("data/tab/forestry_quant.rds") %>% 
   transmute(code, name, date, 
-            firewood_m3 = `Lenha`, logs_m3 = `Madeira em tora`)
+            roundwood_m3 = `Lenha`, logs_m3 = `Madeira em tora`)
 forestry_value <- readRDS("data/tab/forestry_value.rds") %>% 
   transmute(code, name, date, 
-            firewood_brl = `Lenha` * 1000, logs_brl = `Madeira em tora` * 1000)
+            roundwood_brl = `Lenha` * 1000, logs_brl = `Madeira em tora` * 1000)
 veggies_quant <- readRDS("data/tab/veggies_quant.rds") %>% 
   transmute(code, name, date, 
             food_ton = `Alimentícios`, oilseed_ton = `Oleaginosos`)
@@ -98,3 +98,13 @@ forestry <- full_join(full_join(full_join(
   veggies_quant, by = c("code", "name", "date")),
   veggies_value, by = c("code", "name", "date")
 )
+
+
+# Aggregate all -----------------------------------------------------------
+
+tab <- full_join(full_join(full_join(
+  socio, livestock, by = c("code", "name", "date")),
+  crop, by = c("code", "name", "date")),
+  forestry, by = c("code", "name", "date")
+)
+saveRDS(tab, "data/tab/tab.rds")
