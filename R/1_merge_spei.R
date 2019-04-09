@@ -37,4 +37,4 @@ cat("Calculation finished after", format(Sys.time() - start), "\n")
 stopCluster(cl)
 
 names(extr_spei) <- dates[bands]
-saveRDS("data/geo/spei.rds")
+saveRDS(extr_spei, "data/geo/spei.rds")
