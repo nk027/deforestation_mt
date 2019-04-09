@@ -96,3 +96,23 @@ shp %>%
         axis.title.x = element_blank(), axis.title.y = element_blank(), 
         panel.background = element_blank(), panel.border = element_blank(), 
         plot.background = element_blank())
+
+
+# explore data
+
+# x <- as_tibble(t(gdp[c(-1, -2)]))
+# names(x) <- gdp$code
+# x$date <- 2002:2016
+x <- as_tibble(t(pop[c(-1, -2)]))
+names(x) <- pop$code
+x$date <- 2000 + c(1:6, 8:9, 11:18)
+
+i <- 1
+x[c(((i + 1) * 18 - 35):min((i * 18), 141), 142)] %>% 
+  reshape2::melt(id.vars = "date") %>% 
+  ggplot2::ggplot(ggplot2::aes(x = date, colour = variable, y = value)) +
+  ggplot2::geom_line()
+i <- i + 1
+# gdp:
+# Cuiabá, 5103403, grows rapidly
+# Paranaíta, 5106299, rises sharply in 12, plateaus 13-15 and then falls off.
