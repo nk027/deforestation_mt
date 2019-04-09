@@ -1,5 +1,7 @@
 
 library(ncdf4)
+library(raster)
+library(dplyr)
 
 
 # Examine NCDF file & get layers ------------------------------------------
@@ -37,4 +39,21 @@ cat("Calculation finished after", format(Sys.time() - start), "\n")
 stopCluster(cl)
 
 names(extr_spei) <- dates[bands]
-saveRDS(extr_spei, "data/geo/spei.rds")
+saveRDS(extr_spei, "data/geo/geo_spei_raw.rds")
+
+
+# Transform raw extracted values ------------------------------------------
+
+spei <- sapply(extr_spei, function(x)  {
+  x$id <- x[[1]]
+  x$value <- x[[2]] * x[[3]]
+  aggregate(value ~ id, data = x, sum)[[2]]
+})
+
+df_spei <- as_tibble(data.frame(
+  id = unique(extr_spei[[1]][[1]]),
+  spei
+))
+colnames(df_spei)[-1] <- gsub("^...([0-9]{2})[.]([0-9]{2})[.]..$", 
+                              "y\\1m\\2", colnames(df_spei)[-1])
+saveRDS(df_spei, "data/geo/geo_spei.rds")

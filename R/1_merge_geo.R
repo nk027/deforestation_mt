@@ -16,7 +16,7 @@ shp <- sp::spTransform(shp, crs_sin) # raster::extract works with sp, not sf
 
 # Parallel
 library(parallel)
-n_cores <- detectCores() - 2
+n_cores <- detectCores() - 1
 cl <- makeCluster(n_cores)
 start <- Sys.time()
 extr_vals <- parLapply(cl, tifs, function(x, shp) {
