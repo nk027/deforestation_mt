@@ -50,10 +50,10 @@ spei <- sapply(extr_spei, function(x)  {
   aggregate(value ~ id, data = x, sum)[[2]]
 })
 
-df_spei <- as_tibble(data.frame(
-  id = unique(extr_spei[[1]][[1]]),
-  spei
-))
-colnames(df_spei)[-1] <- gsub("^...([0-9]{2})[.]([0-9]{2})[.]..$", 
-                              "y\\1m\\2", colnames(df_spei)[-1])
+spei <- data.frame(code = shp$CD_GEOCMU, spei)
+colnames(spei)[-1] <- gsub("^.([0-9]{4})[.]([0-9]{2})[.]..$", 
+                           "\\1-\\2", colnames(spei)[-1])
+
+df_spei <- as_tibble(reshape2::melt(spei, id.var = "code"))
+
 saveRDS(df_spei, "data/geo/geo_spei.rds")
