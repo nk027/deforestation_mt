@@ -115,7 +115,7 @@ for(name in crop_names) {
 
 
 
-
+# Proceed with care -------------------------------------------------------
 
 ggplot(data) +
   geom_point(aes(x = cott_hha, y = cott_pha))

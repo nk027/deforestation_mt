@@ -1,25 +1,34 @@
 
 library(dplyr)
+
 crs_sin <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
+
+
+# Wrangle SPEI ------------------------------------------------------------
 
 df_spei <- readRDS("data/geo/geo_spei.rds")
 
-df_spei$year <- as.integer(gsub("^([0-9]{4})-..$", "\\1", df_spei$variable))
+df_spei$date <- as.integer(gsub("^([0-9]{4})-..$", "\\1", df_spei$variable))
 df_spei$month <- as.integer(gsub("^....-([0-9]{2})$", "\\1", df_spei$variable))
 df_spei$variable <- NULL
 
-library(ggplot2)
-library(cowplot)
-library(sf)
-
 df <- df_spei %>% 
-  filter(year < 2018) %>% 
-  group_by(year, code) %>% 
+  filter(date < 2018) %>% 
+  group_by(date, code) %>% 
   summarise(mean = mean(value), sd = sd(value), 
             qu2 = quantile(value, 0.2), 
             qu5 = quantile(value, 0.5),
             qu8 = quantile(value, 0.8)) %>% 
   mutate(iqr = qu8 - qu2)
+
+saveRDS(df, "data/geo/spei.rds")
+
+
+# Explore graphically -----------------------------------------------------
+
+library(ggplot2)
+library(cowplot)
+library(sf)
 
 shp <- read_sf("data/municipios/") %>% 
   st_transform(crs_sin) %>% 
@@ -30,7 +39,7 @@ i <- 2000
 
 for(i in 2000:2017) {
   x <- shp %>% 
-    filter(year == i) %>% 
+    filter(date == i) %>% 
     mutate(mean = ifelse(mean < -3, -3, mean),
            qu2 = ifelse(qu2 < -3, -3, qu2),
            qu8 = ifelse(qu8 < -3, -3, qu8)) %>% 
