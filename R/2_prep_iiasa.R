@@ -50,7 +50,7 @@ data_wt %>% group_by(code) %>%
 iiasa <- data_wt %>% 
   transmute(code, yield = reweight * MEANYLD, travel = reweight * MEAN1) %>% 
   group_by(code) %>% 
-  summarise(yield = sum(yield), travel = sum(travel))
+  summarise(iiasa_yield = sum(yield), iiasa_travel = sum(travel))
 
 # Set year arbitrarily / wrongly to 2005
 iiasa$date <- 2005L

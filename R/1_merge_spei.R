@@ -6,7 +6,7 @@ library(dplyr)
 
 # Examine NCDF file & get layers ------------------------------------------
 
-ncdf <- paste0("data/spei/", list.files("data/spei/", "12[.]nc$"))
+ncdf <- paste0("data/spei/", list.files("data/spei/", "03[.]nc$"))
 
 nc <- ncdf4::nc_open(ncdf)
 time <- ncvar_get(nc, "time")

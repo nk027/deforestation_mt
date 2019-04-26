@@ -15,11 +15,11 @@ df_spei$variable <- NULL
 df <- df_spei %>% 
   filter(date < 2018) %>% 
   group_by(date, code) %>% 
-  summarise(mean = mean(value), sd = sd(value), 
-            qu2 = quantile(value, 0.2), 
-            qu5 = quantile(value, 0.5),
-            qu8 = quantile(value, 0.8)) %>% 
-  mutate(iqr = qu8 - qu2)
+  summarise(spei_mean = mean(value), spei_sd = sd(value), 
+            spei_qu2 = quantile(value, 0.2), 
+            spei_qu5 = quantile(value, 0.5),
+            spei_qu8 = quantile(value, 0.8)) %>% 
+  mutate(spei_iqr = spei_qu8 - spei_qu2)
 
 saveRDS(df, "data/geo/spei.rds")
 
@@ -40,22 +40,22 @@ i <- 2000
 for(i in 2000:2017) {
   x <- shp %>% 
     filter(date == i) %>% 
-    mutate(mean = ifelse(mean < -3, -3, mean),
-           qu2 = ifelse(qu2 < -3, -3, qu2),
-           qu8 = ifelse(qu8 < -3, -3, qu8)) %>% 
-    mutate(qu8 = ifelse(qu8 > 2, 2, qu8))
+    mutate(spei_mean = ifelse(spei_mean < -3, -3, spei_mean),
+           spei_qu2 = ifelse(spei_qu2 < -3, -3, spei_qu2),
+           spei_qu8 = ifelse(spei_qu8 < -3, -3, spei_qu8)) %>% 
+    mutate(spei_qu8 = ifelse(spei_qu8 > 2, 2, spei_qu8))
   plot_grid(
     ggplot(x) +
-      geom_sf(aes(fill = mean)) +
+      geom_sf(aes(fill = spei_mean)) +
       scale_fill_viridis_c(option = "plasma", limits = c(-3, 2)),
     ggplot(x) +
-      geom_sf(aes(fill = sd)) +
+      geom_sf(aes(fill = spei_sd)) +
       scale_fill_viridis_c(option = "viridis", limits = c(0, 1.2)),
     ggplot(x) +
-      geom_sf(aes(fill = qu2)) +
+      geom_sf(aes(fill = spei_qu2)) +
       scale_fill_viridis_c(option = "plasma", limits = c(-3, 2)),
     ggplot(x) +
-      geom_sf(aes(fill = qu8)) +
+      geom_sf(aes(fill = spei_qu8)) +
       scale_fill_viridis_c(option = "plasma", limits = c(-3, 2))
   )
   ggsave(paste0("plots/spei_", i, ".png"), width = 30, height = 20, units = "cm")

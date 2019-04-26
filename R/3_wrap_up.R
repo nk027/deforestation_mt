@@ -12,18 +12,10 @@ iiasa <- readRDS("data/geo/iiasa.rds")
 
 data <- full_join(shp, tab, by = c("code", "date")) %>% 
   full_join(spei, by = c("code", "date")) %>% 
-  full_join(iiasa, by = c("code", "date")) %>% 
-  filter(date < 2018, date > 2000)
+  full_join(iiasa, by = c("code", "date"))
 
 refcols <- c("code", "name", "date")
 data <- data[, c(refcols, setdiff(names(data), refcols))]
+data <- data %>% ungroup()
 
 saveRDS(data, "data/data.rds")
-
-
-# Generate some summaries -------------------------------------------------
-
-vars <- read.table("txt/variables.txt", stringsAsFactors = FALSE)
-
-summaries <- t(apply(vars, 1, function(y) c(summary(data[[y]]))))
-write.table(summaries, "txt/summaries.txt", quote = FALSE, row.names = FALSE)
