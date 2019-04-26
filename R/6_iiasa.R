@@ -24,58 +24,6 @@ rm(k_nb)
 rm(nb)
 
 
-# Data --------------------------------------------------------------------
-
-# Changes
-data <- data %>% 
-  group_by(code) %>% 
-  mutate(forest_ch = forest_px - lag(forest_px),
-         cerr_ch = cerr_px - lag(cerr_px),
-         nature_px = forest_px + cerr_px,
-         nature_ch = forest_ch + cerr_ch)
-
-data <- data %>% 
-  mutate(gdp_cap = gdp / pop, 
-         crop_px = soy_px + soycorn_px + soycott_px + cott_px + 
-           soymill_px + soysunfl_px + sugar_px)
-
-# Visualise
-shp <- data %>% filter(date > 2004, date < 2017)
-summary(shp)
-hist(shp$forest_ch, breaks = 50)
-hist(shp$forest_ch[shp$forest_ch < 0], breaks = 50)
-hist(shp$cerr_ch, breaks = 50)
-hist(shp$nature_ch, breaks = 50)
-
-shp <- shp %>% 
-  mutate(rice_brl_hha = rice_brl / rice_hha,
-         sugar_brl_hha = sugar_brl / sugar_hha,
-         manioc_brl_hha = manioc_brl / manioc_hha,
-         corn_brl_hha = corn_brl / corn_hha,
-         bean_brl_hha = bean_brl / bean_hha,
-         sunfl_brl_hha = sunfl_brl / sunfl_hha,
-         sorg_brl_hha = sorg_brl / sorg_hha,
-         cott_brl_hha = cott_brl / cott_hha,
-         soy_brl_hha = soy_brl / soy_hha) %>% 
-  mutate(rice_ton_hha = rice_ton / rice_hha,
-         sugar_ton_hha = sugar_ton / sugar_hha,
-         manioc_ton_hha = manioc_ton / manioc_hha,
-         corn_ton_hha = corn_ton / corn_hha,
-         bean_ton_hha = bean_ton / bean_hha,
-         sunfl_ton_hha = sunfl_ton / sunfl_hha,
-         sorg_ton_hha = sorg_ton / sorg_hha,
-         cott_ton_hha = cott_ton / cott_hha,
-         soy_ton_hha = soy_ton / soy_hha)
-
-# Set NaN to 0
-shp <- shp %>% 
-  mutate_at(vars(ends_with("_brl_hha")), .funs = funs(ifelse(is.nan(.), 0, .))) %>% 
-  mutate_at(vars(ends_with("_ton_hha")), .funs = funs(ifelse(is.nan(.), 0, .)))
-
-# Same for Oilseed
-shp <- shp %>% 
-  mutate_at(vars(starts_with("oilseed")), .funs = funs(ifelse(is.na(.), 0, .)))
-
 
 # Model -------------------------------------------------------------------
 
@@ -88,13 +36,16 @@ cor_data <- shp %>%
          ends_with("_hha"))
 
 # Correlation test
-cor_data$geometry <- NULL
-cor_data <- as.matrix(cor_data)
-cor_data[is.na(cor_data)] <- 0 # a few values on oilseeds
-cor_test <- cor(cor_data)
-diag(cor_test) <- 0
-cutoff <- 0.8
-which(cor_test > cutoff | cor_test < -cutoff, arr.ind = TRUE)
+cor_test <- function(x, cutoff = 0.8, na.0 = TRUE) {
+  x$geometry <- NULL
+  x <- as.matrix(x)
+  if(na.0) {x[is.na(x)] <- 0}
+  y <- cor(x)
+  diag(y) <- 0
+  which(y > cutoff | y < -cutoff, arr.ind = TRUE)
+}
+
+cor_test(cor_data)
 
 
 # Panel -------------------------------------------------------------------

@@ -8,6 +8,16 @@ library(reshape2)
 data <- readRDS("data/data.rds")
 
 
+# Dependents --------------------------------------------------------------
+
+shp <- data %>% filter(date > 2004, date < 2017)
+summary(shp)
+hist(shp$forest_ch, breaks = 50)
+hist(shp$forest_ch[shp$forest_ch < 0], breaks = 50)
+hist(shp$cerr_ch, breaks = 50)
+hist(shp$nature_ch, breaks = 50)
+
+
 # Crop -------------------------------------------------------------------
 
 crops <- data %>% 

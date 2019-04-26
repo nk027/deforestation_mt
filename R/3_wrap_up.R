@@ -20,4 +20,68 @@ refcols <- c("code", "name", "date")
 data <- data[, c(refcols, setdiff(names(data), refcols))]
 data <- data %>% ungroup()
 
-saveRDS(data, "data/data.rds")
+saveRDS(data, "data/data_raw.rds")
+
+
+# Changes------------------------------------------------------------------
+
+data <- readRDS("data/data_raw.rds")
+
+data <- data %>% 
+  group_by(code) %>% 
+  mutate(forest_ch = forest_px - lag(forest_px),
+         cerr_ch = cerr_px - lag(cerr_px),
+         nature_px = forest_px + cerr_px,
+         nature_ch = forest_ch + cerr_ch) %>% 
+  ungroup()
+
+data <- data %>% 
+  mutate(gdp_cap = gdp / pop, 
+         crop_px = soy_px + soycorn_px + soycott_px + cott_px + 
+           soymill_px + soysunfl_px + sugar_px)
+
+data <- data %>% 
+  mutate(rice_brl_hha = rice_brl / rice_hha,
+         sugar_brl_hha = sugar_brl / sugar_hha,
+         manioc_brl_hha = manioc_brl / manioc_hha,
+         corn_brl_hha = corn_brl / corn_hha,
+         bean_brl_hha = bean_brl / bean_hha,
+         sunfl_brl_hha = sunfl_brl / sunfl_hha,
+         sorg_brl_hha = sorg_brl / sorg_hha,
+         cott_brl_hha = cott_brl / cott_hha,
+         soy_brl_hha = soy_brl / soy_hha) %>% 
+  mutate(rice_ton_hha = rice_ton / rice_hha,
+         sugar_ton_hha = sugar_ton / sugar_hha,
+         manioc_ton_hha = manioc_ton / manioc_hha,
+         corn_ton_hha = corn_ton / corn_hha,
+         bean_ton_hha = bean_ton / bean_hha,
+         sunfl_ton_hha = sunfl_ton / sunfl_hha,
+         sorg_ton_hha = sorg_ton / sorg_hha,
+         cott_ton_hha = cott_ton / cott_hha,
+         soy_ton_hha = soy_ton / soy_hha)
+
+# Have a look at NaN values
+x <- data[data$date > 2004 & data$date < 2018, grep("brl_hha$", names(data))]
+x$geometry <- NULL
+apply(x, 2, function(x) sum(is.na(x)))
+y <- data[grep("brl_hha$", names(data))]; y$geometry <- NULL
+data$avg_yield_brl <- apply(y, 1, function(x) sum(x, na.rm = TRUE) / sum(!is.na(x)))
+
+x <- data[data$date > 2004 & data$date < 2018, grep("ton_hha$", names(data))]
+x$geometry <- NULL
+apply(x, 2, function(x) sum(is.na(x)))
+y <- data[grep("ton_hha$", names(data))]; y$geometry <- NULL
+data$avg_yield <- apply(y, 1, function(x) sum(x, na.rm = TRUE) / sum(!is.na(x)))
+
+data %>% filter(date == 2005) %>% 
+  select(avg_yield, avg_yield_brl) %>% plot()
+
+
+# # Set NaN to 0 - Bad!
+# shp <- shp %>% 
+#   mutate_at(vars(ends_with("_brl_hha")), .funs = funs(ifelse(is.nan(.), 0, .))) %>% 
+#   mutate_at(vars(ends_with("_ton_hha")), .funs = funs(ifelse(is.nan(.), 0, .)))
+
+# Set oilseed NA to 0
+data <- data %>% 
+  mutate_at(vars(starts_with("oilseed")), .funs = funs(ifelse(is.na(.), 0, .)))
