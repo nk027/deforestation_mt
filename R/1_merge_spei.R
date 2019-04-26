@@ -3,10 +3,12 @@ library(ncdf4)
 library(raster)
 library(dplyr)
 
+timescale <- "03"
+
 
 # Examine NCDF file & get layers ------------------------------------------
 
-ncdf <- paste0("data/spei/", list.files("data/spei/", "03[.]nc$"))
+ncdf <- paste0("data/spei/", list.files("data/spei/", timescale, "[.]nc$"))
 
 nc <- ncdf4::nc_open(ncdf)
 time <- ncvar_get(nc, "time")
@@ -39,7 +41,7 @@ cat("Calculation finished after", format(Sys.time() - start), "\n")
 stopCluster(cl)
 
 names(extr_spei) <- dates[bands]
-saveRDS(extr_spei, "data/geo/geo_spei_raw.rds")
+saveRDS(extr_spei, paste0("data/geo/geo_spei_", timescale, "_raw.rds"))
 
 
 # Transform raw extracted values ------------------------------------------
@@ -56,4 +58,4 @@ colnames(spei)[-1] <- gsub("^.([0-9]{4})[.]([0-9]{2})[.]..$",
 
 df_spei <- as_tibble(reshape2::melt(spei, id.var = "code"))
 
-saveRDS(df_spei, "data/geo/geo_spei.rds")
+saveRDS(df_spei, paste0("data/geo/geo_spei", timescale, ".rds"))

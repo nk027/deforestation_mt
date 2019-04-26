@@ -35,20 +35,21 @@ data[is.na(data$MEANYLD), ]$weight
 data[is.na(data$MEAN1), ]$weight
 # Remove NAs
 data <- data[!is.na(data$MEANYLD) & !is.na(data$MEAN1), ]
-# Recalculate weights
-reweigh <- data %>% group_by(code) %>% 
-  summarise(reweigh = sum(weight))
-data_wt <- left_join(data, reweigh, by = "code") %>% 
-  mutate(reweight = weight / reweigh)
-# Check reweighted values
-data_wt %>% group_by(code) %>% 
-  summarise(check = round(sum(reweight), 1)) %>% .$check == 1
+# # Recalculate weights - skipped, as NA should be 0
+# reweigh <- data %>% group_by(code) %>%
+#   summarise(reweigh = sum(weight))
+# data_wt <- left_join(data, reweigh, by = "code") %>% 
+#   mutate(weight = weight / reweigh)
+# # Check reweighted values
+# data_wt %>% group_by(code) %>% 
+#   summarise(check = round(sum(weight), 1)) %>% .$check == 1
+data_wt <- data
 
 
 # Aggregate to municipios -------------------------------------------------
 
 iiasa <- data_wt %>% 
-  transmute(code, yield = reweight * MEANYLD, travel = reweight * MEAN1) %>% 
+  transmute(code, yield = weight * MEANYLD, travel = weight * MEAN1) %>% 
   group_by(code) %>% 
   summarise(iiasa_yield = sum(yield), iiasa_travel = sum(travel))
 
