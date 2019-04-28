@@ -65,17 +65,18 @@ x <- data[data$date > 2004 & data$date < 2018, grep("brl_hha$", names(data))]
 x$geometry <- NULL
 apply(x, 2, function(x) sum(is.na(x)))
 y <- data[grep("brl_hha$", names(data))]; y$geometry <- NULL
-data$avg_yield_brl <- apply(y, 1, function(x) sum(x, na.rm = TRUE) / sum(!is.na(x)))
+# data$avg_yield_brl <- apply(y, 1, function(x) sum(x, na.rm = TRUE) / sum(!is.na(x)))
+data$max_yield_brl <- apply(y, 1, function(x) max(x, 0, na.rm = TRUE))
 
 x <- data[data$date > 2004 & data$date < 2018, grep("ton_hha$", names(data))]
 x$geometry <- NULL
 apply(x, 2, function(x) sum(is.na(x)))
 y <- data[grep("ton_hha$", names(data))]; y$geometry <- NULL
-data$avg_yield <- apply(y, 1, function(x) sum(x, na.rm = TRUE) / sum(!is.na(x)))
+# data$avg_yield <- apply(y, 1, function(x) sum(x, na.rm = TRUE) / sum(!is.na(x)))
+data$max_yield <- apply(y, 1, function(x) max(x, 0, na.rm = TRUE))
 
 data %>% filter(date == 2005) %>% 
-  select(avg_yield, avg_yield_brl) %>% plot()
-
+  select(max_yield, max_yield_brl) %>% plot()
 
 # # Set NaN to 0 - Bad!
 # shp <- shp %>% 
@@ -85,3 +86,29 @@ data %>% filter(date == 2005) %>%
 # Set oilseed NA to 0
 data <- data %>% 
   mutate_at(vars(starts_with("oilseed")), .funs = funs(ifelse(is.na(.), 0, .)))
+
+
+# By area -----------------------------------------------------------------
+
+data <- data %>% 
+  mutate(area_km2 = area_m2 / 1000000) %>% 
+  mutate(forest_px_km2 = forest_px / area_km2,
+         cerr_px_km2 = cerr_px / area_km2,
+         nature_px_km2 = nature_px / area_km2,
+         forest_ch_km2 = forest_ch / area_km2,
+         cerr_ch_km2 = cerr_ch / area_km2,
+         nature_ch_km2 = nature_ch / area_km2,
+         crop_px_km2 = crop_px / area_km2,
+         pasture_px_km2 = pasture_px / area_km2,
+         pop_km2 = pop / area_km2,
+         cattle_km2 = cattle / area_km2,
+         cattle_dens = cattle / pasture_px,
+         milk_brl_lt = milk_brl / milk_lt,
+         milk_brl_cow = milk_brl / milk_cow,
+         milk_lt_cow = milk_lt / milk_cow,
+         milk_cow_cattle = milk_cow / cattle,
+         milk_cow_km2 = milk_cow / area_km2) %>% 
+  mutate(spei_dry = ifelse(spei_qu2 < -1.5, 1, 0),
+         spei_wet = ifelse(spei_qu8 > 1.5, 1, 0))
+
+saveRDS(data, "data/data.rds")

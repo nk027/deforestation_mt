@@ -25,14 +25,14 @@ rm(nb)
 
 
 
-# Model -------------------------------------------------------------------
+# Test -------------------------------------------------------------------
 
-cor_data <- shp %>% 
+cor_data <- data %>% 
   ungroup() %>% 
   select(forest_ch, cerr_ch, nature_ch, forest_px, cerr_ch, nature_px,
          pasture_px, cattle, chicken, swine, 
          oilseed_ton, oilseed_brl,
-         mean, pop, gdp_cap, 
+         spei_mean, pop, gdp_cap, 
          ends_with("_hha"))
 
 # Correlation test
@@ -45,10 +45,25 @@ cor_test <- function(x, cutoff = 0.8, na.0 = TRUE) {
   which(y > cutoff | y < -cutoff, arr.ind = TRUE)
 }
 
-cor_test(cor_data)
+cor_test(cor_data, 0.8)
+cor_test(cor_data, 0.9)
 
 
-# Panel -------------------------------------------------------------------
+# Prep for Bayes ----------------------------------------------------------
+
+bayes <- data %>% 
+  filter(date > 2004, date < 2017) %>% 
+  ungroup() %>%
+  sf:::select.sf(forest_ch_km2, forest_px_km2, pasture_px_km2, crop_px_km2, 
+         max_yield_brl, pop_km2, gdp_cap, spei_dry, spei_wet, 
+         milk_brl_cow, cattle_dens)
+bayes$geometry <- NULL
+summary(bayes)
+bayes <- as.matrix(bayes)
+
+
+
+# Stuff -------------------------------------------------------------------
 
 formula <- forest_ch ~ forest_px + cerr_px + pasture_px +
   soy_hha + soy_brl_hha + soy_ton_hha +
