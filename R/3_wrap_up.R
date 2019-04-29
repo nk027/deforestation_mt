@@ -107,8 +107,6 @@ data <- data %>%
          milk_brl_cow = milk_brl / milk_cow,
          milk_lt_cow = milk_lt / milk_cow,
          milk_cow_cattle = milk_cow / cattle,
-         milk_cow_km2 = milk_cow / area_km2) %>% 
-  mutate(spei_dry = ifelse(spei_qu2 < -1.5, 1, 0),
-         spei_wet = ifelse(spei_qu8 > 1.5, 1, 0))
+         milk_cow_km2 = milk_cow / area_km2)
 
 saveRDS(data, "data/data.rds")

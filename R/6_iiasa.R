@@ -49,20 +49,6 @@ cor_test(cor_data, 0.8)
 cor_test(cor_data, 0.9)
 
 
-# Prep for Bayes ----------------------------------------------------------
-
-bayes <- data %>% 
-  filter(date > 2004, date < 2017) %>% 
-  ungroup() %>%
-  sf:::select.sf(forest_ch_km2, forest_px_km2, pasture_px_km2, crop_px_km2, 
-         max_yield_brl, pop_km2, gdp_cap, spei_dry, spei_wet, 
-         milk_brl_cow, cattle_dens)
-bayes$geometry <- NULL
-summary(bayes)
-bayes <- as.matrix(bayes)
-
-
-
 # Stuff -------------------------------------------------------------------
 
 formula <- forest_ch ~ forest_px + cerr_px + pasture_px +

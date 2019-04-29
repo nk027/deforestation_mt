@@ -6,6 +6,7 @@ library(sf)
 
 timescale <- "03"
 
+
 # Explore graphically -----------------------------------------------------
 
 df <- readRDS(paste0("data/geo/spei", timescale, ".rds"))
