@@ -28,7 +28,7 @@ ln_det <- function(
       mavmomi[i, j] = N * ((t(U) %*% WV) / (i * UU))
     }
   }
-  mavmomi[1:n_exact, ] = td[, matrix(1, n_iter, 1)]
+  mavmomi[1:n_exact, ] = TD[, matrix(1, n_iter, 1)]
   
   # Averages across iterations
   avmomi = as.matrix(rowMeans(mavmomi))
@@ -41,7 +41,7 @@ ln_det <- function(
   # Estimate ln |I - rho W| using mixture of exact and stochastic moments
   # Exact from 1 to n_exact, stochastic from (n_exact + 1) to n_order
   
-  ln_det = c(alomat %*% avmomi)
+  ln_det_mat = alomat %*% avmomi
   
   srvs = t(alomat %*% avmomi)
   std_err = c(t(sqrt((rowMeans(srvs * srvs) - rowMeans(srvs) ^ 2) / n_iter)))
@@ -49,10 +49,10 @@ ln_det <- function(
   ci = c(ln_det_mat - 1.96 * std_err,
          ln_det_mat + 1.96 * std_err)
   
-  out = list(ln_det,
-             rho = alpha,
-             std_err,
-             ci)
+  out = list("ln_det" = ln_det_mat,
+             "rho" = alpha,
+             "std_err" = std_err,
+             "ci" = ci)
   
   # return(cbind(ln_det_mat, alpha))
 }
