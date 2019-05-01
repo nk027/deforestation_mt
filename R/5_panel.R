@@ -1,6 +1,7 @@
 
 library(MASS)
 library(dplyr)
+library(sf)
 source("R/7_ln_det.R")
 source("R/7_w_matr.R")
 
@@ -26,19 +27,20 @@ matr <- data %>%
          geometry = NULL) %>% 
   as.matrix(matr, rownames.force = FALSE)
 
-W <- get_W(data)
-W_ext <- kronecker(diag(dates_len), W)
+W_pre <- get_W(data)
+W <- kronecker(diag(dates_len), W_pre)
 
 y <- matr[, 1]
-X <- matr[, -1]
+X_pre <- matr[, -1]
 
-TFE <- kronecker(diag(dates_len), matrix(1, nrow(X) / dates_len, 1))
+TFE <- kronecker(diag(dates_len), matrix(1, nrow(X_pre) / dates_len, 1))
+CFE <- kronecker(diag(nrow(X_pre) / dates_len), matrix(1, dates_len, 1))
 
-X_ext <- cbind(1, X, W %*% X, TFE[, -1])
+X <- cbind(1, X_pre, W %*% X_pre, TFE[, -1])
 
-K <- ncol(X_ext)
-N <- nrow(X)
-k <- ncol(X)
+K <- ncol(X)
+N <- nrow(X_pre)
+k <- ncol(X_pre)
 
 
 # Priors ------------------------------------------------------------------
@@ -48,9 +50,11 @@ beta_pr_mean <- matrix(0, K, 1)
 beta_pr_var <- diag(K) * 10 ^ 8
 beta_pr_var_inv <- solve(beta_pr_var)
 
+# plot(density(rnorm(1e6, beta_pr_mean[1], beta_pr_var[1,1] ^ -1)))
+
 # Proper, but uninformative
-sigma_a <- 0.001
-sigma_b <- 0.001
+sigma_a <- 0.01
+sigma_b <- 0.01
 
 # Beta prior on rho
 beta_prob <- function(rho, a) {
@@ -58,10 +62,12 @@ beta_prob <- function(rho, a) {
     ((1 + rho) ^ (a - 1) * (1 - rho) ^ (a - 1)) / 
     (2 ^ (2 * a - 1))
 }
-rho <- 1.01
+rho_a <- 1.01
+
+# plot(beta_prob(seq(-1, 1, length.out = 1e5), rho_a), type = "l")
 
 
-# Sample rho --------------------------------------------------------------
+# Rho sampling --------------------------------------------------------------
 
 prop_scale <- 1
 prop_adj <- 1.1
@@ -73,13 +79,16 @@ n_save <- 1000
 n_burn <- n_iter - n_save
 
 # Storage
-post_beta <- matrix(0, K, n_save)
-post_sigma <- matrix(0, 1, n_save)
-post_rho <- matrix(0, 1, n_save)
+beta_post <- matrix(0, K, n_save)
+sigma_post <- matrix(0, 1, n_save)
+rho_post <- matrix(0, 1, n_save)
+
+R2_post <- R2_bar_post <- matrix(0, 1, n_save)
+AIC_post <- BIC_post <- matrix(0, 1, n_save)
 
 rho_tmp <- matrix(0, 1, n_iter)
 
-post_dir <- post_ind <- post_tot <- matrix(0, k + 1, n_save)
+direct_post <- indirect_post <- total_post <- matrix(0, k + 1, n_save)
 
 
 # Griddy Gibbs ------------------------------------------------------------
@@ -99,8 +108,8 @@ A_inv_diags <- A_inv_tots <-
 time <- Sys.time()
 cat("Pre-calculating Griddy Gibbs.\n")
 for(i in seq_len(n_griddy)) {
-  A <- .sparseDiagonal(N) - rhos[i] * W
-  Ays[, i] = c(A %*% y)
+  A <- Matrix::.sparseDiagonal(N) - rhos[i] * W
+  Ays[, i] = as.numeric(A %*% y)
   A_inv <- solve(A)
   A_inv_W <- A_inv %*% W
   
@@ -124,6 +133,9 @@ Wy <- W %*% y
 XWy <- crossprod(X, Wy)
 curr_Ay <- y - curr_rho * Wy
 
+
+time <- Sys.time()
+cat("Starting MCMC.\n")
 for(i in seq_len(n_iter)) {
   
   # Beta
@@ -135,15 +147,15 @@ for(i in seq_len(n_iter)) {
   # Sigma
   curr_Xb <- X %*% curr_beta
   curr_ESS <- crossprod(curr_Ay - curr_Xb)
-  curr_sigma <- 1 / rgamma(1, sigma_a + n / 2, 
+  curr_sigma <- 1 / rgamma(1, sigma_a + N / 2, 
                            sigma_b + as.double(curr_ESS) / 2)
   
   # Rho
   b0 <- V %*% (beta_pr_var_inv %*% beta_pr_mean + 1 / curr_sigma * Xy)
   bd <- V %*% (beta_pr_var_inv %*% beta_pr_mean + 1 / curr_sigma * XWy)
   
-  e0 <- Y - X %*% b0
-  ed <- WY - X %*% bd
+  e0 <- y - X %*% b0
+  ed <- Wy - X %*% bd
   
   epe0 <- as.double(crossprod(e0))
   eped <- as.double(crossprod(ed))
@@ -153,15 +165,15 @@ for(i in seq_len(n_iter)) {
   den <- ln_det + z + log(beta_prob(rhos, rho_a))
   den_adj <- den - max(den)
   x <- exp(den_adj)
-  i_sum <- sum((rhos[-1] + y[-length(y)]) * (x[-1] - x[-length(x)]) / 2)
+  i_sum <- sum((rhos[-1] + rhos[-length(rhos)]) * (x[-1] - x[-length(x)]) / 2)
   z <- abs(x / i_sum)
   dens <- cumsum(z)
   rnd <- runif(1) * sum(z)
-  ind <- max(x(1, which(den <= rnd)))
+  ind <- max(1, which(dens <= rnd))
   
   # Adjust
   curr_rho <- rhos[ind]
-  curr_Ay <- AYs[, ind]
+  curr_Ay <- Ays[, ind]
   curr_A_inv_diags <- A_inv_diags[ind]
   curr_A_inv_tots <- A_inv_tots[ind]
   curr_A_inv_W_diags <- A_inv_W_diags[ind]
@@ -170,15 +182,103 @@ for(i in seq_len(n_iter)) {
   # Store
   if(i > n_burn) {
     
-    s <- n_iter - n_burn
-    post_beta[, s] <- as.matrix(curr_beta)
-    post_sigma[s] <- curr_sigma
-    post_rho[s] <- curr_rho
+    s <- i - n_burn
+    beta_post[, s] <- as.matrix(curr_beta)
+    sigma_post[s] <- curr_sigma
+    rho_post[s] <- curr_rho
     
-    post_dir[, s] <- curr_A_inv_diags / N * curr_beta[1:(k + 1)] +
+    # Spatial effects
+    direct_post[, s] <- curr_A_inv_diags / N * curr_beta[1:(k + 1)] +
       c(0, curr_A_inv_W_diags / N * curr_beta[(k + 2):(2 * k + 1)])
-    post_tot[, s] <- curr_A_inv_tots / N * curr_beta[1:(k + 1)] +
+    total_post[, s] <- curr_A_inv_tots / N * curr_beta[1:(k + 1)] +
       c(0, curr_A_inv_W_tots / N * curr_beta[(k + 2):(2 * k + 1)])
-    post_ind[, s] <- post_tot[, s] - post_dir[, s]
+    indirect_post[, s] <- total_post[, s] - direct_post[, s]
+    
+    # R^2
+    curr_resid <- as.matrix((diag(N) - curr_rho * W) %*% y - (X %*% curr_beta))
+    SSR <- crossprod(curr_resid)
+    TSS <- crossprod(y - mean(y))
+    R2_post[s] <- 1 - SSR / TSS
+    
+    SSR_adj <- SSR / (N - K)
+    TSS_adj <- TSS / (N - 1)
+    R2_bar_post[s] <- 1 - SSR_adj / TSS_adj
+    
+    # AIC & BIC
+    ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+    df_ll <- K + 1
+    BIC_post[s] <- -2 * ll + log(N) * df_ll
+    AIC_post[s] <- -2 * ll + 2 * df_ll
   }
 }
+cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
+
+
+# Geweke convergence diagnostics ------------------------------------------
+
+full_chain <- cbind(t(beta_post), t(rho_post))
+mh_draws <- coda::mcmc(full_chain)
+geweke_conv <- coda::geweke.diag(mh_draws)$z
+cat("Geweke convergence diagnostics:", 
+    paste(round(geweke_conv, 1), sep = ","),
+    "\nConverged:", all(abs(geweke_conv) < 3))
+
+
+# Posteriors --------------------------------------------------------------
+
+beta_post_mean <- apply(beta_post, 1, mean)
+sigma_post_mean <- mean(sigma_post)
+rho_post_mean <- mean(rho_post)
+rho_post_sd <- sd(rho_post)
+
+direct_post_mean <- apply(direct_post, 1, mean)
+indirect_post_mean <- apply(indirect_post, 1, mean)
+total_post_mean <- apply(total_post, 1, mean)
+
+direct_post_sd <- apply(direct_post, 1, sd)
+indirect_post_sd <- apply(indirect_post, 1, sd)
+total_post_sd <- apply(total_post, 1, sd)
+
+# More pseudo stuff
+R2 <- median(R2_post)
+R2_bar <- median(R2_bar_post)
+
+AIC <- median(AIC_post)
+BIC <- median(BIC_post)
+
+# CI
+credible_interval <- function(x, prob = 0.05) {
+  quantile(x, c(prob, 0.5, 1 - prob))
+}
+
+beta_post_ci <- apply(beta_post, 1, credible_interval)
+rho_post_ci <- apply(rho_post, 1, credible_interval)
+
+direct_post_ci <- apply(direct_post, 1, credible_interval)
+indirect_post_ci <- apply(direct_post, 1, credible_interval)
+total_post_ci <- apply(direct_post, 1, credible_interval)
+
+
+# Print -------------------------------------------------------------------
+
+# Output as table, post_mean / post_sd ~ Bayesian t-values
+data.frame(
+  Variables = c(c("const", colnames(X_pre))),
+  Direct = direct_post_mean,
+  Direct_t = direct_post_mean / direct_post_sd,
+  Indirect = indirect_post_mean,
+  Indirect_t = indirect_post_mean / indirect_post_sd
+)
+
+plot(density(rho_post))
+ts.plot(rho_post)
+
+data.frame(
+  Variables = c("R2", "R2bar", "Obs."),
+  Direct = c(R2, R2bar, n),
+  Direct_t = NA,
+  Indirect = NA,
+  Indirect_t = NA
+)
+
+
