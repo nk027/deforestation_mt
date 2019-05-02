@@ -1,7 +1,6 @@
 
 library(MASS)
 library(dplyr)
-library(sf)
 source("R/7_ln_det.R")
 source("R/7_w_matr.R")
 
@@ -23,8 +22,8 @@ matr <- data %>%
                  spei_dry, spei_wet, 
                  milk_brl_cow, cattle_dens) %>% 
   mutate(max_yield_brl = max_yield_brl / 1000,
-         milk_brl_cow = milk_brl_cow / 1000,
-         geometry = NULL) %>% 
+         milk_brl_cow = milk_brl_cow / 1000) %>% 
+  sf::`st_geometry<-`(NULL) %>% 
   as.matrix(matr, rownames.force = FALSE)
 
 W_pre <- get_W(data)
@@ -80,13 +79,11 @@ n_burn <- n_iter - n_save
 
 # Storage
 beta_post <- matrix(0, K, n_save)
-sigma_post <- matrix(0, 1, n_save)
-rho_post <- matrix(0, 1, n_save)
+sigma_post <- vector("numeric", n_save)
+rho_post <- vector("numeric", n_save)
 
-R2_post <- R2_bar_post <- matrix(0, 1, n_save)
-AIC_post <- BIC_post <- matrix(0, 1, n_save)
-
-rho_tmp <- matrix(0, 1, n_iter)
+R2_post <- R2_bar_post <- vector("numeric", n_save)
+AIC_post <- BIC_post <- vector("numeric", n_save)
 
 direct_post <- indirect_post <- total_post <- matrix(0, k + 1, n_save)
 
@@ -216,12 +213,13 @@ cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
 
 # Geweke convergence diagnostics ------------------------------------------
 
-full_chain <- cbind(t(beta_post), t(rho_post))
+full_chain <- cbind(t(beta_post), rho_post)
 mh_draws <- coda::mcmc(full_chain)
 geweke_conv <- coda::geweke.diag(mh_draws)$z
 cat("Geweke convergence diagnostics:", 
     paste(round(geweke_conv, 1), sep = ","),
     "\nConverged:", all(abs(geweke_conv) < 3))
+coverged <- all(abs(geweke_conv) < 3)
 
 
 # Posteriors --------------------------------------------------------------
@@ -262,23 +260,31 @@ total_post_ci <- apply(direct_post, 1, credible_interval)
 # Print -------------------------------------------------------------------
 
 # Output as table, post_mean / post_sd ~ Bayesian t-values
-data.frame(
-  Variables = c(c("const", colnames(X_pre))),
-  Direct = direct_post_mean,
-  Direct_t = direct_post_mean / direct_post_sd,
-  Indirect = indirect_post_mean,
-  Indirect_t = indirect_post_mean / indirect_post_sd
+res_effects <- data.frame(
+  variables = c(c("const", colnames(X_pre))),
+  direct = direct_post_mean,
+  direct_t = direct_post_mean / direct_post_sd,
+  indirect = indirect_post_mean,
+  indirect_t = indirect_post_mean / indirect_post_sd,
+  total = total_post_mean,
+  total_t = total_post_mean / total_post_sd
 )
 
 plot(density(rho_post))
 ts.plot(rho_post)
 
-data.frame(
-  Variables = c("R2", "R2bar", "Obs."),
-  Direct = c(R2, R2bar, n),
-  Direct_t = NA,
-  Indirect = NA,
-  Indirect_t = NA
+res_other <- data.frame(
+  variables = c("R2", "R2_bar", "AIC", "BIC", "Obs"),
+  value = c(R2, R2_bar, AIC, BIC, N)
 )
 
 
+# Save --------------------------------------------------------------------
+
+out <- list(
+  variables = colnames(matr),
+  res_effects = res_effects,
+  res_other = res_other,
+  rho_post = rho_post
+  converged = converged
+)
