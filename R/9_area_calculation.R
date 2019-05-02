@@ -11,3 +11,8 @@ r <- raster::raster("data/landsat/mt_2015_v3.tif")
 raster::res(r)
 
 (1000 / 231.6564) ^ 2
+
+data %>% 
+  transmute((forest_px + pasture_px + cerr_px + crop_px + urban_px + water_px) * 
+              (231.6564) ^ 2 / 1e6,
+            area_km2)
