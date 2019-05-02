@@ -93,6 +93,7 @@ data <- data %>%
 data <- data %>% 
   mutate(area_km2 = area_m2 / 1000000) %>% 
   mutate_at(vars(ends_with("px")), .funs = funs(. * (231.6564) ^ 2 / 1e6))
+# Change px from 231m^2 to 1km^2
   
 data <- data %>% 
   mutate(forest_px_km2 = forest_px / area_km2,
