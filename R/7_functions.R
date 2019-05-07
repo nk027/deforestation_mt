@@ -1,5 +1,5 @@
 # Pace & Barry MC approximation to log|I - rho W|
-ln_det <- function(
+get_ln_det <- function(
   W, 
   length.out = 200,
   rmin = -1, # set t0 1e-5 for 0 < rho < 1

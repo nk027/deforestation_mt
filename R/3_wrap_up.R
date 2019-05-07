@@ -32,7 +32,9 @@ data <- data %>%
   mutate(forest_ch = forest_px - lag(forest_px),
          cerr_ch = cerr_px - lag(cerr_px),
          nature_px = forest_px + cerr_px,
-         nature_ch = forest_ch + cerr_ch) %>% 
+         nature_ch = forest_ch + cerr_ch,
+         crop_ch = crop_px - lag(crop_px),
+         pasture_ch = pasture_px - lag(pasture_px)) %>% 
   ungroup()
 
 data <- data %>% 

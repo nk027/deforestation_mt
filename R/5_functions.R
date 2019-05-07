@@ -1,3 +1,16 @@
+# get matrix from sf data
+get_matr <- function(x, variables, dates) {
+  
+  library(dplyr)
+  
+  matr <- x %>% 
+    filter(date >= dates[1], date <= dates[2]) %>% 
+    ungroup() %>%
+    sf:::select.sf(variables) %>% 
+    sf::`st_geometry<-`(NULL) %>% 
+    as.matrix(matr, rownames.force = FALSE)
+}
+
 # spdep weights matrix
 get_W <- function(x, type = c("queen", "knear"), k = 5) {
   

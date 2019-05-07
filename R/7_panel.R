@@ -1,25 +1,33 @@
 
-# To be sourced by 5_panel.R
+# To be used in 5_panel.R
+
+source("R/7_functions.R")
+
 
 # Prep --------------------------------------------------------------------
 
-matr <- data %>%
-  filter(date >= dates[1], date <= dates[2]) %>% 
-  ungroup() %>%
-  sf:::select.sf(variables) %>% 
-  sf::`st_geometry<-`(NULL) %>% 
-  as.matrix(matr, rownames.force = FALSE)
+sdm_panel <- function(
+  x, W_pre, dates_len,
+  tfe = TRUE, cfe = TRUE, 
+  n_iter = 2000,
+  n_save = 1000,
+  n_griddy = 200) {
 
-W_pre <- get_W(data)
 W <- kronecker(diag(dates_len), W_pre)
 
-y <- matr[, 1]
-X_pre <- matr[, -1]
+y <- x[, 1]
+X_pre <- x[, -1]
 
-TFE <- kronecker(diag(dates_len), matrix(1, nrow(X_pre) / dates_len, 1))
-CFE <- kronecker(diag(nrow(X_pre) / dates_len), matrix(1, dates_len, 1))
+X <- cbind(1, X_pre, W %*% X_pre)
 
-X <- cbind(1, X_pre, W %*% X_pre, TFE[, -1])
+if(tfe) {
+  TFE <- kronecker(diag(dates_len), matrix(1, nrow(X_pre) / dates_len, 1))
+  X <- cbind(X, TFE[, -1])
+  if(cfe) {
+    CFE <- kronecker(diag(nrow(X_pre) / dates_len), matrix(1, dates_len, 1))
+    X <- cbind(X, CFE[, -1])
+  }
+}
 
 K <- ncol(X)
 N <- nrow(X_pre)
@@ -57,8 +65,6 @@ prop_adj <- 1.1
 
 n_acc <- 0
 
-n_iter <- 2000
-n_save <- 1000
 n_burn <- n_iter - n_save
 
 # Storage
@@ -74,8 +80,7 @@ direct_post <- indirect_post <- total_post <- matrix(0, k + 1, n_save)
 
 # Griddy Gibbs ------------------------------------------------------------
 
-n_griddy <- 1000
-list_det <- ln_det(W, length.out = n_griddy + 2)
+list_det <- get_ln_det(W, length.out = n_griddy + 2)
 
 rhos <- list_det$rho[-c(1, n_griddy + 2)]
 ln_det <- list_det$ln_det[-c(1, n_griddy + 2), ]
@@ -104,7 +109,7 @@ cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
 
 # Gibbs Sampler -----------------------------------------------------------
 
-curr_beta <- mvrnorm(1, beta_pr_mean, beta_pr_var)
+curr_beta <- MASS::mvrnorm(1, beta_pr_mean, beta_pr_var)
 curr_sigma <- 1 / rgamma(1, sigma_a / 2, sigma_b / 2)
 curr_rho <- 0
 
@@ -123,7 +128,7 @@ for(i in seq_len(n_iter)) {
   V <- solve(beta_pr_var_inv + 1 / curr_sigma * XX)
   b <- V %*% (beta_pr_var %*% beta_pr_mean + 
                 1 / curr_sigma * crossprod(X, curr_Ay))
-  curr_beta <- mvrnorm(1, b, V)
+  curr_beta <- MASS::mvrnorm(1, b, V)
   
   # Sigma
   curr_Xb <- X %*% curr_beta
@@ -200,18 +205,18 @@ cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
 full_chain <- cbind(t(beta_post), rho_post)
 mh_draws <- coda::mcmc(full_chain)
 geweke_conv <- coda::geweke.diag(mh_draws)$z
-cat("Geweke convergence diagnostics:", 
-    paste(round(geweke_conv, 1), sep = ","),
-    "\nConverged:", all(abs(geweke_conv) < 3))
-coverged <- all(abs(geweke_conv) < 3)
+cat("Geweke convergence diagnostics: ", 
+    paste(round(geweke_conv, 1), collapse = ", "),
+    "\nConverged: ", all(abs(geweke_conv) < 3), "\n", sep = "")
+converged <- all(abs(geweke_conv) < 3)
 
 
 # Posteriors --------------------------------------------------------------
 
-beta_post_mean <- apply(beta_post, 1, mean)
-sigma_post_mean <- mean(sigma_post)
-rho_post_mean <- mean(rho_post)
-rho_post_sd <- sd(rho_post)
+# beta_post_mean <- apply(beta_post, 1, mean)
+# sigma_post_mean <- mean(sigma_post)
+# rho_post_mean <- mean(rho_post)
+# rho_post_sd <- sd(rho_post)
 
 direct_post_mean <- apply(direct_post, 1, mean)
 indirect_post_mean <- apply(indirect_post, 1, mean)
@@ -229,16 +234,16 @@ AIC <- median(AIC_post)
 BIC <- median(BIC_post)
 
 # CI
-credible_interval <- function(x, prob = 0.05) {
-  quantile(x, c(prob, 0.5, 1 - prob))
-}
+# credible_interval <- function(x, prob = 0.05) {
+#   quantile(x, c(prob, 0.5, 1 - prob))
+# }
 
-beta_post_ci <- apply(beta_post, 1, credible_interval)
-rho_post_ci <- apply(rho_post, 1, credible_interval)
-
-direct_post_ci <- apply(direct_post, 1, credible_interval)
-indirect_post_ci <- apply(direct_post, 1, credible_interval)
-total_post_ci <- apply(direct_post, 1, credible_interval)
+# beta_post_ci <- apply(beta_post, 1, credible_interval)
+# rho_post_ci <- credible_interval(rho_post)
+# 
+# direct_post_ci <- apply(direct_post, 1, credible_interval)
+# indirect_post_ci <- apply(direct_post, 1, credible_interval)
+# total_post_ci <- apply(direct_post, 1, credible_interval)
 
 
 # Print -------------------------------------------------------------------
@@ -249,13 +254,8 @@ res_effects <- data.frame(
   direct = direct_post_mean,
   direct_t = direct_post_mean / direct_post_sd,
   indirect = indirect_post_mean,
-  indirect_t = indirect_post_mean / indirect_post_sd,
-  total = total_post_mean,
-  total_t = total_post_mean / total_post_sd
+  indirect_t = indirect_post_mean / indirect_post_sd
 )
-
-plot(density(rho_post))
-ts.plot(rho_post)
 
 res_other <- data.frame(
   variables = c("R2", "R2_bar", "AIC", "BIC", "Obs"),
@@ -266,11 +266,15 @@ res_other <- data.frame(
 # Save --------------------------------------------------------------------
 
 out <- list(
-  variables = colnames(matr),
-  res_effects = res_effects,
-  res_other = res_other,
-  rho_post_mean = rho_post_mean,
-  beta_post_mean = beta_post_mean,
-  sigma_post_mean = sigma_post_mean,
-  converged = converged
+  "variables" = colnames(X_pre),
+  "res_effects" = res_effects,
+  "res_other" = res_other,
+  "rho_post" = rho_post,
+  "beta_post" = beta_post,
+  "sigma_post" = sigma_post,
+  # "direct_post_ci" = direct_post_ci,
+  # "indirect_post_ci" = indirect_post_ci,
+  "converged" = converged
 )
+
+}
