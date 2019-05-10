@@ -1,6 +1,6 @@
 
 W_pre <- W_qu
-date_fit <- dates[1]
+date_fit <- dates[2] + 1
 beta_post <- results_qu[[3]]$beta_post
 rho_post <- results_qu[[3]]$rho_post
 vars <- variables[[3]]
@@ -44,10 +44,6 @@ y_pred
 
 plot(oos[, 1] - y_pred)
 
-curr_resid <- oos[, 1] - y_pred
-SSR <- crossprod(curr_resid)
-TSS <- crossprod(oos[, 1] - mean(oos[, 1]))
-1 - SSR / TSS # R2
 
 
 # Plot --------------------------------------------------------------------

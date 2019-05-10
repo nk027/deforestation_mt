@@ -56,6 +56,13 @@ plot(oos[, 1], plm_pred)
 lines(x = -1:1, y = -1:1)
 par(op)
 
+op <- par(mfrow = c(1, 2))
+plot(oos[, 1] - y_pred)
+abline(h = 0)
+plot(oos[, 1] - plm_pred)
+abline(h = 0)
+par(op)
+
 cowplot::plot_grid(
   data %>%
     filter(date == dates[2] + 1) %>%

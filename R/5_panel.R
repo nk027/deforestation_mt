@@ -16,7 +16,8 @@ dates_len <- length(dates[1]:dates[2])
 
 names(data)
 
-municipio_subset <- read.table("municipios.txt")[[1]]
+municipio_subset <- c()
+# municipio_subset <- read.table("municipios.txt")[[1]]
 data <- data %>% filter(!code %in% municipio_subset)
 
 data <- data %>% 
