@@ -1,6 +1,7 @@
 
 library(MASS)
 library(dplyr)
+library(spdep)
 source("R/5_functions.R")
 source("R/7_functions.R")
 source("R/7_panel.R")
@@ -14,6 +15,9 @@ dates_len <- length(dates[1]:dates[2])
 # Build model -------------------------------------------------------------
 
 names(data)
+
+municipio_subset <- read.table("municipios.txt")[[1]]
+data <- data %>% filter(!code %in% municipio_subset)
 
 data <- data %>% 
   mutate(
@@ -97,9 +101,9 @@ results_qu <- list()
 results_kn <- list()
 
 W_qu <- get_W(data, type = "queen")
-W_kn <- get_W(data, type = "knear", k = 5)
+W_kn <- get_W(data, type = "knear", k = 7)
 
-
+counter <- 1
 for(counter in seq_along(variables)) {
   matrices[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
   results_qu[[counter]] <- sdm_panel(matrices[[counter]], W_qu, dates_len)
@@ -109,8 +113,6 @@ for(counter in seq_along(variables)) {
 
 
 # Print -------------------------------------------------------------------
-
-
 
 
 print_results <- function(x) {
@@ -164,11 +166,13 @@ print_vars <- function(x) {
 
 
 
-png("plots/rho_densities.png", width = 1200, height = 600)
-plot(density(results_qu[[1]]$rho_post), xlim = c(0.5, 1), ylim = c(0, 18), 
+png("plots/rho_densities.png", width = 800, height = 400, pointsize = 18)
+op <- par(mar = c(2, 2, 2, 0.5))
+plot(density(results_qu[[1]]$rho_post), xlim = c(0.4, 1), ylim = c(0, 15), 
      col = "darkgreen", main = "Rho posterior densities")
 for(i in 2:length(results_qu)) lines(density(results_qu[[i]]$rho_post), col = "darkgreen")
-for(i in 1:length(results_kn)) lines(density(results_kn[[i]]$rho_post), col = "darkblue")
+for(i in 1:length(results_kn)) lines(density(results_kn[[i]]$rho_post), col = "darkgreen")
+par(op)
 dev.off()
 
 png("plots/r2_density.png", width = 1200, height = 600)
