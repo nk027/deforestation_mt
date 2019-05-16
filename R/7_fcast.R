@@ -21,22 +21,18 @@ oos <- data %>%
   sf::`st_geometry<-`(NULL) %>% 
   as.matrix(matr, rownames.force = FALSE)
 
-as.matrix((diag(N) - curr_rho * W) %*% y - (X %*% curr_beta))
-
 y_pred <- A_inv %*% 
   (1 * beta_post_mean[1] + 
      oos[, -1] %*% beta_post_mean[2:(ncol(oos))] + 
-     W_pre %*% oos[, -1] %*% beta_post_mean[(1 + ncol(oos)):(2 * ncol(oos) - 1)])
-
+     W_pre %*% oos[, -1] %*% beta_post_mean[(1 + ncol(oos)):(2 * ncol(oos) - 1)] +
 if(tfe) {
-  y_pred <- y_pred +
-    mean(beta_post_mean[(2 * ncol(oos)):(2 * ncol(oos) + dates_len - 2)]) # TFE
+    mean(beta_post_mean[(2 * ncol(oos)):(2 * ncol(oos) + dates_len - 2)]) + # TFE
     # beta_post_mean[(2 * ncol(oos) + dates_len - 2)] # TFE
   if(cfe) {
-    y_pred <- y_pred +
       c(0, beta_post_mean[(2 * ncol(oos) + dates_len - 1):len(beta_post_mean)]) # CFE
   }
-}
+} else {0})
+
 y_pred
 
 
@@ -47,6 +43,8 @@ plot(oos[, 1] - y_pred)
 
 
 # Plot --------------------------------------------------------------------
+
+library(ggplot2)
 
 # cowplot::plot_grid(
 #   data %>% 

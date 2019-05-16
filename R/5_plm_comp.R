@@ -1,42 +1,46 @@
 
 library(plm)
 
-x <- matrix(NA, ncol = ncol(matrices[[3]]) + 2, nrow = nrow(matrices[[3]]))
-x[, 1:ncol(matrices[[3]])] <- matrices[[3]]
-x[, ncol(matrices[[3]]) + 1] <- rep(1:(141 - len(municipio_subset)), dates_len)
-x[, ncol(matrices[[3]]) + 2] <- rep(1:dates_len, 141 - len(municipio_subset))
-colnames(x) <- c(colnames(matrices[[3]]), "ind", "time")
+x <- matrix(NA, ncol = ncol(matrices[[1]]) + 2, nrow = nrow(matrices[[1]]))
+x[, 1:ncol(matrices[[1]])] <- matrices[[1]]
+x[, ncol(matrices[[1]]) + 1] <- rep(1:(141 - len(municipio_subset)), dates_len)
+x[, ncol(matrices[[1]]) + 2] <- rep(1:dates_len, 141 - len(municipio_subset))
+colnames(x) <- c(colnames(matrices[[1]]), "ind", "time")
 x <- as.data.frame(x)
 
 form1 <- forest_ch_km2 ~ 
   forest_px_km2 + pasture_px_km2 + crop_px_km2 + 
-  pop_km2 + gdp_cap + milk_brl_cow + cattle_dens + max_yield_brl + 
+  pop_km2 + gdp_cap + cattle_dens + max_yield_brl + 
   spei_wet + spei_dry
 form2 <- forest_ch_km2 ~
   forest_px_km2 + pasture_px_km2 + crop_px_km2_lag +
-  pop_km2 + gdp_cap + milk_brl_cow + cattle_dens + max_yield_brl_lag + 
+  pop_km2 + gdp_cap + cattle_dens + max_yield_brl_lag + 
   spei_wet + spei_dry
 
-out <- plm::plm(form2, x, 
-                effect = "time", index = c("ind", "time"), model = "within")
+out <- plm::plm(form1, x, effect = "twoways", 
+                index = c("ind", "time"), model = "within", type = "dfirst")
 
 
 # Test --------------------------------------------------------------------
 
-# # Hausmann
-# out_f <- plm::plm(forest_ch_km2 ~ forest_px_km2 + pasture_px_km2 + crop_px_km2 + 
-#                   pop_km2 + gdp_cap + cattle_dens + max_yield_brl + 
-#                   spei_wet + spei_dry, x, 
-#                   effect = "time", index = c("ind", "time"), model = "within")
-# out_r <- plm::plm(forest_ch_km2 ~ forest_px_km2 + pasture_px_km2 + crop_px_km2 + 
-#                   pop_km2 + gdp_cap + cattle_dens + max_yield_brl + 
-#                   spei_wet + spei_dry, x, 
-#                   effect = "time", index = c("ind", "time"), model = "random")
-# phtest(out_f, out_r)
+# Hausmann
+out_f <- plm::plm(form1, x, effect = "twoways", 
+                  index = c("ind", "time"), model = "within", type = "dfirst")
+out_r <- plm::plm(form1, x, effect = "time", 
+                  index = c("ind", "time"), model = "random")
+phtest(out_f, out_r)
+
+# LM
+
+plmtest(form1, data = x, effect = "twoways", index = c("ind", "time"))
+
+# PCD
+
+pcdtest(form1, data = x, effect = "twoways", index = c("ind", "time"))
 
 # Moran's I
-moran.mc(out$residuals, mat2listw(kronecker(diag(dates_len), W_qu)), 1000)
-moran.mc(out$residuals, mat2listw(kronecker(diag(dates_len), W_kn)), 1000)
+moran.mc(out_f$residuals, mat2listw(kronecker(diag(dates_len), W_qu)), 1000)
+moran.mc(out_f$residuals, mat2listw(kronecker(diag(dates_len), W_kn)), 1000)
 
 
 # Compare fit -------------------------------------------------------------

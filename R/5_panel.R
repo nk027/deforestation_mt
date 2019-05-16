@@ -2,9 +2,8 @@
 library(MASS)
 library(dplyr)
 library(spdep)
+
 source("R/5_functions.R")
-source("R/7_functions.R")
-source("R/7_panel.R")
 
 data <- readRDS("data/data.rds")
 
@@ -12,12 +11,12 @@ dates <- c(2005, 2015)
 dates_len <- length(dates[1]:dates[2])
    
 
-# Build model -------------------------------------------------------------
+# Prep data again -------------------------------------------------------------
 
 names(data)
 
 municipio_subset <- c()
-# municipio_subset <- read.table("municipios.txt")[[1]]
+municipio_subset <- read.table("txt/municipios.txt")[[1]]
 data <- data %>% filter(!code %in% municipio_subset)
 
 data <- data %>% 
@@ -38,10 +37,13 @@ data <- data %>%
     crop_px_km2_lag4 = lag(crop_px_km2, 4L)
   )
 
+
+# Prep model --------------------------------------------------------------
+
 variables <- list(
   base = c("forest_ch_km2", 
     "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
-    "pop_km2", "gdp_cap", "milk_brl_cow", "cattle_dens", 
+    "pop_km2", "gdp_cap", "cattle_dens", 
     "max_yield_brl", "spei_wet", "spei_dry"),
   lag = c("forest_ch_km2", 
     "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag", 
@@ -104,6 +106,11 @@ results_kn <- list()
 W_qu <- get_W(data, type = "queen")
 W_kn <- get_W(data, type = "knear", k = 7)
 
+
+# Calculate ---------------------------------------------------------------
+
+# matrices[[1]] <- get_matr(data, variables[[1]], dates = dates)
+
 counter <- 1
 for(counter in seq_along(variables)) {
   matrices[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
@@ -112,34 +119,18 @@ for(counter in seq_along(variables)) {
 }
 
 
+# Summarise------------------------------------------------------------------
 
-# Print -------------------------------------------------------------------
-
-
-print_results <- function(x) {
-  x$res_effects[2] <- ifelse(x$res_effects[2] < 0, -1, 1)
-  x$res_effects[4] <- ifelse(x$res_effects[4] < 0, -1, 1)
-  x$res_effects[3] <- ifelse(abs(x$res_effects[3]) > 2, 3, 
-                             ifelse(abs(x$res_effects[3]) > 1.5, 2,
-                                    ifelse(abs(x$res_effects[3]) > 1, 1, 0)))
-  x$res_effects[5] <- ifelse(abs(x$res_effects[5]) > 2, 3, 
-                             ifelse(abs(x$res_effects[5]) > 1.5, 2,
-                                    ifelse(abs(x$res_effects[5]) > 1, 1, 0)))
-  print(x$res_effects)
-  print(c("R2" = x$res_other[1, 2]))
-  print(c("rho" = mean(x$rho_post)))
-}
-
-summarise_results <- function(x) {
+sm_results <- function(x) {
   
   x$res_effects[2] <- round(x$res_effects[2], 7)
   x$res_effects[4] <- round(x$res_effects[4], 7)
   x$res_effects[3] <- ifelse(abs(x$res_effects[3]) > 2.576, " ***", 
-                             ifelse(abs(x$res_effects[3]) > 1.96, " **",
-                                    ifelse(abs(x$res_effects[3]) > 1.645, " *", "")))
+                        ifelse(abs(x$res_effects[3]) > 1.96, " **",
+                          ifelse(abs(x$res_effects[3]) > 1.645, " *", "")))
   x$res_effects[5] <- ifelse(abs(x$res_effects[5]) > 2.576, " ***", 
-                             ifelse(abs(x$res_effects[5]) > 1.96, " **",
-                                    ifelse(abs(x$res_effects[5]) > 1.645, " *", "")))
+                        ifelse(abs(x$res_effects[5]) > 1.96, " **",
+                          ifelse(abs(x$res_effects[5]) > 1.645, " *", "")))
   
   tibble("variable" = c(as.character(x$res_effects[[1]]), 
                         "Rho", "R2", "AIC", "BIC"), 
@@ -156,16 +147,8 @@ print_vars <- function(x) {
   paste0(x[1], " ~ ", paste(x[-1], collapse = " + "))
 }
 
-# sdm_fit(matrices[[counter]], dates_len, dates[2] + 1,
-#         results[[counter]]$beta_post, results[[counter]]$rho_post)
 
-
-# curr_resid <- as.matrix((diag(N) - curr_rho * W) %*% y - (X %*% curr_beta))
-# SSR <- crossprod(curr_resid)
-# TSS <- crossprod(y - mean(y))
-# R2_post[s] <- 1 - SSR / TSS
-
-
+# Plots -------------------------------------------------------------------
 
 png("plots/rho_densities.png", width = 800, height = 400, pointsize = 18)
 op <- par(mar = c(2, 2, 2, 0.5))
