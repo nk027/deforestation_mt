@@ -23,7 +23,7 @@ out <- plm::plm(form1, x, effect = "twoways",
 
 # Test --------------------------------------------------------------------
 
-# Hausmann
+# Hausman
 out_f <- plm::plm(form1, x, effect = "twoways", 
                   index = c("ind", "time"), model = "within", type = "dfirst")
 out_r <- plm::plm(form1, x, effect = "time", 
