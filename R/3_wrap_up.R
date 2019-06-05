@@ -28,6 +28,11 @@ saveRDS(data, "data/data_raw.rds")
 data <- readRDS("data/data_raw.rds")
 
 data <- data %>% 
+  mutate(gdp_cap = gdp / pop, 
+         crop_px = soy_px + soycorn_px + soycott_px + cott_px + 
+           soymill_px + soysunfl_px + sugar_px)
+
+data <- data %>% 
   group_by(code) %>% 
   mutate(forest_ch = forest_px - lag(forest_px),
          cerr_ch = cerr_px - lag(cerr_px),
@@ -36,11 +41,6 @@ data <- data %>%
          crop_ch = crop_px - lag(crop_px),
          pasture_ch = pasture_px - lag(pasture_px)) %>% 
   ungroup()
-
-data <- data %>% 
-  mutate(gdp_cap = gdp / pop, 
-         crop_px = soy_px + soycorn_px + soycott_px + cott_px + 
-           soymill_px + soysunfl_px + sugar_px)
 
 data <- data %>% 
   mutate(rice_brl_hha = rice_brl / rice_hha,
@@ -95,7 +95,7 @@ data <- data %>%
 data <- data %>% 
   mutate(area_km2 = area_m2 / 1000000) %>% 
   mutate_at(vars(ends_with("px")), .funs = funs(. * (231.6564) ^ 2 / 1e6))
-# Change px from 231m^2 to 1km^2
+# Change px from 232m^2 to 1km^2
   
 data <- data %>% 
   mutate(forest_px_km2 = forest_px / area_km2,
@@ -113,6 +113,7 @@ data <- data %>%
          milk_brl_cow = milk_brl / milk_cow,
          milk_lt_cow = milk_lt / milk_cow,
          milk_cow_cattle = milk_cow / cattle,
-         milk_cow_km2 = milk_cow / area_km2)
+         milk_cow_km2 = milk_cow / area_km2) %>% 
+  ungroup()
 
 saveRDS(data, "data/data.rds")
