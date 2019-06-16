@@ -269,6 +269,7 @@ sdm_panel <- function(
     "sigma_post" = sigma_post,
     # "direct_post_ci" = direct_post_ci,
     # "indirect_post_ci" = indirect_post_ci,
+    "ssr" = SSR,
     "converged" = converged
   )
   
