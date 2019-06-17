@@ -103,18 +103,26 @@ dates <- c(2005, 2008)
 dates_len <- length(dates[1]:dates[2])
 
 counter <- 1
-matrices1[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
-results_qu1[[counter]] <- sdm_panel(matrices1[[counter]], W_qu, dates_len)
-results_kn1[[counter]] <- sdm_panel(matrices1[[counter]], W_kn, dates_len)
+for(counter in seq_along(variables)) {
+  matrices1[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
+  results_qu1[[counter]] <- sdm_panel(matrices1[[counter]], W_qu, dates_len)
+  results_kn1[[counter]] <- sdm_panel(matrices1[[counter]], W_kn, dates_len)
+}
 
 dates <- c(2009, 2015)
 dates_len <- length(dates[1]:dates[2])
 
 counter <- 1
-matrices2[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
-results_qu2[[counter]] <- sdm_panel(matrices2[[counter]], W_qu, dates_len)
-results_kn2[[counter]] <- sdm_panel(matrices2[[counter]], W_kn, dates_len)
+for(counter in seq_along(variables)) {
+  matrices2[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
+  results_qu2[[counter]] <- sdm_panel(matrices2[[counter]], W_qu, dates_len)
+  results_kn2[[counter]] <- sdm_panel(matrices2[[counter]], W_kn, dates_len)
+}
 
-
-(results_qu[[1]]$ssr - (results_qu1[[1]]$ssr + results_qu2[[1]]$ssr)) / (length(variables[[1]]) - 1) /
-  (results_qu1[[1]]$ssr + results_qu2[[1]]$ssr) / (nrow(matrices1[[1]]) + nrow(matrices2[[1]]) - 2 * (length(variables[[1]]) - 1))
+i <- 1
+chow <- (results_qu[[i]]$ssr - (results_qu1[[i]]$ssr + results_qu2[[i]]$ssr)) / (length(variables[[i]]) - 1) /
+  (results_qu1[[i]]$ssr + results_qu2[[i]]$ssr) / (nrow(matrices1[[i]]) + nrow(matrices2[[i]]) - 2 * (length(variables[[i]]) - 1))
+significance <- qf(0.95, (length(variables[[i]]) - 1), (nrow(matrices1[[i]]) + nrow(matrices2[[i]]) - 2 * (length(variables[[i]]) - 1)))
+# chow > significance
+chow
+i <- i + 1
