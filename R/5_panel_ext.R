@@ -91,6 +91,7 @@ for(counter in seq_along(variables)) {
 
 
 # Chow test ---------------------------------------------------------------
+
 matrices1 <- list()
 matrices2 <- list()
 results_qu1 <- list()

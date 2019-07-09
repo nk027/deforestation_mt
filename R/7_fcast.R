@@ -6,13 +6,7 @@ rho_post <- results_qu[[3]]$rho_post
 vars <- variables[[3]]
 tfe <- TRUE
 cfe <- TRUE
-
-
-beta_post_mean <- apply(beta_post, 1, mean)
-rho_post_mean <- mean(rho_post)
-
-A <- Matrix::.sparseDiagonal(nrow(W_pre)) - rho_post_mean * W_pre
-A_inv <- solve(A)
+n_draws <- 1000
 
 oos <- data %>%
   filter(date == date_fit) %>% 
@@ -21,19 +15,32 @@ oos <- data %>%
   sf::`st_geometry<-`(NULL) %>% 
   as.matrix(matr, rownames.force = FALSE)
 
-y_pred <- A_inv %*% 
-  (1 * beta_post_mean[1] + 
-     oos[, -1] %*% beta_post_mean[2:(ncol(oos))] + 
-     W_pre %*% oos[, -1] %*% beta_post_mean[(1 + ncol(oos)):(2 * ncol(oos) - 1)] +
-if(tfe) {
-    mean(beta_post_mean[(2 * ncol(oos)):(2 * ncol(oos) + dates_len - 2)]) + # TFE
-    # beta_post_mean[(2 * ncol(oos) + dates_len - 2)] # TFE
-  if(cfe) {
-      c(0, beta_post_mean[(2 * ncol(oos) + dates_len - 1):len(beta_post_mean)]) # CFE
-  }
-} else {0})
+# beta_post_mean <- apply(beta_post, 1, mean)
+# rho_post_mean <- mean(rho_post)
 
-y_pred
+y_pred <- matrix(NA, nrow = nrow(oos), ncol = n_draws)
+for(i in 1:n_draws) {
+  rnd <- sample(seq(1, length(beta_post)), 1)
+  beta_post_draw <- beta_post[rnd]
+  rho_post_draw <- rho_post[rnd]
+  
+  A <- Matrix::.sparseDiagonal(nrow(W_pre)) - rho_post_draw * W_pre
+  A_inv <- solve(A)
+  
+  y_pred <- A_inv %*% 
+    (1 * beta_post_draw[1] + 
+       oos[, -1] %*% beta_post_draw[2:(ncol(oos))] + 
+       W_pre %*% oos[, -1] %*% beta_post_draw[(1 + ncol(oos)):(2 * ncol(oos) - 1)] +
+  if(tfe) {
+      mean(beta_post_draw[(2 * ncol(oos)):(2 * ncol(oos) + dates_len - 2)]) + # TFE
+      # beta_post_draw[(2 * ncol(oos) + dates_len - 2)] # TFE
+    if(cfe) {
+        c(0, beta_post_draw[(2 * ncol(oos) + dates_len - 1):len(beta_post_draw)]) # CFE
+    }
+  } else {0})
+}
+
+apply(y_pred, 1, quantile, c(0.16, 0.5, 0.84))
 
 
 # Analyse -----------------------------------------------------------------
