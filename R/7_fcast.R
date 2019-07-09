@@ -1,9 +1,9 @@
 
 W_pre <- W_qu
 date_fit <- dates[2] + 1
-beta_post <- results_qu[[3]]$beta_post
-rho_post <- results_qu[[3]]$rho_post
-vars <- variables[[3]]
+beta_post <- results_qu[[5]]$beta_post
+rho_post <- results_qu[[5]]$rho_post
+vars <- variables[[5]]
 tfe <- TRUE
 cfe <- TRUE
 n_draws <- 1000
@@ -20,14 +20,14 @@ oos <- data %>%
 
 y_pred <- matrix(NA, nrow = nrow(oos), ncol = n_draws)
 for(i in 1:n_draws) {
-  rnd <- sample(seq(1, length(beta_post)), 1)
-  beta_post_draw <- beta_post[rnd]
+  rnd <- sample(seq(1, dim(beta_post)[2]), 1)
+  beta_post_draw <- beta_post[, rnd]
   rho_post_draw <- rho_post[rnd]
   
   A <- Matrix::.sparseDiagonal(nrow(W_pre)) - rho_post_draw * W_pre
   A_inv <- solve(A)
   
-  y_pred <- A_inv %*% 
+  y_pred[, i] <- A_inv %*% 
     (1 * beta_post_draw[1] + 
        oos[, -1] %*% beta_post_draw[2:(ncol(oos))] + 
        W_pre %*% oos[, -1] %*% beta_post_draw[(1 + ncol(oos)):(2 * ncol(oos) - 1)] +
@@ -40,12 +40,14 @@ for(i in 1:n_draws) {
   } else {0})
 }
 
-apply(y_pred, 1, quantile, c(0.16, 0.5, 0.84))
+y_pred_mean <- apply(y_pred, 1, quantile, c(0.16, 0.5, 0.84))[2, ]
+y_pred_16 <- apply(y_pred, 1, quantile, c(0.16, 0.5, 0.84))[1, ]
+y_pred_84 <- apply(y_pred, 1, quantile, c(0.16, 0.5, 0.84))[3, ]
 
 
 # Analyse -----------------------------------------------------------------
 
-plot(oos[, 1] - y_pred)
+plot(oos[, 1] - y_pred_mean)
 
 
 
@@ -57,14 +59,14 @@ library(ggplot2)
 #   data %>% 
 #     filter(date == dates[2] + 1) %>% 
 #     transmute(act = (forest_ch_km2) * area_km2, 
-#               prd = (y_pred) * area_km2) %>% 
+#               prd = (y_pred_mean) * area_km2) %>% 
 #     ggplot() + geom_sf(aes(fill = act)) + 
 #     scale_fill_viridis_c(limits = c(-5000, 5000)) +
 #     cowplot::theme_map(),
 #   data %>% 
 #     filter(date == dates[2] + 1) %>% 
 #     transmute(act = (forest_ch_km2) * area_km2, 
-#               prd = (y_pred) * area_km2) %>% 
+#               prd = (y_pred_mean) * area_km2) %>% 
 #     ggplot() + geom_sf(aes(fill = prd)) + 
 #     scale_fill_viridis_c(limits = c(-5000, 5000)) +
 #     cowplot::theme_map()
@@ -74,14 +76,14 @@ cowplot::plot_grid(
   data %>%
     filter(date == dates[2] + 1) %>%
     transmute(act = (forest_ch_km2),
-              prd = (y_pred)) %>%
+              prd = (y_pred_mean)) %>%
     ggplot() + geom_sf(aes(fill = act)) +
     scale_fill_viridis_c(limits = c(-0.5, 0.1)) +
     cowplot::theme_map(),
   data %>%
     filter(date == dates[2] + 1) %>%
     transmute(act = (forest_ch_km2),
-              prd = (y_pred)) %>%
+              prd = (y_pred_mean)) %>%
     ggplot() + geom_sf(aes(fill = prd)) +
     scale_fill_viridis_c(limits = c(-0.5, 0.1)) +
     cowplot::theme_map()
@@ -91,7 +93,7 @@ cowplot::plot_grid(
 #   data %>% 
 #     filter(date == dates[2] + 1) %>% 
 #     transmute(act = (forest_ch_km2) * area_km2, 
-#               prd = (y_pred) * area_km2) %>% 
+#               prd = (y_pred_mean) * area_km2) %>% 
 #     mutate(act = ifelse(act < 0, log(-act), 0),
 #            prd = ifelse(prd < 0, log(-prd), 0)) %>% 
 #     ggplot() + geom_sf(aes(fill = act)) + 
@@ -100,7 +102,7 @@ cowplot::plot_grid(
 #   data %>% 
 #     filter(date == dates[2] + 1) %>% 
 #     transmute(act = (forest_ch_km2) * area_km2, 
-#               prd = (y_pred) * area_km2) %>% 
+#               prd = (y_pred_mean) * area_km2) %>% 
 #     mutate(act = ifelse(act < 0, log(-act), 0),
 #            prd = ifelse(prd < 0, log(-prd), 0)) %>% 
 #     ggplot() + geom_sf(aes(fill = prd)) + 
@@ -112,7 +114,7 @@ cowplot::plot_grid(
 #   data %>% 
 #     filter(date == dates[2] + 1) %>% 
 #     transmute(act = (forest_ch_km2), 
-#               prd = (y_pred)) %>% 
+#               prd = (y_pred_mean)) %>% 
 #     mutate(act = ifelse(act < 0, log(-act), 0),
 #            prd = ifelse(prd < 0, log(-prd), 0)) %>% 
 #     ggplot() + geom_sf(aes(fill = act)) + 
@@ -121,7 +123,7 @@ cowplot::plot_grid(
 #   data %>% 
 #     filter(date == dates[2] + 1) %>% 
 #     transmute(act = (forest_ch_km2), 
-#               prd = (y_pred)) %>% 
+#               prd = (y_pred_mean)) %>% 
 #     mutate(act = ifelse(act < 0, log(-act), 0),
 #            prd = ifelse(prd < 0, log(-prd), 0)) %>% 
 #     ggplot() + geom_sf(aes(fill = prd)) + 
