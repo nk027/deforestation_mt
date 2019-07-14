@@ -9,7 +9,7 @@ cfe <- TRUE
 n_draws <- 1000
 
 oos <- data %>%
-  filter(date == date_fit) %>% 
+  filter(date == date_fit) %>%
   ungroup() %>%
   sf:::select.sf(vars) %>% 
   sf::`st_geometry<-`(NULL) %>% 
@@ -27,7 +27,7 @@ for(i in 1:n_draws) {
   A <- Matrix::.sparseDiagonal(nrow(W_pre)) - rho_post_draw * W_pre
   A_inv <- solve(A)
   
-  y_pred[, i] <- A_inv %*% 
+  x <- A_inv %*% 
     (1 * beta_post_draw[1] + 
        oos[, -1] %*% beta_post_draw[2:(ncol(oos))] + 
        W_pre %*% oos[, -1] %*% beta_post_draw[(1 + ncol(oos)):(2 * ncol(oos) - 1)] +
@@ -38,6 +38,7 @@ for(i in 1:n_draws) {
         c(0, beta_post_draw[(2 * ncol(oos) + dates_len - 1):len(beta_post_draw)]) # CFE
     }
   } else {0})
+  y_pred[, i] <- x[, 1]
 }
 
 y_pred_mean <- apply(y_pred, 1, quantile, c(0.16, 0.5, 0.84))[2, ]

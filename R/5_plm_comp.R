@@ -70,6 +70,8 @@ plot(oos[, 1] - plm_pred)
 abline(h = 0)
 par(op)
 
+boxplot(oos[, 1], y_pred_mean)
+
 cowplot::plot_grid(
   data %>%
     filter(date == dates[2] + 1) %>%

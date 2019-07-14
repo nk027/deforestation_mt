@@ -1,3 +1,4 @@
+
 library(raster)
 library(sf)
 
@@ -9,6 +10,9 @@ colour_collapsed <- c("#b3cc33", "#e4a540", "#10773e", "#eeefce",
                       "#e4a540", "#e4a540", "#e4a540", "#e4a540",
                       "#e4a540", "#e4a540",
                       "#dddddd", "#dddddd", "#dddddd")
+colour_final <- c("#EEEEEE", "#C18FE3", "#10773E", "#E8D313",
+                  "#C18FE3", "#C18FE3", "#C18FE3", "#C18FE3", "#C18FE3", "#C18FE3",
+                  "#EEEEEE", "#EEEEEE", "#EEEEEE")
 names(colour) <- c("cerrado", "cotton", "forest", "pasture",
                    "soy-corn", "soy-cotton", "soy", "soy-millet",
                    "soy-sunflower", "sugarcane",
@@ -22,25 +26,32 @@ view_col <- function(x) {
     names.arg = if(is.null(names(x))) {rev(x)} else {rev(names(x))},
     cex.names = 1.8, horiz = TRUE, las = 1
   )
+  x
 }
 
-png("colour.png", width = 200, height = 800)
+png("plots/colour.png", width = 200, height = 800)
 op <- par(mar = c(2, 12, 2, 0.5))
 view_col(colour)
 par(op)
 dev.off()
 
 
-r <- raster("~/Dokumente/msc/mt_landuse/mt_2001_v3_1.tif")
-# r <- raster("~/Dokumente/msc/mt_landuse/mt_2017_v3_1.tif")
+r01 <- raster("~/Dokumente/msc/mt_landuse/mt_2001_v3_1.tif")
+r17 <- raster("~/Dokumente/msc/mt_landuse/mt_2017_v3_1.tif")
 shp <- rgdal::readOGR("~/Dokumente/msc/mt_municipios_2014")
 
-png("2001.png", width = 800, height = 800)
-# png("2017.png", width = 800, height = 800)
+png("plots/2001.png", width = 1600, height = 1440)
 op <- par(mar = c(2, 2, 2, 0.5))
-plot(r, col = colour_collapsed, axes = FALSE, ann = FALSE, legend = FALSE)
+plot(r01, col = colour_final, axes = FALSE, ann = FALSE, legend = FALSE)
 par(op)
 dev.off()
+
+png("plots/2017.png", width = 1600, height = 1440)
+op <- par(mar = c(2, 2, 2, 0.5))
+plot(r17, col = colour_final, axes = FALSE, ann = FALSE, legend = FALSE)
+par(op)
+dev.off()
+
 
 
 # Legend ------------------------------------------------------------------
@@ -51,10 +62,10 @@ library(grid)
 library(gridExtra) 
 
 df <- data.frame(
-  Class = factor(x = c("Forest", "Pasture", "Cerrado", "Croplands", "Other"),
-                 levels = c("Forest", "Pasture", "Cerrado", "Croplands", "Other")),
-  Colour = c("#10773e", "#eeefce", "#b3cc33", "#e4a540", "#dddddd"),
-  Value = 1:5,
+  Class = factor(x = c("Forest", "Pasture", "Croplands", "Other"),
+                 levels = c("Forest", "Pasture", "Croplands", "Other")),
+  Colour = c("#10773e", "#E8D313", "#C18FE3", "#eeeeee"),
+  Value = 1:4,
   stringsAsFactors = FALSE)
 
 (gg_legend <- ggplot(df, aes(Value, fill = Class)) + 
@@ -68,4 +79,4 @@ legend <- cowplot::get_legend(gg_legend)
 
 grid.newpage()
 grid.draw(legend)
-ggsave("plots/legend.png", legend, width = 2, height = 4, bg = "transparent")
+ggsave("plots/legend.png", legend, width = 2, height = 2, bg = "transparent")
