@@ -4,7 +4,7 @@ library(sf)
 
 source("R/5_functions.R")
 
-data <- readRDS("data/data.rds")
+data <- readRDS("data/data_soyed.rds")
 
 
 # Prep data ---------------------------------------------------------------

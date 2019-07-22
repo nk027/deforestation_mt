@@ -20,7 +20,7 @@ sdm_panel <- function(
   
   X <- cbind(1, X_pre)
   
-  if(lag_X) {cbind(X, W %*% X_pre)}
+  if(lag_X) {X <- cbind(X, W %*% X_pre)}
   if(tfe) {
     TFE <- kronecker(diag(dates_len), matrix(1, nrow(X_pre) / dates_len, 1))
     X <- cbind(X, TFE[, -1])
@@ -139,9 +139,9 @@ sdm_panel <- function(
     z <- -(N - K) / 2 * log(epe0 - 2 * rhos * epe0d + rhos ^ 2 * eped)
     den <- ln_det + z + log(beta_prob(rhos, rho_a))
     den_adj <- den - max(den)
-    x <- exp(den_adj)
-    i_sum <- sum((rhos[-1] + rhos[-length(rhos)]) * (x[-1] - x[-length(x)]) / 2)
-    z <- abs(x / i_sum)
+    ex <- exp(den_adj)
+    i_sum <- sum((rhos[-1] + rhos[-length(rhos)]) * (ex[-1] - ex[-length(ex)]) / 2)
+    z <- abs(ex / i_sum)
     dens <- cumsum(z)
     rnd <- runif(1) * sum(z)
     ind <- max(1, which(dens <= rnd))
@@ -402,4 +402,8 @@ sm_results <- function(x) {
                             round(x$res_other[4, 2], 1)),
          "indirect" = c(paste0(x$res_effects[[4]], x$res_effects[[5]]),
                         "", "", "", ""))
+}
+
+print_vars <- function(x) {
+  paste0(x[1], " ~ ", paste(x[-1], collapse = " + "))
 }
