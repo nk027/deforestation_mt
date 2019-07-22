@@ -5,12 +5,8 @@ sdm_panel <- function(
   x, # Data
   W_pre, 
   dates_len, # Number of time periods
-  lag_X = TRUE,
-  tfe = TRUE, cfe = TRUE, 
-  rho_a = 1.01,
-  sigma_a = 0.01,
-  sigma_b = 0.01,
-  beta_var = 10 ^ 8,
+  lag_X = TRUE, tfe = TRUE, cfe = TRUE, 
+  rho_a = 1.01, sigma_a = 0.01, sigma_b = 0.01, beta_var = 10 ^ 8, # Priors
   n_iter = 2000,
   n_save = 1000,
   n_griddy = 200) {
