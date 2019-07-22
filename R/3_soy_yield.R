@@ -226,9 +226,9 @@ shp <- merge(shp, data[, c("code", "date", "soy_filled")], by = c("date", "code"
 shp %>% select(code, date, soy_filled) %>% group_by(date) %>% summarise(mean(soy_filled))
 data %>% select(code, date, soy_filled) %>% group_by(date) %>% summarise(mean(soy_filled))
 
-date <- 2002
-shp %>% 
-  filter(date == date) %>% 
-  select(soy_filled) %>% plot(); date <- date + 1
+# date <- 2002
+# shp %>% 
+#   filter(date == date) %>% 
+#   select(soy_filled) %>% plot(); date <- date + 1
 
 saveRDS(shp, "data/data_soyed.rds")

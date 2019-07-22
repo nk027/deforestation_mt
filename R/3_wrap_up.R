@@ -117,3 +117,6 @@ data <- data %>%
   ungroup()
 
 saveRDS(data, "data/data.rds")
+
+# Finish by adding filled soy yields
+source("R/3_soy_yield.R")

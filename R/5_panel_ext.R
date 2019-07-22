@@ -8,8 +8,9 @@ source("R/5_functions.R")
 
 data <- readRDS("data/data_soyed.rds")
 
-dates <- c(2005, 2015)
-dates_len <- length(dates[1]:dates[2])
+dates <- seq(2005, 2015)
+# dates <- seq(2005, 2015, 3)
+dates_len <- length(dates)
 
 
 # Setup -------------------------------------------------------------------
@@ -44,31 +45,50 @@ data <- data %>%
 # Variables ---------------------------------------------------------------
 
 variables <- list(
-  base = c("forest_ch_km2", 
-           "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
-           "pop_km2", "gdp_cap", "cattle_dens", 
+  base = c("forest_ch_km2",
+           "forest_px_km2", "pasture_px_km2", "crop_px_km2",
+           "pop_km2", "gdp_cap", "cattle_dens",
            "soy_filled", "spei_wet", "spei_dry"),
-  lag_crop = c("forest_ch_km2", 
-               "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag", 
-               "pop_km2", "gdp_cap", "cattle_dens", 
+  lag_crop = c("forest_ch_km2",
+               "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag",
+               "pop_km2", "gdp_cap", "cattle_dens",
                "soy_filled_lag", "spei_wet", "spei_dry"),
-  lag_catt = c("forest_ch_km2", 
-               "forest_px_km2", "pasture_px_km2_lag", "crop_px_km2", 
-               "pop_km2", "gdp_cap", "cattle_dens_lag", 
+  lag_crop = c("forest_ch_km2",
+               "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag",
+               "pop_km2", "gdp_cap", "cattle_dens",
                "soy_filled", "spei_wet", "spei_dry"),
+  # lag_catt = c("forest_ch_km2", 
+  #              "forest_px_km2", "pasture_px_km2_lag", "crop_px_km2", 
+  #              "pop_km2", "gdp_cap", "cattle_dens_lag", 
+  #              "soy_filled", "spei_wet", "spei_dry"),
   base_vlim = c("forest_ch_km2",
                 "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
                 "pop_km2", "cattle_dens", "soy_filled", "spei_wet"),
   lag_crop_vlim = c("forest_ch_km2",
                     "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag", 
-                    "pop_km2", "cattle_dens", "soy_filled_lag", "spei_wet"),
-  lag_catt_vlim = c("forest_ch_km2",
-                    "forest_px_km2", "pasture_px_km2_lag", "crop_px_km2", 
-                    "pop_km2", "cattle_dens_lag", "soy_filled", "spei_wet"),
-  lag_vlim = c("forest_ch_km2",
-               "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
-               "pop_km2_lag", "gdp_cap_lag", "cattle_dens", "soy_filled", "spei_wet")
+                    "pop_km2", "cattle_dens", "soy_filled_lag", "spei_wet")#,
+  # lag_catt_vlim = c("forest_ch_km2",
+  #                   "forest_px_km2", "pasture_px_km2_lag", "crop_px_km2", 
+  #                   "pop_km2", "cattle_dens_lag", "soy_filled", "spei_wet"),
+  # lag_vlim = c("forest_ch_km2",
+  #              "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
+  #              "pop_km2_lag", "gdp_cap_lag", "cattle_dens", "soy_filled", "spei_wet")
 )
+
+# Forecast
+# variables <- list(
+#   lag_crop = c("forest_ch_km2",
+#                "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag2", 
+#                "pop_km2_lag", "cattle_dens_lag", "soy_filled_lag", "spei_wet_lag"))
+
+# Skip 2 years
+# variables <- list(
+#   base_vlim = c("forest_ch_km2",
+#                 "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
+#                 "pop_km2", "cattle_dens", "soy_filled"),
+#   lag_crop_vlim = c("forest_ch_km2",
+#                     "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag", 
+#                     "pop_km2", "cattle_dens", "soy_filled_lag"))
 
 matrices <- list()
 results_qu <- list()
@@ -89,6 +109,7 @@ for(counter in seq_along(variables)) {
   results_kn[[counter]] <- sdm_panel(matrices[[counter]], W_kn, dates_len)
 }
 
+results_qu[[counter]] <- sdm_panel(matrices[[counter]], W_qu, dates_len, n_save = 10000, n_iter = 20000, n_griddy = 500, cfe = FALSE, tfe = FALSE)
 
 # Chow test ---------------------------------------------------------------
 

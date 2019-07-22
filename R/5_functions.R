@@ -18,10 +18,10 @@ sdm_panel <- function(
   if(tfe) {
     TFE <- kronecker(diag(dates_len), matrix(1, nrow(X_pre) / dates_len, 1))
     X <- cbind(X, TFE[, -1])
-    if(cfe) {
-      CFE <- kronecker(diag(nrow(X_pre) / dates_len), matrix(1, dates_len, 1))
-      X <- cbind(X, CFE[, -1])
-    }
+  }
+  if(cfe) {
+    CFE <- kronecker(matrix(1, dates_len, 1), diag(nrow(X_pre) / dates_len))
+    X <- cbind(X, CFE[, -1])
   }
   
   K <- ncol(X)
@@ -344,11 +344,13 @@ get_matr <- function(x, variables, dates) {
   library(dplyr)
   
   matr <- x %>% 
-    filter(date >= dates[1], date <= dates[2]) %>% 
+    filter(date %in% dates) %>% 
     ungroup() %>%
     sf:::select.sf(variables) %>% 
     sf::`st_geometry<-`(NULL) %>% 
     as.matrix(matr, rownames.force = FALSE)
+  
+  matr
 }
 
 

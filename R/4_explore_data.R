@@ -74,6 +74,7 @@ for(name in crop_names) {
   )
   graphics.off()
 }
+
 for(name in crop_name) {
   ylim <- quantile(crops[[paste0(name, "_brl")]], c(0.05, 0.95)) / 1000
   png(paste0("./plots/box_crop_quant/", name, "_brl.png"), 
@@ -97,7 +98,6 @@ for(name in crop_name) {
   graphics.off()
 }
 
-
 for(name in crop_names) {
   png(paste0("./plots/scatter_crop_quant/", name, ".png"), 
       width = 12, height = 5, units = "in", res = 300)
@@ -119,7 +119,6 @@ for(name in crop_names) {
   )
   graphics.off()
 }
-
 
 # for(name in crop_names) {
 #   png(paste0("./plots/scatter_crop_ha/", name, ".png"), 

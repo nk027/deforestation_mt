@@ -11,7 +11,7 @@ cor_data <- data %>%
   select(forest_ch, cerr_ch, nature_ch, forest_px, cerr_ch, nature_px,
          pasture_px, cattle, chicken, swine, 
          oilseed_ton, oilseed_brl,
-         spei_mean, pop, gdp_cap, 
+         spei_dry, pop, gdp_cap, 
          ends_with("_hha"))
 
 # Correlation test

@@ -1,10 +1,11 @@
 
+var <- 1
 W_pre <- W_qu
-date_fit <- dates[2] + 1
-beta_post <- results_qu[[5]]$beta_post
-rho_post <- results_qu[[5]]$rho_post
-vars <- variables[[5]]
-tfe <- TRUE
+date_fit <- max(dates) + 1
+beta_post <- results_qu[[var]]$beta_post
+rho_post <- results_qu[[var]]$rho_post
+vars <- variables[[var]]
+tfe <- FALSE
 cfe <- TRUE
 n_draws <- 1000
 
@@ -27,17 +28,19 @@ for(i in 1:n_draws) {
   A <- Matrix::.sparseDiagonal(nrow(W_pre)) - rho_post_draw * W_pre
   A_inv <- solve(A)
   
-  x <- A_inv %*% 
-    (1 * beta_post_draw[1] + 
+  B <- (1 * beta_post_draw[1] + 
        oos[, -1] %*% beta_post_draw[2:(ncol(oos))] + 
-       W_pre %*% oos[, -1] %*% beta_post_draw[(1 + ncol(oos)):(2 * ncol(oos) - 1)] +
+       W_pre %*% oos[, -1] %*% beta_post_draw[(1 + ncol(oos)):(2 * ncol(oos) - 1)])
   if(tfe) {
-      mean(beta_post_draw[(2 * ncol(oos)):(2 * ncol(oos) + dates_len - 2)]) + # TFE
+      B <- B + mean(beta_post_draw[(2 * ncol(oos)):(2 * ncol(oos) + dates_len - 2)]) # TFE
       # beta_post_draw[(2 * ncol(oos) + dates_len - 2)] # TFE
-    if(cfe) {
-        c(0, beta_post_draw[(2 * ncol(oos) + dates_len - 1):len(beta_post_draw)]) # CFE
-    }
-  } else {0})
+  }
+  if(cfe) {
+    B <- B + c(0, beta_post_draw[(2 * ncol(oos) + dates_len - 1):len(beta_post_draw)]) # CFE
+  }
+  
+  x <- A_inv %*% B
+  
   y_pred[, i] <- x[, 1]
 }
 
@@ -75,18 +78,18 @@ library(ggplot2)
 # 
 cowplot::plot_grid(
   data %>%
-    filter(date == dates[2] + 1) %>%
+    filter(date == max(dates) + 1) %>%
     transmute(act = (forest_ch_km2),
               prd = (y_pred_mean)) %>%
     ggplot() + geom_sf(aes(fill = act)) +
-    scale_fill_viridis_c(limits = c(-0.5, 0.1)) +
+    scale_fill_viridis_c(limits = c(-0.6, 0.2)) +
     cowplot::theme_map(),
   data %>%
-    filter(date == dates[2] + 1) %>%
+    filter(date == max(dates) + 1) %>%
     transmute(act = (forest_ch_km2),
               prd = (y_pred_mean)) %>%
     ggplot() + geom_sf(aes(fill = prd)) +
-    scale_fill_viridis_c(limits = c(-0.5, 0.1)) +
+    scale_fill_viridis_c(limits = c(-0.6, 0.2)) +
     cowplot::theme_map()
 )
 # 
