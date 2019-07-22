@@ -2,19 +2,29 @@
 # SDM panel ---------------------------------------------------------------
 
 sdm_panel <- function(
-  x, W_pre, dates_len,
+  x, # Data
+  W_pre, 
+  dates_len, # Number of time periods
+  lag_X = TRUE,
   tfe = TRUE, cfe = TRUE, 
+  rho_a = 1.01,
+  sigma_a = 0.01,
+  sigma_b = 0.01,
+  beta_var = 10 ^ 8,
   n_iter = 2000,
   n_save = 1000,
   n_griddy = 200) {
+  
+  library(MASS)
   
   W <- kronecker(diag(dates_len), W_pre)
   
   y <- x[, 1]
   X_pre <- x[, -1]
   
-  X <- cbind(1, X_pre, W %*% X_pre)
+  X <- cbind(1, X_pre)
   
+  if(lag_X) {cbind(X, W %*% X_pre)}
   if(tfe) {
     TFE <- kronecker(diag(dates_len), matrix(1, nrow(X_pre) / dates_len, 1))
     X <- cbind(X, TFE[, -1])
@@ -33,14 +43,9 @@ sdm_panel <- function(
   
   # Proper, but uninformative
   beta_pr_mean <- matrix(0, K, 1)
-  beta_pr_var <- diag(K) * 10 ^ 8
+  beta_pr_var <- diag(K) * beta_var
   beta_pr_var_inv <- solve(beta_pr_var)
-  
   # plot(density(rnorm(1e6, beta_pr_mean[1], beta_pr_var[1,1] ^ -1)))
-  
-  # Proper, but uninformative
-  sigma_a <- 0.01
-  sigma_b <- 0.01
   
   # Beta prior on rho
   beta_prob <- function(rho, a) {
@@ -48,16 +53,10 @@ sdm_panel <- function(
       ((1 + rho) ^ (a - 1) * (1 - rho) ^ (a - 1)) / 
       (2 ^ (2 * a - 1))
   }
-  rho_a <- 1.01
-  
   # plot(beta_prob(seq(-1, 1, length.out = 1e5), rho_a), type = "l")
   
   
   # Rho sampling --------------------------------------------------------------
-  
-  prop_scale <- 1
-  prop_adj <- 1.1
-  
   n_acc <- 0
   
   n_burn <- n_iter - n_save
@@ -82,8 +81,7 @@ sdm_panel <- function(
   
   Ays <- matrix(0, N, n_griddy)
   
-  A_inv_diags <- A_inv_tots <- 
-    A_inv_W_diags <- A_inv_W_tots <- 
+  A_inv_diags <- A_inv_tots <- A_inv_W_diags <- A_inv_W_tots <- 
     vector("numeric", n_griddy)
   
   time <- Sys.time()
@@ -200,9 +198,8 @@ sdm_panel <- function(
   full_chain <- cbind(t(beta_post), rho_post)
   mh_draws <- coda::mcmc(full_chain)
   geweke_conv <- coda::geweke.diag(mh_draws)$z
-  cat("Geweke convergence diagnostics: ", 
-      paste(round(geweke_conv, 1), collapse = ", "),
-      "\nConverged: ", all(abs(geweke_conv) < 3), "\n", sep = "")
+  cat("Geweke convergence diagnostic indicate conversion: ",
+      all(abs(geweke_conv) < 3), ".\n", sep = "")
   converged <- all(abs(geweke_conv) < 3)
   
   
@@ -384,4 +381,29 @@ get_W <- function(x, type = c("queen", "knear"), k = 5) {
     )
   }
   
+}
+
+
+# Outputs -----------------------------------------------------------------
+
+sm_results <- function(x) {
+  
+  x$res_effects[2] <- round(x$res_effects[2], 7)
+  x$res_effects[4] <- round(x$res_effects[4], 7)
+  x$res_effects[3] <- ifelse(abs(x$res_effects[3]) > 2.576, " ***", 
+                             ifelse(abs(x$res_effects[3]) > 1.96, " **",
+                                    ifelse(abs(x$res_effects[3]) > 1.645, " *", "")))
+  x$res_effects[5] <- ifelse(abs(x$res_effects[5]) > 2.576, " ***", 
+                             ifelse(abs(x$res_effects[5]) > 1.96, " **",
+                                    ifelse(abs(x$res_effects[5]) > 1.645, " *", "")))
+  
+  tibble("variable" = c(as.character(x$res_effects[[1]]), 
+                        "Rho", "R2", "AIC", "BIC"), 
+         "value/direct" = c(paste0(x$res_effects[[2]], x$res_effects[[3]]),
+                            round(mean(x$rho_post), 3),
+                            round(x$res_other[1, 2], 3),
+                            round(x$res_other[3, 2], 1),
+                            round(x$res_other[4, 2], 1)),
+         "indirect" = c(paste0(x$res_effects[[4]], x$res_effects[[5]]),
+                        "", "", "", ""))
 }
