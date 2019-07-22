@@ -407,3 +407,5 @@ sm_results <- function(x) {
 print_vars <- function(x) {
   paste0(x[1], " ~ ", paste(x[-1], collapse = " + "))
 }
+
+ssr <- function(x, y) {round(sum((x - y)^2), 3)}
