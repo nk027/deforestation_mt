@@ -61,6 +61,6 @@ results_err[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm,
 
 # Store results -----------------------------------------------------------
 
-save(file = "data/models.rda", 
+save(file = paste0("data/models_", effect, ".rda"), 
      list = c("results_qu", "results_k5n", "results_k7n", 
               "results_plm", "results_lag", "results_err"))
