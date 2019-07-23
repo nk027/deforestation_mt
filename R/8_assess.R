@@ -23,7 +23,7 @@ table <- do.call(cbind,
                     results_err_qu[[counter]], results_err_k5n[[counter]]), 
                table_ise, variables[[counter]]))
 table <- table[, c(1, which(!names(table) == "variables"))]
-write.csv()
+write.csv(table, file = paste0("txt/fit_", names(variables)[counter], ".csv"))
 
 
 # Check fit ---------------------------------------------------------------
