@@ -16,8 +16,10 @@ results_qu <- list()
 results_k5n <- list()
 results_k7n <- list()
 results_plm <- list()
-results_lag <- list()
-results_err <- list()
+results_lag_qu <- list()
+results_lag_k5n <- list()
+results_err_qu <- list()
+results_err_k5n <- list()
 
 
 # Go over all models ------------------------------------------------------
@@ -47,13 +49,19 @@ results_plm[[counter]] <- plm::plm(formula_ify(variables[[counter]]), df_plm,
 
 # SPLM --------------------------------------------------------------------
 
-results_lag[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
-                               listw = W_qu, model = "within", effect = effect, 
-                               lag = TRUE, spatial.error = "none")
+results_lag_qu[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
+                                  listw = W_qu, model = "within", effect = effect, 
+                                  lag = TRUE, spatial.error = "none")
+results_lag_k5n[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
+                                   listw = W_k5n, model = "within", effect = effect, 
+                                   lag = TRUE, spatial.error = "none")
 
-results_err[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
-                               listw = W_qu, model = "within", effect = effect, 
-                               lag = FALSE, spatial.error = "b")
+results_err_qu[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
+                                  listw = W_qu, model = "within", effect = effect, 
+                                  lag = FALSE, spatial.error = "b")
+results_err_k5n[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
+                                   listw = W_k5n, model = "within", effect = effect, 
+                                   lag = FALSE, spatial.error = "b")
 
 }
 
@@ -62,4 +70,6 @@ results_err[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm,
 
 save(file = paste0("data/models_", effect, ".rda"), 
      list = c("results_qu", "results_k5n", "results_k7n", 
-              "results_plm", "results_lag", "results_err"))
+              "results_plm", 
+              "results_lag_qu", "results_err_qu", 
+              "results_lag_k5n", "results_err_k5n"))

@@ -15,8 +15,10 @@ sm_results(results_qu[[counter]])
 sm_results(results_k5n[[counter]])
 sm_results(results_k7n[[counter]])
 summary(results_plm[[counter]])
-summary(results_lag[[counter]])
-summary(results_err[[counter]])
+summary(results_lag_qu[[counter]])
+summary(results_lag_k5n[[counter]])
+summary(results_err_qu[[counter]])
+summary(results_err_k5n[[counter]])
 
 
 # Check fit ---------------------------------------------------------------
@@ -37,12 +39,16 @@ sdm_k7n_fit_mean <- apply(sdm_k7n_fit, 1, mean)
 
 clm_fit <- plm_fit(oos, results_plm[[counter]], tfe, cfe, tfe_idx = tfe_idx)
 
-sar_fit <- splm_fit(oos, results_lag[[counter]], W_qu, tfe, cfe, tfe_idx = tfe_idx)
+sar_qu_fit <- splm_fit(oos, results_lag_qu[[counter]], W_qu, tfe, cfe, tfe_idx = tfe_idx)
 
-sem_fit <- splm_fit(oos, results_err[[counter]], W_qu, tfe, cfe, tfe_idx = tfe_idx)
+sar_k5n_fit <- splm_fit(oos, results_lag_k5n[[counter]], W_k5n, tfe, cfe, tfe_idx = tfe_idx)
 
-png(paste0("plots/", date_fit, "_oos_fit_model_", counter, ".png"), width = 1000, height = 600)
-print({op <- par(mfrow = c(2, 3), mar = c(2, 2, 2, 0.5))
+sem_qu_fit <- splm_fit(oos, results_err_qu[[counter]], W_qu, tfe, cfe, tfe_idx = tfe_idx)
+
+sem_k5n_fit <- splm_fit(oos, results_err_k5n[[counter]], W_k5n, tfe, cfe, tfe_idx = tfe_idx)
+
+png(paste0("plots/", date_fit, "_oos_fit_model_", counter, ".png"), width = 1200, height = 600)
+print({op <- par(mfrow = c(2, 4), mar = c(2, 2, 2, 0.5))
 plot(oos[, 1] - sdm_qu_fit_mean, xlab = "region", ylab = "residual")
 abline(h = 0); title(paste0("SDM, Q, SSR = ", ssr(oos[, 1], sdm_qu_fit_mean)))
 plot(oos[, 1] - sdm_k5n_fit_mean, xlab = "region", ylab = "residual")
@@ -51,10 +57,14 @@ plot(oos[, 1] - sdm_k7n_fit_mean, xlab = "region", ylab = "residual")
 abline(h = 0); title(paste0("SDM, K7, SSR = ", ssr(oos[, 1], sdm_k7n_fit_mean)))
 plot(oos[, 1] - clm_fit, xlab = "region", ylab = "residual")
 abline(h = 0); title(paste0("PLM, SSR = ", ssr(oos[, 1], clm_fit)))
-plot(oos[, 1] - sar_fit, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SAR, Q, SSR = ", ssr(oos[, 1], sar_fit)))
-plot(oos[, 1] - sem_fit, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SEM, Q, SSR = ", ssr(oos[, 1], sem_fit)))
+plot(oos[, 1] - sar_qu_fit, xlab = "region", ylab = "residual")
+abline(h = 0); title(paste0("SAR, Q, SSR = ", ssr(oos[, 1], sar_qu_fit)))
+plot(oos[, 1] - sar_k5n_fit, xlab = "region", ylab = "residual")
+abline(h = 0); title(paste0("SAR, Q, SSR = ", ssr(oos[, 1], sar_k5n_fit)))
+plot(oos[, 1] - sem_qu_fit, xlab = "region", ylab = "residual")
+abline(h = 0); title(paste0("SEM, Q, SSR = ", ssr(oos[, 1], sem_qu_fit)))
+plot(oos[, 1] - sem_k5n_fit, xlab = "region", ylab = "residual")
+abline(h = 0); title(paste0("SEM, Q, SSR = ", ssr(oos[, 1], sem_k5n_fit)))
 par(op)})
 dev.off()
 
