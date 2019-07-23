@@ -2,13 +2,9 @@
 source("R/7_calc_fit.R")
 # load("data/models_twoways.rda")
 
-date_fit <- max(dates) + 1
-# date_fit <- 2010
-tfe_idx <- if(date_fit %in% dates) {which(dates == date_fit)} else {NULL}
-
-counter <- 1
+# counter <- 1
 for(counter in seq_along(variables)) {
-  
+
 cat(print_vars(variables[[counter]]))
 
 sm_results(results_qu[[counter]])
@@ -20,8 +16,22 @@ summary(results_lag_k5n[[counter]])
 summary(results_err_qu[[counter]])
 summary(results_err_k5n[[counter]])
 
+table <- do.call(cbind, 
+        lapply(list(results_qu[[counter]], results_k5n[[counter]], 
+                    results_k7n[[counter]], results_plm[[counter]], 
+                    results_lag_qu[[counter]], results_lag_k5n[[counter]], 
+                    results_err_qu[[counter]], results_err_k5n[[counter]]), 
+               table_ise, variables[[counter]]))
+table <- table[, c(1, which(!names(table) == "variables"))]
+write.csv()
+
 
 # Check fit ---------------------------------------------------------------
+
+date_fit <- max(dates) + 1
+# date_fit <- 2010
+tfe_idx <- if(date_fit %in% dates) {which(dates == date_fit)} else {NULL}
+
 
 oos <- prep_fit(data, date_fit, variables[[counter]])
 
@@ -47,7 +57,7 @@ sem_qu_fit <- splm_fit(oos, results_err_qu[[counter]], W_qu, tfe, cfe, tfe_idx =
 
 sem_k5n_fit <- splm_fit(oos, results_err_k5n[[counter]], W_k5n, tfe, cfe, tfe_idx = tfe_idx)
 
-png(paste0("plots/", date_fit, "_residual_model_", names(variables)[counter], ".png"), width = 1200, height = 600)
+png(paste0("plots/fit_resid/", date_fit, "_residual_model_", names(variables)[counter], ".png"), width = 1200, height = 600)
 print({op <- par(mfrow = c(2, 4), mar = c(2, 2, 2, 0.5))
 plot(oos[, 1] - sdm_qu_fit_mean, xlab = "region", ylab = "residual")
 abline(h = 0); title(paste0("SDM, Q, SSR = ", ssr(oos[, 1], sdm_qu_fit_mean)))
@@ -68,7 +78,7 @@ abline(h = 0); title(paste0("SEM, K5, SSR = ", ssr(oos[, 1], sem_k5n_fit)))
 par(op)})
 dev.off()
 
-png(paste0("plots/", date_fit, "_comparison_model_", names(variables)[counter], ".png"), width = 1200, height = 600)
+png(paste0("plots/fit_line/", date_fit, "_comparison_model_", names(variables)[counter], ".png"), width = 1200, height = 600)
 print({op <- par(mfrow = c(2, 4), mar = c(2, 2, 2, 0.5))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sdm_qu_fit_mean, col = "black"); lines(x = -1:1, y = -1:1)

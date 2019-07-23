@@ -409,3 +409,39 @@ print_vars <- function(x) {
 }
 
 ssr <- function(x, y) {round(sum((x - y)^2), 3)}
+
+table_ise <- function(x, vars) {
+  
+  if(is(x, "plm")) return(table_ise.plm(x, vars))
+  if(is(x, "splm")) return(table_ise.splm(x, vars))
+  
+  data.frame(
+    "variables" = c(vars[-1], "Rho", "R2", "SSR"),
+    "direct" = c(sign(x$res_effects[-1, "direct"]), 
+                 mean(x$rho_post), x$res_other[1, 2], x$ssr[1,1]),
+    "direct_t" = c(x$res_effects[-1, "direct_t"], 
+                   mean(x$rho_post) / sd(x$rho_post), NA, NA),
+    "indirect" = c(sign(x$res_effects[-1, "indirect"]), NA, NA, NA),
+    "indirect_t" = c(x$res_effects[-1, "indirect_t"], NA, NA, NA)
+  )
+}
+
+table_ise.plm <- function(x, vars) {
+  y <- summary(x)
+  data.frame(
+    "variables" =  c(vars[-1], "Rho", "R2", "SSR"),
+    "value" = c(sign(x$coefficients), 
+                NA, plm::r.squared(x), sum(x$residuals^2)),
+    "value_t" = c(coef(y)[, "t-value"], NA, NA, NA)
+  )
+}
+
+table_ise.splm <- function(x, vars) {
+  y <- summary(x)
+  data.frame(
+    "variables" =  c(vars[-1], "Rho", "R2", "SSR"),
+    "value" = c(sign(x$coefficients[-1]), 
+                x$coefficients[1], y$rsqr, y$tss),
+    "value_t" = c(y$CoefTable[-1, "t-value"], y$CoefTable[1, "t-value"], NA, NA)
+  )
+}
