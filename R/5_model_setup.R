@@ -35,6 +35,7 @@ data <- data %>%
     pasture_px_km2_log = log(pasture_px_km2),
     cerr_px_km2_log = log(cerr_px_km2),
     crop_px_km2_log = log(crop_px_km2),
+    crop_px_km2_lag_log = log(crop_px_km2_lag),
     cattle_dens_log = log(cattle_dens),
     max_yield_brl_log = log(max_yield_brl),
     soy_filled_log = log(soy_filled),
@@ -46,7 +47,8 @@ data <- data %>%
   ) %>% # Watch out for log(0)
   mutate(
     forest_px_km2_log = ifelse(is.finite(forest_px_km2_log), forest_px_km2_log, -27),
-    crop_px_km2_log = ifelse(is.finite(crop_px_km2_log), crop_px_km2_log, -27)
+    crop_px_km2_log = ifelse(is.finite(crop_px_km2_log), crop_px_km2_log, -27),
+    crop_px_km2_lag_log = ifelse(is.finite(crop_px_km2_lag_log), crop_px_km2_lag_log, -27)
   )
 
 
@@ -58,27 +60,42 @@ variables <- list(
            "forest_px_km2", "pasture_px_km2", "crop_px_km2",
            "pop_km2", "gdp_cap", "cattle_dens", "soy_filled", 
            "spei_wet", "spei_dry"),
-  lag_crop1 = c("forest_ch_km2",
-                "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag",
-                "pop_km2", "gdp_cap", "cattle_dens", "soy_filled_lag", 
-                "spei_wet", "spei_dry"),
-  lag_crop2 = c("forest_ch_km2",
-                "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag",
-                "pop_km2", "gdp_cap", "cattle_dens", "soy_filled", 
-                "spei_wet", "spei_dry"),
+  crop = c("forest_ch_km2",
+               "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag",
+               "pop_km2", "gdp_cap", "cattle_dens", "soy_filled", 
+               "spei_wet", "spei_dry"),
   log = c("forest_ch_km2",
           "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_log",
           "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled_log", 
           "spei_wet", "spei_dry"),
+  log_crop = c("forest_ch_km2", 
+               "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_lag_log",
+               "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled_log", 
+               "spei_wet", "spei_dry"),
+  base_lim = c("forest_ch_km2",
+               "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
+                "pop_km2", "cattle_dens", "soy_filled", "spei_wet"),
+  crop_lim = c("forest_ch_km2",
+               "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag", 
+               "pop_km2", "cattle_dens", "soy_filled", "spei_wet"),
+  log_lim = c("forest_ch_km2",
+              "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_log", 
+              "pop_km2_log", "cattle_dens_log", "soy_filled_log", "spei_wet"),
+  log_crop_lim = c("forest_ch_km2",
+                   "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_lag_log", 
+                   "pop_km2_log", "cattle_dens_log", "soy_filled_log", "spei_wet"),
   base_vlim = c("forest_ch_km2",
                 "forest_px_km2", "pasture_px_km2", "crop_px_km2", 
-                "pop_km2", "cattle_dens", "soy_filled", "spei_wet"),
-  lag_crop1_vlim = c("forest_ch_km2",
-                     "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag", 
-                     "pop_km2", "cattle_dens", "soy_filled", "spei_wet"),
+                "pop_km2", "soy_filled"),
+  crop_vlim = c("forest_ch_km2",
+                "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag", 
+                "pop_km2", "soy_filled"),
   log_vlim = c("forest_ch_km2",
                "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_log", 
-               "pop_km2_log", "cattle_dens_log", "soy_filled_log", "spei_wet")
+               "pop_km2_log", "soy_filled_log"),
+  log_crop_vlim = c("forest_ch_km2",
+                    "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_lag_log", 
+                    "pop_km2_log", "soy_filled_log")
 )
 
 formula_ify <- function(x) { # To convert this for plm & splm
