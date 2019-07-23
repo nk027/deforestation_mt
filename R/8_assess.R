@@ -28,8 +28,10 @@ write.csv(table, file = paste0("txt/fit_", names(variables)[counter], ".csv"))
 
 # Check fit ---------------------------------------------------------------
 
-date_fit <- max(dates) + 1
+# date_fit <- max(dates) + 1
 # date_fit <- 2010
+for(date_fit in c(dates, max(dates) + 1)) {
+
 tfe_idx <- if(date_fit %in% dates) {which(dates == date_fit)} else {NULL}
 
 
@@ -106,6 +108,8 @@ points(oos[, 1], sem_k5n_fit); lines(x = -1:1, y = -1:1)
 title(paste0("SEM, K5N, SSR = ", ssr(oos[, 1], sem_k5n_fit)))
 par(op)})
 dev.off()
+
+}
 
 }
 
