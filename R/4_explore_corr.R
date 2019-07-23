@@ -16,8 +16,10 @@ cor_data <- data %>%
 
 # Correlation test
 cor_test <- function(x, cutoff = 0.8, na.0 = TRUE) {
-  x$geometry <- NULL
-  x <- as.matrix(x)
+  if(!is.matrix(x)) {
+    x$geometry <- NULL
+    x <- as.matrix(x)
+  }
   if(na.0) {x[is.na(x)] <- 0}
   y <- cor(x)
   diag(y) <- 0

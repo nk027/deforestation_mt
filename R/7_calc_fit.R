@@ -62,7 +62,8 @@ plm_fit <- function(x, results, tfe, cfe, tfe_idx = NULL) {
       # mean(plm::fixef(results, effect = "time"))
       0 # Option 2
     } else {
-      plm::fixef(results, effect = "time")[tfe_idx]
+      # plm::fixef(results, effect = "time")[tfe_idx]
+      0
     }
   }
   if(cfe) {plm_pred <- plm_pred + plm::fixef(results, effect = "individual")}

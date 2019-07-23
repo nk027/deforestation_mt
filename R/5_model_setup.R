@@ -43,6 +43,10 @@ data <- data %>%
     spei_dry_log = log(spei_dry),
     pop_km2_log = log(pop_km2),
     gdp_cap_log = log(gdp_cap)
+  ) %>% # Watch out for log(0)
+  mutate(
+    forest_px_km2_log = ifelse(is.finite(forest_px_km2_log), forest_px_km2_log, -27),
+    crop_px_km2_log = ifelse(is.finite(crop_px_km2_log), crop_px_km2_log, -27)
   )
 
 

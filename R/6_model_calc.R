@@ -1,4 +1,8 @@
 
+library(plm)
+library(splm)
+library(spatialreg)
+
 dates <- seq(2005, 2015)
 dates_len <- length(dates)
 
@@ -37,16 +41,11 @@ results_k7n[[counter]] <- sdm_panel(matrices[[counter]], W_k7n, dates_len, tfe =
 
 # PLM ---------------------------------------------------------------------
 
-library(plm)
-
 results_plm[[counter]] <- plm::plm(formula_ify(variables[[counter]]), df_plm, 
                                    effect = effect, model = "within")
 
 
 # SPLM --------------------------------------------------------------------
-
-library(splm)
-library(spatialreg)
 
 results_lag[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
                                listw = W_qu, model = "within", effect = effect, 
