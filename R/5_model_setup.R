@@ -16,6 +16,7 @@ data <- data %>% filter(!code %in% municipio_subset)
 
 # Transform variables
 data <- data %>% 
+  group_by(code) %>% 
   mutate( # Lag
     forest_px_km2_lag = lag(forest_px_km2),
     pasture_px_km2_lag = lag(pasture_px_km2),
@@ -30,6 +31,7 @@ data <- data %>%
     pop_km2_lag = lag(pop_km2),
     gdp_cap_lag = lag(gdp_cap)
   ) %>% 
+  ungroup() %>% 
   mutate( # Log
     forest_px_km2_log = log(forest_px_km2),
     pasture_px_km2_log = log(pasture_px_km2),
@@ -81,7 +83,8 @@ variables <- list(
   log_lim = c("forest_ch_km2",
               "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_log", 
               "pop_km2_log", "cattle_dens_log", "soy_filled_log", "spei_wet"),
-  log_crop_lim = c("forest_ch_km2",
+  log_crop_lim = c("forest
+                   _ch_km2",
                    "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_lag_log", 
                    "pop_km2_log", "cattle_dens_log", "soy_filled_log", "spei_wet"),
   base_vlim = c("forest_ch_km2",

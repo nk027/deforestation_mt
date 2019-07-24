@@ -6,6 +6,10 @@ library(spatialreg)
 dates <- seq(2005, 2015)
 dates_len <- length(dates)
 
+n_iter <- 25000
+n_save <- 10000
+n_griddy <- 2000
+
 tfe <- TRUE
 cfe <- TRUE
 effect <- if(tfe) {if(cfe) {"twoways"} else {"time"}
@@ -36,9 +40,15 @@ df_plm <- as.data.frame(cbind(rep(1:(141 - len(municipio_subset)), dates_len),
 
 # Bayesian SDM ---------------------------------------------------------------
 
-results_qu[[counter]] <- sdm_panel(matrices[[counter]], W_qu, dates_len, tfe = tfe, cfe = cfe)
-results_k5n[[counter]] <- sdm_panel(matrices[[counter]], W_k5n, dates_len, tfe = tfe, cfe = cfe)
-results_k7n[[counter]] <- sdm_panel(matrices[[counter]], W_k7n, dates_len, tfe = tfe, cfe = cfe)
+results_qu[[counter]] <- sdm_panel(matrices[[counter]], W_qu, dates_len, 
+                                   tfe = tfe, cfe = cfe,
+                                   n_iter = n_iter, n_save = n_save, n_griddy = n_griddy)
+results_k5n[[counter]] <- sdm_panel(matrices[[counter]], W_k5n, dates_len, 
+                                    tfe = tfe, cfe = cfe,
+                                    n_iter = n_iter, n_save = n_save, n_griddy = n_griddy)
+results_k7n[[counter]] <- sdm_panel(matrices[[counter]], W_k7n, dates_len, 
+                                    tfe = tfe, cfe = cfe,
+                                    n_iter = n_iter, n_save = n_save, n_griddy = n_griddy)
 
 
 # PLM ---------------------------------------------------------------------
