@@ -10,10 +10,21 @@ n_iter <- 25000
 n_save <- 10000
 n_griddy <- 2000
 
-tfe <- TRUE
-cfe <- TRUE
-effect <- if(tfe) {if(cfe) {"twoways"} else {"time"}
-} else {if(cfe) {"individual"} else{stop()}}
+fixed_effects <- list(c(TRUE, TRUE), c(TRUE, FALSE), c(FALSE, TRUE), c(FALSE, FALSE))
+
+for(fe in fixed_effects) {
+
+tfe <- fe[1]
+cfe <- fe[2]
+pl_model <- "within"
+if(tfe) {
+  if(cfe) {effect <- "twoways"} else {effect <- "time"}
+} else {
+  if(cfe) {effect <- "individual"} else {
+    effect <- "individual" # Renamed later, must be one of the three
+    pl_model <- "pooling"
+  }
+}
 
 matrices <- list()
 results_qu <- list()
@@ -54,27 +65,28 @@ results_k7n[[counter]] <- sdm_panel(matrices[[counter]], W_k7n, dates_len,
 # PLM ---------------------------------------------------------------------
 
 results_plm[[counter]] <- plm::plm(formula_ify(variables[[counter]]), df_plm, 
-                                   effect = effect, model = "within")
+                                   effect = effect, model = pl_model)
 
 
 # SPLM --------------------------------------------------------------------
 
 results_lag_qu[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
-                                  listw = W_qu, model = "within", effect = effect, 
+                                  listw = W_qu, model = pl_model, effect = effect, 
                                   lag = TRUE, spatial.error = "none")
 results_lag_k5n[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
-                                   listw = W_k5n, model = "within", effect = effect, 
+                                   listw = W_k5n, model = pl_model, effect = effect, 
                                    lag = TRUE, spatial.error = "none")
 
 results_err_qu[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
-                                  listw = W_qu, model = "within", effect = effect, 
+                                  listw = W_qu, model = pl_model, effect = effect, 
                                   lag = FALSE, spatial.error = "b")
 results_err_k5n[[counter]] <- spml(formula_ify(variables[[counter]]), df_plm, 
-                                   listw = W_k5n, model = "within", effect = effect, 
+                                   listw = W_k5n, model = pl_model, effect = effect, 
                                    lag = FALSE, spatial.error = "b")
 
 }
 
+if(pl_model == "pooling") {effect <- "none"} # Properly name effect now
 
 # Store results -----------------------------------------------------------
 
@@ -83,3 +95,5 @@ save(file = paste0("data/models_", effect, ".rda"),
               "results_plm", 
               "results_lag_qu", "results_err_qu", 
               "results_lag_k5n", "results_err_k5n"))
+
+}
