@@ -59,6 +59,10 @@ data <- data %>%
     forest_px_km2_log = ifelse(is.finite(forest_px_km2_log), forest_px_km2_log, -27),
     crop_px_km2_log = ifelse(is.finite(crop_px_km2_log), crop_px_km2_log, -27),
     crop_px_km2_lag_log = ifelse(is.finite(crop_px_km2_lag_log), crop_px_km2_lag_log, -27)
+  ) %>% 
+  mutate(
+    crop_ch_km2 = crop_ch / area_km2,
+    pasture_ch_km2 = pasture_ch / area_km2
   )
 
 
@@ -106,6 +110,33 @@ variables <- list(
   log_crop_vlim = c("forest_ch_km2",
                     "forest_px_km2_log", "pasture_px_km2_log", "crop_px_km2_lag_log", 
                     "pop_km2_log", "soy_filled_log")
+)
+
+variables <- c(
+  logbase = c("forest_ch_km2",
+              "forest_px_km2", "pasture_px_km2", "crop_px_km2",
+              "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled",
+              "spei_wet", "spei_dry"),
+  use_lag = c("forest_ch_km2",
+              "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
+              "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled",
+              "spei_wet", "spei_dry"),
+  use_lag2 = c("forest_ch_km2",
+              "forest_px_km2_lag2", "pasture_px_km2_lag2", "crop_px_km2_lag2",
+              "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled",
+              "spei_wet", "spei_dry"),
+  spei_lag = c("forest_ch_km2",
+              "forest_px_km2", "pasture_px_km2", "crop_px_km2",
+              "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled",
+              "spei_wet_lag", "spei_dry_lag"),
+  crop_lag2 = c("forest_ch_km2",
+                "forest_px_km2", "pasture_px_km2", "crop_px_km2_lag2",
+                "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled",
+                "spei_wet", "spei_dry"),
+  change = c("forest_ch_km2",
+             "forest_px_km2", "pasture_ch_km2", "crop_ch_km2",
+             "pop_km2_log", "gdp_cap_log", "cattle_dens_log", "soy_filled",
+             "spei_wet", "spei_dry")
 )
 
 formula_ify <- function(x) { # To convert this for plm & splm
