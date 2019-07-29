@@ -10,7 +10,7 @@ n_iter <- 25000
 n_save <- 10000
 n_griddy <- 2000
 
-fixed_effects <- list(c(TRUE, TRUE), c(TRUE, FALSE), c(FALSE, TRUE), c(FALSE, FALSE))
+fixed_effects <- list(c(TRUE, TRUE), c(TRUE, FALSE), c(FALSE, FALSE))
 
 for(fe in fixed_effects) {
 

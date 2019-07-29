@@ -408,7 +408,9 @@ print_vars <- function(x) {
   paste0(x[1], " ~ ", paste(x[-1], collapse = " + "))
 }
 
-ssr <- function(x, y) {round(sum((x - y)^2), 3)}
+ssr <- function(x, y, ...) {round(sum((x - y)^2), 3)}
+
+rmse <- function(x, y, N = len(x)) {round(sqrt(sum(x - y)^2 / N), 3)}
 
 table_ise <- function(x, vars) {
   
@@ -428,11 +430,13 @@ table_ise <- function(x, vars) {
 
 table_ise.plm <- function(x, vars) {
   y <- summary(x)
+  intercept <- names(x$coefficients)[1] == "(Intercept)"
   data.frame(
     "variables" =  c(vars[-1], "Rho", "R2", "SSR"),
-    "value" = c(sign(x$coefficients), 
+    "value" = c(if(intercept) {sign(coef(x)[-1])} else {sign(coef(x))}, 
                 NA, plm::r.squared(x), sum(x$residuals^2)),
-    "value_t" = c(coef(y)[, "t-value"], NA, NA, NA)
+    "value_t" = c(if(intercept) {coef(y)[-1, "t-value"]} else {coef(y)[, "t-value"]}, 
+    NA, NA, NA)
   )
 }
 
