@@ -1,5 +1,6 @@
 
 source("R/7_calc_fit.R")
+source("R/8_functions.R")
 # load("data/models_twoways.rda")
 
 fixed_effects <- list(c(TRUE, TRUE), c(TRUE, FALSE), c(FALSE, FALSE))

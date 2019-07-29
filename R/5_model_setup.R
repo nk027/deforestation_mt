@@ -31,6 +31,16 @@ data <- data %>%
     pop_km2_lag = lag(pop_km2),
     gdp_cap_lag = lag(gdp_cap)
   ) %>% 
+  mutate( # Lag2
+    forest_px_km2_lag2 = lag(forest_px_km2, 2),
+    pasture_px_km2_lag2 = lag(pasture_px_km2, 2),
+    cerr_px_km2_lag2 = lag(cerr_px_km2, 2),
+    crop_px_km2_lag2 = lag(crop_px_km2, 2),
+    cattle_dens_lag2 = lag(cattle_dens, 2),
+    soy_filled_lag2 = lag(soy_filled, 2),
+    pop_km2_lag2 = lag(pop_km2),
+    gdp_cap_lag2 = lag(gdp_cap)
+  ) %>% 
   ungroup() %>% 
   mutate( # Log
     forest_px_km2_log = log(forest_px_km2),
@@ -42,8 +52,6 @@ data <- data %>%
     max_yield_brl_log = log(max_yield_brl),
     soy_filled_log = log(soy_filled),
     milk_brl_cow_log = log(milk_brl_cow),
-    spei_wet_log = log(spei_wet),
-    spei_dry_log = log(spei_dry),
     pop_km2_log = log(pop_km2),
     gdp_cap_log = log(gdp_cap)
   ) %>% # Watch out for log(0)
