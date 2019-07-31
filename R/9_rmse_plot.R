@@ -46,7 +46,7 @@ for(date_fit in c(dates, max(dates) + 1)) {
   
 }
 
-counter <- which(names(variables) == "base_vlim")
+counter <- which(names(variables) == "base_lim")
 for(date_fit in c(dates, max(dates) + 1)) {
   
   tfe_idx <- if(date_fit %in% dates) {which(dates == date_fit)} else {NULL}
@@ -104,7 +104,7 @@ ggplot(df, aes(x = variable, y = model)) +
   scale_fill_gradientn(colours = col_vector, na.value = "white") +
   scale_y_discrete(expand = c(0, 0), limits = rev(rownames(mat))) +
   scale_x_discrete(position = "top", expand = c(0, 0)) +
-  labs(title = "RMSE") + xlab(NULL) + ylab(NULL) +
+  labs(title = NULL) + xlab(NULL) + ylab(NULL) +
   coord_equal() +
   theme(
     text = element_text(colour = "black"),
