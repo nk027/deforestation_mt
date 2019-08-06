@@ -56,7 +56,13 @@ bayesian_fit <- function(
 
 plm_fit <- function(x, results, tfe, cfe, tfe_idx = NULL) {
   
-  plm_pred <- x[, -1] %*% results$coefficients
+  intercept <- names(results$coefficients)[1] == "(Intercept)"
+  
+  plm_pred <- if(intercept) {
+    x[, -1] %*% results$coefficients[-1] + results$coefficients[1]
+  } else {
+    x[, -1] %*% results$coefficients
+  }
   if(tfe) {plm_pred <- plm_pred + 
     if(is.null(tfe_idx)) {
       # mean(plm::fixef(results, effect = "time"))
@@ -73,6 +79,16 @@ plm_fit <- function(x, results, tfe, cfe, tfe_idx = NULL) {
 
 splm_fit <- function(x, results, W, tfe, cfe, tfe_idx = NULL) {
   
+  if(!tfe & !cfe) {
+    if(!is.null(results$arcoef)) {
+      A <- Matrix::.sparseDiagonal(nrow(W)) - results$arcoef * W
+      A_inv <- solve(A)
+    }
+    splm_pred <- x[, -1] %*% results$coefficients[-1] + results$coefficients[1]
+    if(!is.null(results$arcoef)) {splm_pred <- (A_inv %*% splm_pred)[, 1]}
+    return(c(splm_pred))
+  }
+  
   excl <- c()
   if("lambda" %in% names(results$coefficients)) { # SAR
     A <- Matrix::.sparseDiagonal(nrow(W)) - results$coefficients[1] * W
@@ -84,7 +100,7 @@ splm_fit <- function(x, results, W, tfe, cfe, tfe_idx = NULL) {
   }
   
   splm_pred <- as.numeric(results$res.eff[[1]]$intercept) + # Constant
-    x[, -1] %*% results$coefficients[-excl] # X \beta
+      x[, -1] %*% results$coefficients[-excl] # X \beta
   if(tfe) {splm_pred <- splm_pred + 
     if(is.null(tfe_idx)) {
       mean(results$res.eff[[1]]$res.tfe)

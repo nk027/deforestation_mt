@@ -3,14 +3,15 @@ library(plm)
 library(splm)
 library(spatialreg)
 
-dates <- seq(2005, 2015)
+dates <- seq(2006, 2016)
 dates_len <- length(dates)
 
 n_iter <- 25000
 n_save <- 10000
 n_griddy <- 2000
 
-fixed_effects <- list(c(TRUE, TRUE), c(TRUE, FALSE), c(FALSE, TRUE), c(FALSE, FALSE))
+# fixed_effects <- list(c(FALSE, FALSE))
+fixed_effects <- list(c(TRUE, TRUE))
 
 for(fe in fixed_effects) {
 

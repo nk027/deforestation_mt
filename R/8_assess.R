@@ -1,6 +1,26 @@
 
 source("R/7_calc_fit.R")
+source("R/8_functions.R")
 # load("data/models_twoways.rda")
+
+fixed_effects <- list(c(TRUE, TRUE), c(TRUE, FALSE), c(FALSE, FALSE))
+fixed_effects <- list(c(TRUE, TRUE))
+
+for(fe in fixed_effects) {
+
+tfe <- fe[1]
+cfe <- fe[2]
+pl_model <- "within"
+if(tfe) {
+  if(cfe) {effect <- "twoways"} else {effect <- "time"}
+} else {
+  if(cfe) {effect <- "individual"} else {
+    effect <- "none" # Renamed later, must be one of the three
+    pl_model <- "pooling"
+  }
+}
+
+load(paste0("data/models_", effect, ".rda"))
 
 # counter <- 1
 for(counter in seq_along(variables)) {
@@ -23,7 +43,7 @@ table <- do.call(cbind,
                     results_err_qu[[counter]], results_err_k5n[[counter]]), 
                table_ise, variables[[counter]]))
 table <- table[, c(1, which(!names(table) == "variables"))]
-write.csv(table, file = paste0("txt/fit_", names(variables)[counter], ".csv"))
+write.csv(table, file = paste0("txt/fit_", effect, "_", names(variables)[counter], ".csv"))
 
 
 # Check fit ---------------------------------------------------------------
@@ -59,55 +79,59 @@ sem_qu_fit <- splm_fit(oos, results_err_qu[[counter]], W_qu, tfe, cfe, tfe_idx =
 
 sem_k5n_fit <- splm_fit(oos, results_err_k5n[[counter]], W_k5n, tfe, cfe, tfe_idx = tfe_idx)
 
-png(paste0("plots/fit_resid/", date_fit, "_residual_model_", names(variables)[counter], ".png"), width = 1200, height = 600)
+png(paste0("plots/fit_resid/", date_fit, "_residual_", effect, "_", names(variables)[counter], ".png"), 
+    width = 1200, height = 600)
 print({op <- par(mfrow = c(2, 4), mar = c(2, 2, 2, 0.5))
 plot(oos[, 1] - sdm_qu_fit_mean, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SDM, Q, SSR = ", ssr(oos[, 1], sdm_qu_fit_mean)))
+abline(h = 0); title(paste0("SDM, Q, RMSE = ", rmse(oos[, 1], sdm_qu_fit_mean)))
 plot(oos[, 1] - sdm_k5n_fit_mean, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SDM, K5, SSR = ", ssr(oos[, 1], sdm_k5n_fit_mean)))
+abline(h = 0); title(paste0("SDM, K5, RMSE = ", rmse(oos[, 1], sdm_k5n_fit_mean)))
 plot(oos[, 1] - sdm_k7n_fit_mean, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SDM, K7, SSR = ", ssr(oos[, 1], sdm_k7n_fit_mean)))
+abline(h = 0); title(paste0("SDM, K7, RMSE = ", rmse(oos[, 1], sdm_k7n_fit_mean)))
 plot(oos[, 1] - clm_fit, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("PLM, SSR = ", ssr(oos[, 1], clm_fit)))
+abline(h = 0); title(paste0("PLM, RMSE = ", rmse(oos[, 1], clm_fit)))
 plot(oos[, 1] - sar_qu_fit, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SAR, Q, SSR = ", ssr(oos[, 1], sar_qu_fit)))
+abline(h = 0); title(paste0("SAR, Q, RMSE = ", rmse(oos[, 1], sar_qu_fit)))
 plot(oos[, 1] - sar_k5n_fit, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SAR, K5, SSR = ", ssr(oos[, 1], sar_k5n_fit)))
+abline(h = 0); title(paste0("SAR, K5, RMSE = ", rmse(oos[, 1], sar_k5n_fit)))
 plot(oos[, 1] - sem_qu_fit, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SEM, Q, SSR = ", ssr(oos[, 1], sem_qu_fit)))
+abline(h = 0); title(paste0("SEM, Q, RMSE = ", rmse(oos[, 1], sem_qu_fit)))
 plot(oos[, 1] - sem_k5n_fit, xlab = "region", ylab = "residual")
-abline(h = 0); title(paste0("SEM, K5, SSR = ", ssr(oos[, 1], sem_k5n_fit)))
+abline(h = 0); title(paste0("SEM, K5, RMSE = ", rmse(oos[, 1], sem_k5n_fit)))
 par(op)})
 dev.off()
 
-png(paste0("plots/fit_line/", date_fit, "_comparison_model_", names(variables)[counter], ".png"), width = 1200, height = 600)
+png(paste0("plots/fit_line/", date_fit, "_comparison_", effect, "_", names(variables)[counter], ".png"), 
+    width = 1200, height = 600)
 print({op <- par(mfrow = c(2, 4), mar = c(2, 2, 2, 0.5))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sdm_qu_fit_mean, col = "black"); lines(x = -1:1, y = -1:1)
-title(paste0("SDM, Q, SSR = ", ssr(oos[, 1], sdm_qu_fit_mean)))
+title(paste0("SDM, Q, RMSE = ", rmse(oos[, 1], sdm_qu_fit_mean)))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sdm_k5n_fit_mean); lines(x = -1:1, y = -1:1)
-title(paste0("SDM, K5, SSR = ", ssr(oos[, 1], sdm_k5n_fit_mean)))
+title(paste0("SDM, K5, RMSE = ", rmse(oos[, 1], sdm_k5n_fit_mean)))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sdm_k7n_fit_mean); lines(x = -1:1, y = -1:1)
-title(paste0("SDM, K7, SSR = ", ssr(oos[, 1], sdm_k7n_fit_mean)))
+title(paste0("SDM, K7, RMSE = ", rmse(oos[, 1], sdm_k7n_fit_mean)))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], clm_fit); lines(x = -1:1, y = -1:1)
-title(paste0("PLM, SSR = ", ssr(oos[, 1], clm_fit)))
+title(paste0("PLM, RMSE = ", rmse(oos[, 1], clm_fit)))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sar_qu_fit); lines(x = -1:1, y = -1:1)
-title(paste0("SAR, Q, SSR = ", ssr(oos[, 1], sar_qu_fit)))
+title(paste0("SAR, Q, RMSE = ", rmse(oos[, 1], sar_qu_fit)))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sar_k5n_fit); lines(x = -1:1, y = -1:1)
-title(paste0("SAR, K5, SSR = ", ssr(oos[, 1], sar_k5n_fit)))
+title(paste0("SAR, K5, RMSE = ", rmse(oos[, 1], sar_k5n_fit)))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sem_qu_fit); lines(x = -1:1, y = -1:1)
-title(paste0("SEM, Q, SSR = ", ssr(oos[, 1], sem_qu_fit)))
+title(paste0("SEM, Q, RMSE = ", rmse(oos[, 1], sem_qu_fit)))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), xlab = "prediction", ylab = "observation", col = "white")
 points(oos[, 1], sem_k5n_fit); lines(x = -1:1, y = -1:1)
-title(paste0("SEM, K5N, SSR = ", ssr(oos[, 1], sem_k5n_fit)))
+title(paste0("SEM, K5N, RMSE = ", rmse(oos[, 1], sem_k5n_fit)))
 par(op)})
 dev.off()
+
+}
 
 }
 

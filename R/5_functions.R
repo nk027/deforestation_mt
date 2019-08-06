@@ -260,8 +260,8 @@ sdm_panel <- function(
     "rho_post" = rho_post,
     "beta_post" = beta_post,
     "sigma_post" = sigma_post,
-    # "direct_post_ci" = direct_post_ci,
-    # "indirect_post_ci" = indirect_post_ci,
+    "direct_post" = direct_post,
+    "indirect_post" = indirect_post,
     "ssr" = SSR,
     "converged" = converged
   )
@@ -379,69 +379,3 @@ get_W <- function(x, type = c("queen", "knear"), k = 5) {
   
 }
 
-
-# Outputs -----------------------------------------------------------------
-
-sm_results <- function(x) {
-  
-  x$res_effects[2] <- round(x$res_effects[2], 7)
-  x$res_effects[4] <- round(x$res_effects[4], 7)
-  x$res_effects[3] <- ifelse(abs(x$res_effects[3]) > 2.576, " ***", 
-                             ifelse(abs(x$res_effects[3]) > 1.96, " **",
-                                    ifelse(abs(x$res_effects[3]) > 1.645, " *", "")))
-  x$res_effects[5] <- ifelse(abs(x$res_effects[5]) > 2.576, " ***", 
-                             ifelse(abs(x$res_effects[5]) > 1.96, " **",
-                                    ifelse(abs(x$res_effects[5]) > 1.645, " *", "")))
-  
-  tibble("variable" = c(as.character(x$res_effects[[1]]), 
-                        "Rho", "R2", "AIC", "BIC"), 
-         "value/direct" = c(paste0(x$res_effects[[2]], x$res_effects[[3]]),
-                            round(mean(x$rho_post), 3),
-                            round(x$res_other[1, 2], 3),
-                            round(x$res_other[3, 2], 1),
-                            round(x$res_other[4, 2], 1)),
-         "indirect" = c(paste0(x$res_effects[[4]], x$res_effects[[5]]),
-                        "", "", "", ""))
-}
-
-print_vars <- function(x) {
-  paste0(x[1], " ~ ", paste(x[-1], collapse = " + "))
-}
-
-ssr <- function(x, y) {round(sum((x - y)^2), 3)}
-
-table_ise <- function(x, vars) {
-  
-  if(is(x, "plm")) return(table_ise.plm(x, vars))
-  if(is(x, "splm")) return(table_ise.splm(x, vars))
-  
-  data.frame(
-    "variables" = c(vars[-1], "Rho", "R2", "SSR"),
-    "direct" = c(sign(x$res_effects[-1, "direct"]), 
-                 mean(x$rho_post), x$res_other[1, 2], x$ssr[1,1]),
-    "direct_t" = c(x$res_effects[-1, "direct_t"], 
-                   mean(x$rho_post) / sd(x$rho_post), NA, NA),
-    "indirect" = c(sign(x$res_effects[-1, "indirect"]), NA, NA, NA),
-    "indirect_t" = c(x$res_effects[-1, "indirect_t"], NA, NA, NA)
-  )
-}
-
-table_ise.plm <- function(x, vars) {
-  y <- summary(x)
-  data.frame(
-    "variables" =  c(vars[-1], "Rho", "R2", "SSR"),
-    "value" = c(sign(x$coefficients), 
-                NA, plm::r.squared(x), sum(x$residuals^2)),
-    "value_t" = c(coef(y)[, "t-value"], NA, NA, NA)
-  )
-}
-
-table_ise.splm <- function(x, vars) {
-  y <- summary(x)
-  data.frame(
-    "variables" =  c(vars[-1], "Rho", "R2", "SSR"),
-    "value" = c(sign(x$coefficients[-1]), 
-                x$coefficients[1], y$rsqr, y$tss),
-    "value_t" = c(y$CoefTable[-1, "t-value"], y$CoefTable[1, "t-value"], NA, NA)
-  )
-}
