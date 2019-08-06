@@ -260,8 +260,8 @@ sdm_panel <- function(
     "rho_post" = rho_post,
     "beta_post" = beta_post,
     "sigma_post" = sigma_post,
-    # "direct_post_ci" = direct_post_ci,
-    # "indirect_post_ci" = indirect_post_ci,
+    "direct_post" = direct_post,
+    "indirect_post" = indirect_post,
     "ssr" = SSR,
     "converged" = converged
   )
