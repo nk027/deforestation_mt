@@ -13,7 +13,7 @@ prep_fit <- function(x, date_fit, vars) {
 
 bayesian_fit <- function(
   x, 
-  vars, results, W, 
+  vars, results, W, dates_len,
   lag_X = TRUE, tfe = TRUE, cfe = TRUE, tfe_idx = NULL,
   n_draws = 1000) {
   
