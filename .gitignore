@@ -6,3 +6,5 @@
 data/*
 plots/*
 txt/*.csv
+txt/base/*
+txt/proper/*
