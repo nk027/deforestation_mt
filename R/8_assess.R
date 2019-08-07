@@ -7,6 +7,7 @@ fixed_effects <- list(c(TRUE, TRUE), c(TRUE, FALSE), c(FALSE, FALSE))
 fixed_effects <- list(c(TRUE, TRUE))
 
 for(fe in fixed_effects) {
+fe <- c(TRUE, TRUE)
 
 tfe <- fe[1]
 cfe <- fe[2]
@@ -20,7 +21,7 @@ if(tfe) {
   }
 }
 
-load(paste0("data/models_", effect, ".rda"))
+# load(paste0("data/models_", effect, ".rda"))
 
 # counter <- 1
 for(counter in seq_along(variables)) {

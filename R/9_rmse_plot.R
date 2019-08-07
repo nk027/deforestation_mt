@@ -11,7 +11,7 @@ tfe <- cfe <- TRUE
 
 mat <- matrix(NA, nrow = 5, ncol = len(dates) + 1)
 colnames(mat) <- c(dates, max(dates) + 1)
-rownames(mat) <- paste0(rep(c("sdm-qu", "sdm-k5", "sar-qu", "sem-qu", "clm")))#, 2)), 
+rownames(mat) <- paste0(rep(c("sdm-qu", "sdm-k7", "sar-qu", "sem-qu", "clm")))#, 2)), 
                         # rep(c("", "-lim"), each = 5))
 
 counter <- which(names(variables) == "base")
@@ -26,9 +26,9 @@ for(date_fit in c(dates, max(dates) + 1)) {
                              W_qu, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
   sdm_qu_fit_mean <- apply(sdm_qu_fit, 1, mean)
   
-  sdm_k5n_fit <- bayesian_fit(oos, variables[[counter]], results_k5n[[counter]],
-                              W_k5n, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
-  sdm_k5n_fit_mean <- apply(sdm_k5n_fit, 1, mean)
+  sdm_k7n_fit <- bayesian_fit(oos, variables[[counter]], results_k7n[[counter]],
+                              W_k7n, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
+  sdm_k7n_fit_mean <- apply(sdm_k7n_fit, 1, mean)
   
   clm_fit <- plm_fit(oos, results_plm[[counter]], tfe, cfe, tfe_idx = tfe_idx)
   
