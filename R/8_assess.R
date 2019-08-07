@@ -58,15 +58,15 @@ tfe_idx <- if(date_fit %in% dates) {which(dates == date_fit)} else {NULL}
 oos <- prep_fit(data, date_fit, variables[[counter]])
 
 sdm_qu_fit <- bayesian_fit(oos, variables[[counter]], results_qu[[counter]],
-                        W_qu, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
+                        W_qu, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
 sdm_qu_fit_mean <- apply(sdm_qu_fit, 1, mean)
 
 sdm_k5n_fit <- bayesian_fit(oos, variables[[counter]], results_k5n[[counter]],
-                           W_k5n, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
+                           W_k5n, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
 sdm_k5n_fit_mean <- apply(sdm_k5n_fit, 1, mean)
 
 sdm_k7n_fit <- bayesian_fit(oos, variables[[counter]], results_k7n[[counter]],
-                           W_k7n, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
+                           W_k7n, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
 sdm_k7n_fit_mean <- apply(sdm_k7n_fit, 1, mean)
 
 clm_fit <- plm_fit(oos, results_plm[[counter]], tfe, cfe, tfe_idx = tfe_idx)
