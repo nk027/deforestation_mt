@@ -1,7 +1,7 @@
 
 source("R/8_functions.R")
 
-load("data/models_twoways.rda")
+load("data/models_twoways_final.rda")
 tfe <- cfe <- TRUE
 # load("data/models_time.rda")
 # load("data/models_none.rda")
@@ -9,9 +9,9 @@ tfe <- cfe <- TRUE
 
 # RMSE Matrix -------------------------------------------------------------
 
-mat <- matrix(NA, nrow = 5, ncol = len(dates) + 1)
+mat <- matrix(NA, nrow = 8, ncol = len(dates) + 1)
 colnames(mat) <- c(dates, max(dates) + 1)
-rownames(mat) <- paste0(rep(c("sdm-qu", "sdm-k7", "sar-qu", "sem-qu", "clm")))#, 2)), 
+rownames(mat) <- paste0(rep(c("sdm-qu", "sdm-k7", "sdm-k5", "sar-qu", "sar-k5", "sem-qu", "sem-k5", "clm")))#, 2)), 
                         # rep(c("", "-lim"), each = 5))
 
 counter <- which(names(variables) == "base")
@@ -23,12 +23,16 @@ for(date_fit in c(dates, max(dates) + 1)) {
   
   
   sdm_qu_fit <- bayesian_fit(oos, variables[[counter]], results_qu[[counter]],
-                             W_qu, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
+                             W_qu, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
   sdm_qu_fit_mean <- apply(sdm_qu_fit, 1, mean)
   
   sdm_k7n_fit <- bayesian_fit(oos, variables[[counter]], results_k7n[[counter]],
-                              W_k7n, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
+                              W_k7n, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
   sdm_k7n_fit_mean <- apply(sdm_k7n_fit, 1, mean)
+  
+  sdm_k5n_fit <- bayesian_fit(oos, variables[[counter]], results_k5n[[counter]],
+                              W_k5n, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe, tfe_idx = tfe_idx)
+  sdm_k5n_fit_mean <- apply(sdm_k5n_fit, 1, mean)
   
   clm_fit <- plm_fit(oos, results_plm[[counter]], tfe, cfe, tfe_idx = tfe_idx)
   
@@ -40,8 +44,8 @@ for(date_fit in c(dates, max(dates) + 1)) {
   
   sem_k5n_fit <- splm_fit(oos, results_err_k5n[[counter]], W_k5n, tfe, cfe, tfe_idx = tfe_idx)
   
-  mat[1:5, as.character(date_fit)] <- sapply(
-    list(sdm_qu_fit_mean, sdm_k5n_fit_mean, sar_qu_fit, sem_qu_fit, clm_fit), 
+  mat[1:8, as.character(date_fit)] <- sapply(
+    list(sdm_qu_fit_mean, sdm_k7n_fit_mean, sdm_k5n_fit_mean, sar_qu_fit, sar_k5n_fit, sem_qu_fit, sem_k5n_fit, clm_fit), 
     rmse, oos[, 1])
   
 }
@@ -77,8 +81,11 @@ for(date_fit in c(dates, max(dates) + 1)) {
 #     rmse, oos[, 1])
 # }
 
+
 df <- as.data.frame(mat)
+# df <- as.data.frame(mat[c(1, 3, 4, 6, 8), ])
 df$model <- toupper(rownames(mat))
+# df$model <- toupper(rownames(mat[c(1, 3, 4, 6, 8), ]))
 
 df <- reshape2::melt(df)
 
@@ -94,6 +101,9 @@ colours = c(rgb(  0, 102, 156, maxColorValue = 255),
 palette = colorRampPalette(colours)
 col_vector = palette(256)
 
+# df <- df %>% 
+#   filter(!model %in% c("SDM-K7", "SAR-K5", "SEM-K5"))
+
 label = ifelse(is.na(df$value), NA, sprintf("%.1f%%", df$value * 100))
 label = round(df$value, 2)
 
@@ -104,6 +114,7 @@ ggplot(df, aes(x = variable, y = model)) +
   # scale_fill_gradientn(colours = col_vector, na.value = "white") +
   scale_fill_viridis_c() +
   scale_y_discrete(expand = c(0, 0), limits = rev(toupper(rownames(mat)))) +
+  # scale_y_discrete(expand = c(0, 0), limits = rev(toupper(rownames(mat[c(1, 3, 4, 6, 8), ])))) +
   scale_x_discrete(position = "top", expand = c(0, 0)) +
   labs(title = NULL) + xlab(NULL) + ylab(NULL) +
   coord_equal() +
@@ -114,8 +125,9 @@ ggplot(df, aes(x = variable, y = model)) +
     plot.margin = unit(c(0.5, 1, 0, 0), "lines"),
     panel.background = element_blank(),
     panel.grid = element_blank(),
-    legend.position = "none",
+    # legend.position = "none",
     axis.ticks = element_blank(),
     axis.text.x = element_text(hjust = 0))
 
-ggsave("plots/rmse_plot.png", width = 15, height = 6, units = "cm")
+# ggsave("plots/rmse_plot.png", width = 15, height = 6, units = "cm")
+ggsave("plots/rmse_plot_full.png", width = 15, height = 9, units = "cm")
