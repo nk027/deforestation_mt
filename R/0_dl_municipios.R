@@ -12,7 +12,6 @@ link <- paste0("ftp://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territ
 years <- c(2018:2013, 2010, 2007, 2005, 2001, 2000)
 files <- paste0("shp", years, ".zip")
 
-
 for(i in seq_along(link)) {
   if(!file.exists(paste0(path, files[i])))
     download.file(paste0(link[i]), destfile = paste0(path, files[i]))

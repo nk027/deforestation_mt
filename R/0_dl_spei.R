@@ -1,9 +1,8 @@
 
 # SPEI from http://spei.csic.es/ ------------------------------------------
 
-timescales <- c("03", "06", "12", "24", "36") # 1:48 are available
-
 path <- "data/spei/"
+timescales <- c("03", "06", "12", "24", "36") # 1:48 are available
 link <- paste0("http://soton.eead.csic.es/spei/10/nc/spei", timescales, ".nc")
 files <- paste0("spei", timescales, ".nc")
 
