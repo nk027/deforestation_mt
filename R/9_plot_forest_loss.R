@@ -8,11 +8,12 @@ df <- data.frame(
   "loss_kha" = t(x[5, 7:ncol(x)]) / 1000
 )
 
-barplot(df$tr_cov_loss_kha)
+barplot(df$loss_kha)
 
 ggplot(df, aes(x = date, y = loss_kha)) +
   geom_bar(stat = "identity", fill = "darkgray", width = 0.8) +
-  ylab("Loss in 1,000 ha") +
+  ylab(NULL) +
+  # ylab("Loss in 1,000 ha") +
   xlab(NULL) +
   # xlab("Year") +
   scale_y_continuous(expand = c(0, 0), 
@@ -21,5 +22,5 @@ ggplot(df, aes(x = date, y = loss_kha)) +
   scale_x_discrete(breaks = 2001:2018,
                    labels = paste0("'", formatC(1:18, width = 2, flag = "0"))) +
   coord_cartesian(ylim = c(0, 7000)) +
-  theme_bw(base_size = 14, base_family = "Arial")
+  theme_bw(base_size = 12, base_family = "Arial")
 ggsave("plots/bars_tree_cover_loss.png", height = 6, width = 16, units = "cm")

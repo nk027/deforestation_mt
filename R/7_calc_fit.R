@@ -72,7 +72,12 @@ plm_fit <- function(x, results, tfe, cfe, tfe_idx = NULL) {
       0
     }
   }
-  if(cfe) {plm_pred <- plm_pred + plm::fixef(results, effect = "individual")}
+  if(cfe) {
+    if(!is.null(tfe_idx)) {
+    plm_pred <- plm_pred + 
+      plm::fixef(results, effect = "individual")[(1 + (tfe_idx - 1) * len(plm_pred)):(tfe_idx * len(plm_pred))]
+    }
+  }
   
   return(c(plm_pred))
 }
