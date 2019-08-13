@@ -21,3 +21,5 @@ for(i in seq_along(files)) {
         exdir = paste0(path, years[i]),
         unzip = "/usr/bin/unzip")
 }
+file.copy(from = paste0(path, max(years)),
+          to = path)
