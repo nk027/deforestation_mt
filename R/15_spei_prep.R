@@ -1,12 +1,18 @@
 
-library(dplyr)
-
 timescale <- "03"
 
 
-# Wrangle SPEI ------------------------------------------------------------
+# Dependencies ------------------------------------------------------------
 
-df_spei <- readRDS(paste0("data/geo/geo_spei", timescale, ".rds"))
+stopifnot(
+  require("dplyr")
+)
+if(!exists("df_spei")) {
+  df_spei <- readRDS(paste0("data/geo/geo_spei_", timescale, ".rds"))
+}
+
+
+# Wrangle SPEI ------------------------------------------------------------
 
 df_spei$date <- as.integer(gsub("^([0-9]{4})-..$", "\\1", df_spei$variable))
 df_spei$month <- as.integer(gsub("^....-([0-9]{2})$", "\\1", df_spei$variable))
@@ -23,4 +29,7 @@ df <- df_spei %>%
   #           spei_qu8 = quantile(value, 0.8)) %>% 
   # mutate(spei_iqr = spei_qu8 - spei_qu2)
 
-saveRDS(df, paste0("data/geo/spei", timescale, ".rds"))
+# Store tibble with the transformed SPEI
+saveRDS(df, paste0("data/geo/spei_", timescale, ".rds"))
+
+detach("package:dplyr")

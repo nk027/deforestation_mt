@@ -9,7 +9,7 @@ timescale <- "03"
 
 shp <- readRDS("data/geo/shp.rds")
 tab <- readRDS("data/tab/tab.rds")
-spei <- readRDS(paste0("data/geo/spei", timescale, ".rds"))
+spei <- readRDS(paste0("data/geo/spei_", timescale, ".rds"))
 
 data <- full_join(shp, tab, by = c("code", "date")) %>% 
   full_join(spei, by = c("code", "date"))

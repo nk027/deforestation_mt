@@ -17,7 +17,7 @@ source("R/00_dl_municipios.R")
 # Downloads NCDFs of desired timescales to "data/spei/".
 source("R/00_dl_spei.R")
 
-# Note: Additional IBGE data was downloaded manually from SIDRA
+# Note: Additional IBGE data was downloaded manually from SIDRA.
 
 rm(list = ls()); gc()
 
@@ -47,5 +47,29 @@ rm(list = ls()); gc()
 # of values extracted from the land use change maps.
 # Stores an sf-tibble as "shp.rds".
 source("R/15_raster_aggregate.R")
+
 rm(list = ls()); gc()
 
+
+# Prepare SPEI data -------------------------------------------------------
+
+# Read in NCDF raster files from "data/spei", merge them with IDs from the maps 
+# of political boundaries found in "data/municipios" and create a tidy tibble.
+# Intermediate and final outputs are stored in "data/geo". The desired 
+# SPEI timescale is set in the scripts.
+
+# Read in NCDFs and merge them with the SHP file using weighted 
+# `raster::extract`. Creates a list of extracted dataframes and stores it as 
+# "geo_spei_%TIMESCALE_raw.rds".
+# Very computationally intensive, done via `parallel::parLapply` if available.
+source("R/10_spei_extract.R")
+
+# Create and tidy a tibble from the list of extracted values. Stores the tidy 
+# tibble in long format as "geo_spei_%TIMESCALE.rds".
+source("R/11_spei_tidy.R")
+
+# Transform the SPEI to the format used later on (i.e. two binary variables).
+# Stores the resulting tibble as "spei_%TIMESCALE.rds".
+source("R/15_spei_prep.R")
+
+rm(list = ls()); gc()

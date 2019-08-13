@@ -40,6 +40,7 @@ if(require("parallel")) {
   for(i in seq_along(tifs)) {
     r <- raster::raster(paste0("data/landsat/", tifs[i]))
     extr_vals[[i]] <- raster::extract(r, shp, df = TRUE)
+    cat("Extracted values ", i, " of ", length(tifs), ".", sep = "")
   }
 }
 names(extr_vals) <- paste0("y", formatC(1:17, width = 2, flag = "0"))
