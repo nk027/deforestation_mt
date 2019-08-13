@@ -28,6 +28,9 @@ crs(defore) <- crs(mt)
 intersection <- raster::intersect(defore, mt)
 hist(values(intersection))
 
+plot(intersection, col = c("#C18FE3", "#10773E", "#E8D313", "#EEEEEE", "#EEEEEE", "#EEEEEE"))
+plot(mt, col = rep("#FFFFFF00", 255), colNA = "#FFFFFF", add = TRUE, legend = FALSE)
+
 
 # Check using the municipality shapefile ----------------------------------
 
