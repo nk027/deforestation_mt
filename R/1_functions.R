@@ -100,36 +100,3 @@ adj_first <- function(x, grep_var) {
   x[[grep_var]] <- y[[1]]
   x
 }
-
-
-pull_vars <- function(x, formula, date = TRUE) {
-  
-  year <- as.character(formula[3])
-  y <- reshape2::dcast(x, formula, value.var = year, fun.aggregate = length)
-  
-  if(is.null(y$sugarcane)) y$sugarcane <- 0
-  if(is.null(y$sec_veg)) y$sec_veg <- 0
-  
-  z <- tibble(
-    id = y$id,
-    forest = y$forest,
-    pasture = y$pasture,
-    fallow_cotton = y$fallow_cotton, 
-    soy_corn = y$soy_corn,
-    soy_cotton = y$soy_cotton, 
-    soy_fallow = y$soy_fallow,
-    soy_millet = y$soy_millet,
-    soy_sunflower = y$soy_sunflower,
-    sugarcane = y$sugarcane,
-    cerrado = y$cerrado,
-    urban = y$urban,
-    water = y$water,
-    sec_veg = y$sec_veg
-  )
-  if(date) {
-    z$date <- as.integer(substr(year, 2, 3)) + 2000L
-  } else {
-    names(z) <- c("id", paste(year, names(z)[-1], sep = "_"))
-  }
-  z
-}
