@@ -64,4 +64,6 @@ df_date <- as_tibble(rbind(
 
 # Store tidy tibble of the raster values
 saveRDS(df_date, "data/geo/geo_df_long.rds")
+
+
 detach("package:dplyr")

@@ -34,5 +34,6 @@ shp <- shp %>%
 
 saveRDS(shp, "data/geo/shp.rds")
 
+
 detach("package:dplyr")
 detach("package:sf")

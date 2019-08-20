@@ -34,4 +34,5 @@ df <- df[!df$id %in% as.integer(names(occ[occ < 1000])), ]
 # Store tibble of raw extracted values
 saveRDS(df, "data/geo/geo_extract.rds")
 
+
 detach("package:dplyr")

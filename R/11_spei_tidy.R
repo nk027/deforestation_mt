@@ -40,4 +40,5 @@ df_spei <- as_tibble(reshape2::melt(spei, id.var = "code"))
 # Store tidy tibble of the NCDF values
 saveRDS(df_spei, paste0("data/geo/geo_spei_", timescale, ".rds"))
 
+
 detach("package:dplyr")

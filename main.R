@@ -17,7 +17,8 @@ source("R/00_dl_municipios.R")
 # Downloads NCDFs of desired timescales to "data/spei/".
 source("R/00_dl_spei.R")
 
-# Note: Additional IBGE data was downloaded manually from SIDRA.
+# Note: Additional IBGE data was downloaded manually from SIDRA and adjusted by
+# hand due to limitation of ODS et cetera.
 
 rm(list = ls()); gc()
 
@@ -77,9 +78,31 @@ rm(list = ls()); gc()
 
 # Prepare tabular data ----------------------------------------------------
 
-source("R/16_crops_read.R")
-source("R/16_forestry_read.R")
-source("R/16_livestock_read.R")
-source("R/16_socio_read.R")
+# Prepare the manually downloaded and adjusted data from SIDRA. This part is not
+# as easily reproduced, but should be replicable with the data that is available
+# online.
+# Outputs are stored as RDS files under "data/tab".
+
+source("R/16_functions_read.R")
+
+# Read in ODS files with crop data from "data/sidra" and merge them with each 
+# other. Requires manually downloaded files from SIDRA and some additional 
+# adjustments. 
+# The files are split to contain areas and quantities (i.e. value and weight). 
+# Numbered files contain different periods, where #1 is dropped as it is too 
+# early to be useful. Worksheets contain planted (1) and harvested (2) area.
+source("R/17_crops_read.R")
+
+# Read in ODF files with forestry data data/sidra" and merge them with each 
+# other. Requires manually downloaded files from SIDRA and some additional 
+# adjustments.
+# The files are split into actual forestry and vegetable data. Columns contain
+# totals and subtotals, making subsetting necessary. Worksheets contain 
+# quantities (1) and values (2).
+source("R/17_forestry_read.R")
+
+
+source("R/17_livestock_read.R")
+source("R/17_socio_read.R")
 
 

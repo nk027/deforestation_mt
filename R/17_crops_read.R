@@ -7,6 +7,7 @@ stopifnot(
   require(dplyr),
   nzchar(system.file(package = "readODS"))
 )
+source("R/16_functions_read.R")
 
 
 # Adjustments -------------------------------------------------------------
@@ -22,11 +23,6 @@ adj_cafe <- function(x) {adj_first(x, "Café")}
 
 
 # Crops ---------------------------------------------------------------
-
-# Files are split to contain areas and quantities (i.e. value and weight). 
-# Numbered files contain different periods - file 1 is dropped as it is too 
-# early for us to be useful. Sheet 1 contains planted, 2 harvested area.
-
 
 # Planted area
 crop_planted_1 <- read_sidra("data/sidra/crop_area_2.ods", sheet = 1)
@@ -100,3 +96,6 @@ crop_value <- crop_value %>% # Apply adjustments
 crop_value <- as_tibble(crop_value[get_state(crop_value$name), ])
 
 saveRDS(crop_value, "data/tab/crop_value.rds")
+
+
+detach("package:dplyr")
