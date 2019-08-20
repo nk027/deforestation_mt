@@ -73,3 +73,13 @@ source("R/11_spei_tidy.R")
 source("R/15_spei_prep.R")
 
 rm(list = ls()); gc()
+
+
+# Prepare tabular data ----------------------------------------------------
+
+source("R/16_crops_read.R")
+source("R/16_forestry_read.R")
+source("R/16_livestock_read.R")
+source("R/16_socio_read.R")
+
+
