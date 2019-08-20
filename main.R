@@ -86,23 +86,32 @@ rm(list = ls()); gc()
 source("R/16_functions_read.R")
 
 # Read in ODS files with crop data from "data/sidra" and merge them with each 
-# other. Requires manually downloaded files from SIDRA and some additional 
-# adjustments. 
+# other.
 # The files are split to contain areas and quantities (i.e. value and weight). 
 # Numbered files contain different periods, where #1 is dropped as it is too 
 # early to be useful. Worksheets contain planted (1) and harvested (2) area.
+# Creates two files - "crop_quant.rds" and "crop_value.rds".
 source("R/17_crops_read.R")
 
-# Read in ODF files with forestry data data/sidra" and merge them with each 
-# other. Requires manually downloaded files from SIDRA and some additional 
-# adjustments.
+# Read in ODS files with forestry data data/sidra" and merge them with each 
+# other.
 # The files are split into actual forestry and vegetable data. Columns contain
 # totals and subtotals, making subsetting necessary. Worksheets contain 
 # quantities (1) and values (2).
+# Creates four files - "forestry_quant.rds", "forestry_value.rds", 
+# "veggies_quant.rds" and "veggies_value.rds".
 source("R/17_forestry_read.R")
 
-
+# Read in ODS files with forestry data data/sidra" and merge them with each 
+# other.
+# The files are split into animal produce, with worksheets containing 
+# quantities (1) and values (2), general herd sizes and the herd size of milk
+# cows.
+# Creates four files - "animal_quant.rds", "animal_value.rds", "herd_sizes.rds"
+# and "milk_cows.rds".
 source("R/17_livestock_read.R")
+
+
 source("R/17_socio_read.R")
 
 
