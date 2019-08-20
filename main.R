@@ -93,8 +93,7 @@ source("R/16_functions_read.R")
 # Creates two files - "crop_quant.rds" and "crop_value.rds".
 source("R/17_crops_read.R")
 
-# Read in ODS files with forestry data data/sidra" and merge them with each 
-# other.
+# Read in ODS files with forestry data from "data/sidra".
 # The files are split into actual forestry and vegetable data. Columns contain
 # totals and subtotals, making subsetting necessary. Worksheets contain 
 # quantities (1) and values (2).
@@ -102,8 +101,7 @@ source("R/17_crops_read.R")
 # "veggies_quant.rds" and "veggies_value.rds".
 source("R/17_forestry_read.R")
 
-# Read in ODS files with forestry data data/sidra" and merge them with each 
-# other.
+# Read in ODS files with livestock data from "data/sidra".
 # The files are split into animal produce, with worksheets containing 
 # quantities (1) and values (2), general herd sizes and the herd size of milk
 # cows.
@@ -111,7 +109,11 @@ source("R/17_forestry_read.R")
 # and "milk_cows.rds".
 source("R/17_livestock_read.R")
 
-
+# Read in ODS files with socioeconomic data from "data/sidra" and merge them 
+# with each other.
+# The files are split into GDP, population estimates and population censuses for
+# 2007 and 2010.
+# Creates three files - "gdp.rds", "pop.rds" and "pop_details.rds".
 source("R/17_socio_read.R")
 
 
