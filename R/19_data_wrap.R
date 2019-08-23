@@ -102,6 +102,8 @@ data <- data %>%
          nature_ch_km2 = nature_ch / area_km2,
          crop_px_km2 = crop_px / area_km2,
          pasture_px_km2 = pasture_px / area_km2,
+         crop_ch_km2 = crop_ch / area_km2,
+         pasture_ch_km2 = pasture_ch / area_km2,
          pop_km2 = pop / area_km2,
          cattle_km2 = cattle / area_km2,
          cattle_dens = cattle / pasture_px,

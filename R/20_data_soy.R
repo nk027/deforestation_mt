@@ -247,7 +247,7 @@ shp <- merge(shp, data[, c("code", "date", "soy_filled")],
              by = c("date", "code"), all.x = TRUE)
 
 # Store
-saveRDS(shp, "data/data.rds")
+saveRDS(shp, "data/data_soy.rds")
 
 
 detach("package:dplyr")

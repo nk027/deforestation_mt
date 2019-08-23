@@ -119,4 +119,6 @@ source("R/18_tab_aggregate.R")
 
 source("R/19_data_wrap.R")
 
-source("R/20_data_fill.R")
+source("R/20_data_soy.R")
+
+source("R/21_data_fin.R")
