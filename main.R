@@ -35,19 +35,13 @@ rm(list = ls()); gc()
 source("R/10_raster_extract.R")
 
 # Transform the list of extracted values into a wide tibble and clean variables.
-# Stores said tibble as "geo_extract.rds".
-source("R/11_raster_df.R")
-
-# Tidy the tibble from the previous step, transforming it to a long table. 
-# Stores the tidy tibble as "geo_df_long.rds".
-source("R/12_raster_tidy.R")
-
-rm(list = ls()); gc()
+# Tidy the tibble, (create a long table) and store it as "geo_df_long.rds".
+source("R/11_raster_tidy.R")
 
 # Read in the SHP map using the sf package and join it with the tidy tibble
 # of values extracted from the land use change maps.
 # Stores an sf-tibble as "shp.rds".
-source("R/15_raster_aggregate.R")
+source("R/12_raster_aggregate.R")
 
 rm(list = ls()); gc()
 
@@ -116,4 +110,13 @@ source("R/17_livestock_read.R")
 # Creates three files - "gdp.rds", "pop.rds" and "pop_details.rds".
 source("R/17_socio_read.R")
 
+rm(list = ls()); gc()
 
+
+# Merge datasets ----------------------------------------------------------
+
+source("R/18_tab_aggregate.R")
+
+source("R/19_yield_fill.R")
+
+source("R/20_data_wrap.R")

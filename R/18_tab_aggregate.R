@@ -1,22 +1,50 @@
 
-library(dplyr)
-source("R/2_functions.R")
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  length(list.files("data/tab")) > 0,
+  require(dplyr)
+)
 
 
-# Read in tab data --------------------------------------------------------
+# Functions ---------------------------------------------------------------
+
+summ_crop <- function(x, fun = median, threshold = 100) {
+  x %>% filter(date > 2004) %>% 
+    group_by(date) %>% 
+    select(-code, -name) %>% 
+    summarise_all(fun) %>% 
+    select(-date) %>% 
+    colSums() -> . 
+  names(which(. >= threshold))
+}
+
+count_na <- function(x, per = x$date) {
+  per_uniq <- unique(per)
+  out <- matrix(NA, nrow = length(per_uniq), ncol = ncol(x) - 3,
+                dimnames = list(per_uniq, names(x)[4:ncol(x)]))
+  for(i in seq_along(per_uniq)) {
+    out[i, ] <- sapply(x[per == per_uniq[i], 4:ncol(x)], function(x) {
+      sum(is.na(x))
+    })
+  }
+  out
+}
+
+
+# Read in data ------------------------------------------------------------
 
 # Socioeconomic
-gdp <- readRDS("data/tab/gdp.rds")
-pop <- readRDS("data/tab/pop.rds")
-pop_details <- readRDS("data/tab/pop_details.rds")
+gdp <- readRDS("data/tab/gdp.rds") %>% 
+  transmute(code, name, date, gdp = value)
+pop <- readRDS("data/tab/pop.rds") %>% 
+  transmute(code, name, date, pop = value)
+pop_details <- readRDS("data/tab/pop_details.rds") %>% 
+  transmute(code, name, date, pop_rur = rural, pop_urb = urban, pop_ind = indigenous)
 
-socio <- full_join(full_join(
-  gdp %>% transmute(code, name, date, gdp = value),
-  pop %>% transmute(code, name, date, pop = value),
-  by = c("code", "name", "date")),
-  pop_details %>% transmute(code, name, date, pop_rur = rural, pop_urb = urban, 
-                            pop_ind = indigenous),
-  by = c("code", "name", "date")
+socio <- full_join(
+  full_join(gdp, pop, by = c("code", "name", "date")), 
+  pop_details, by = c("code", "name", "date")
 )
 
 # Livestock
@@ -32,16 +60,17 @@ herd_sizes <- readRDS("data/tab/herd_sizes.rds") %>%
 milk_cows <- readRDS("data/tab/milk_cows.rds") %>% 
   transmute(code, name, date, milk_cow = value)
 
-livestock <- full_join(full_join(full_join(
-  animal_quant, animal_value, by = c("code", "name", "date")),
-  herd_sizes, by = c("code", "name", "date")),
+livestock <- full_join(
+  full_join(
+    full_join(animal_quant, animal_value, by = c("code", "name", "date")),
+    herd_sizes, by = c("code", "name", "date")),
   milk_cows,  by = c("code", "name", "date")
 )
 
 
 # Crops -------------------------------------------------------------------
 
-# Find proper crop subset via `summ_crop`, e.g.:
+# Use `summ_crop` to find a sensible subset of crops, e.g.:
 # summ_crop(crop_harvested, fun = mean, threshold = 200 * 13)
 
 crop_harvested <- readRDS("data/tab/crop_harvested.rds") %>% 
@@ -67,9 +96,10 @@ crop_value <- readRDS("data/tab/crop_value.rds") %>%
             sorg_brl = `Sorgo` * 1000, cott_brl = `Algodão herbáceo` * 1000, 
             soy_brl = `Soja`)
 
-crop <- full_join(full_join(full_join(
-  crop_harvested, crop_planted, by = c("code", "name", "date")),
-  crop_quant, by = c("code", "name", "date")),
+crop <- full_join(
+  full_join(
+    full_join(crop_harvested, crop_planted, by = c("code", "name", "date")),
+    crop_quant, by = c("code", "name", "date")),
   crop_value, by = c("code", "name", "date")
 )
 
@@ -93,18 +123,24 @@ veggies_value <- readRDS("data/tab/veggies_value.rds") %>%
   transmute(code, name, date, 
             food_brl = `Alimentícios` * 1000, oilseed_brl = `Oleaginosos` * 1000)
 
-forestry <- full_join(full_join(full_join(
-  forestry_quant, forestry_value, by = c("code", "name", "date")),
-  veggies_quant, by = c("code", "name", "date")),
+forestry <- full_join(
+  full_join(
+    full_join(forestry_quant, forestry_value, by = c("code", "name", "date")),
+    veggies_quant, by = c("code", "name", "date")),
   veggies_value, by = c("code", "name", "date")
 )
 
 
 # Aggregate all -----------------------------------------------------------
 
-tab <- full_join(full_join(full_join(
-  socio, livestock, by = c("code", "name", "date")),
-  crop, by = c("code", "name", "date")),
+tab <- full_join(
+  full_join(
+    full_join(socio, livestock, by = c("code", "name", "date")),
+    crop, by = c("code", "name", "date")),
   forestry, by = c("code", "name", "date")
 )
+
 saveRDS(tab, "data/tab/tab.rds")
+
+
+detach("package:dplyr")
