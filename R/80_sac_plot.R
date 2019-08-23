@@ -16,7 +16,8 @@ ggplot(data, aes(x, y)) +
   scale_fill_viridis_c() +
   theme(legend.position = "none")
 
-ggsave("spatial_autocorrelation_1.png", width = 8, height = 8, units = "cm")
+ggsave("plots/spatial_autocorrelation_1.png", 
+       width = 8, height = 8, units = "cm")
 
 ggplot(data, aes(x, y)) +
   geom_tile(aes(fill = random)) +
@@ -24,4 +25,7 @@ ggplot(data, aes(x, y)) +
   scale_fill_viridis_c() +
   theme(legend.position = "none")
 
-ggsave("spatial_autocorrelation_2.png", width = 8, height = 8, units = "cm")
+ggsave("plots/spatial_autocorrelation_2.png", 
+       width = 8, height = 8, units = "cm")
+
+detach("package:ggplot2")

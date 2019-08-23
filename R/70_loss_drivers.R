@@ -1,5 +1,7 @@
 
-library(raster)
+library("raster")
+
+# See Curtis (2018): Classifying Drivers of Global Forest Loss
 
 tif <- "data/deforestation/curtis2018.tif"
 if(!file.exists(tif)) {
@@ -28,24 +30,26 @@ crs(defore) <- crs(mt)
 intersection <- raster::intersect(defore, mt)
 hist(values(intersection))
 
-plot(intersection, col = c("#C18FE3", "#10773E", "#E8D313", "#EEEEEE", "#EEEEEE", "#EEEEEE"))
-plot(mt, col = rep("#FFFFFF00", 255), colNA = "#FFFFFF", add = TRUE, legend = FALSE)
+plot(intersection, 
+     col = c("#C18FE3", "#10773E", "#E8D313", "#EEEEEE", "#EEEEEE", "#EEEEEE"))
+plot(mt, 
+     col = rep("#FFFFFF00", 255), colNA = "#FFFFFF", 
+     add = TRUE, legend = FALSE)
 
 
 # Check using the municipality shapefile ----------------------------------
 
-library(sf)
-library(dplyr)
+library("sf")
+library("dplyr")
 
 shp <- read_sf("data/municipios/") %>% 
   transmute(id = as.integer(CD_GEOCMU)) %>% 
-  filter(id > 5100000 & id < 5200000)
+  filter(id > 5100000 & id < 5200000) # These correspond to Mato Grosso
 
-# unweighted
+# 1, unweighted
 extracted <- raster::extract(defore, shp, df = TRUE)
 extracted$curtis2018 <- factor(extracted$curtis2018, 
                                labels = names(classification))
-
 
 loss <- extracted$curtis2018[!is.na(extracted$curtis2018)]
 # 7 NAs
@@ -65,7 +69,8 @@ sum(loss %in% c("deforestation", "shifting_agriculture")) /
   (length(loss) - sum(loss == "minor_loss"))
 # 0.95
 
-# weighted
+
+# 2, weighted
 extracted <- raster::extract(defore, shp, df = TRUE, weight = TRUE)
 extracted$curtis2018 <- factor(extracted$curtis2018, 
                                labels = names(classification))
@@ -84,3 +89,7 @@ loss[2, 2] / sum(loss[-1, 2])
 # 0.78
 sum(loss[2:3, 2]) / sum(loss[-1, 2])
 # 0.92
+
+detach("package:raster")
+detach("package:sf")
+detach("package:dplyr")

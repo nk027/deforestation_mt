@@ -3,7 +3,10 @@
 
 stopifnot(
   exists("fixed_effects"), exists("variables"), exists("dates"), # etc., 31
-  exists("prep_fit"), exists("bayesian_fit"), exists("sm_results") # etc., 40
+  exists("prep_fit"), exists("bayesian_fit"), exists("sm_results"), # etc., 40
+  require("dplyr"),
+  require("plm"),
+  require("splm")
 )
 
 
@@ -21,6 +24,7 @@ if(tfe) {if(cfe) {effect <- "twoways"} else {effect <- "time"}} else {
   }
 }
 
+# Retrieve estimated model based on FE
 load(paste0("data/models_", effect, ".rda"))
 
 
@@ -164,3 +168,8 @@ dev.off()
 }
 
 }
+
+
+detach("package:dplyr")
+detach("package:plm")
+detach("package:splm")

@@ -2,7 +2,8 @@
 # Dependencies ------------------------------------------------------------
 
 stopifnot(
-  exists("data"),
+  exists("fixed_effects"), exists("variables"), exists("dates"), # etc., 31
+  require("dplyr"),
   require("plm"),
   require("splm"),
   require("spatialreg")
@@ -103,3 +104,9 @@ save(file = paste0("data/models_", effect, ".rda"),
               "results_lag_qu", "results_err_qu", 
               "results_lag_k5n", "results_err_k5n"))
 }
+
+
+detach("package:dplyr")
+detach("package:plm")
+detach("package:splm")
+detach("package:spatialreg")

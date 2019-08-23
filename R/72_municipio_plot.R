@@ -1,12 +1,13 @@
 
-library(sf)
-library(dplyr)
+library("sf")
+library("dplyr")
+library("ggplot2")
 
 x <- read_sf("data/municipios/")
 
 df <- x %>% 
   transmute(id = as.integer(CD_GEOCMU)) %>% 
-  filter(id > 5100000 & id < 5200000)
+  filter(id > 5100000 & id < 5200000) # Correspond to Mato Grosso
 
 ggplot(df) +
   geom_sf() +
@@ -22,3 +23,8 @@ ggplot(df) +
   theme_bw(base_size = 14, base_family = "Arial")
 
 ggsave("plots/municipios.png", width = 20, height = 20, units = "cm")
+
+
+detach("package:sf")
+detach("package:dplyr")
+detach("package:ggplot2")

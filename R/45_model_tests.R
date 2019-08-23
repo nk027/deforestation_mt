@@ -1,4 +1,13 @@
 
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  exists("sdm_panel"), exists("data"), exists("variables"), # etc., 30, & 31
+  require("plm"),
+  require("spdep")
+)
+
+
 # Chow test ---------------------------------------------------------------
 
 matrices1 <- list()
@@ -25,19 +34,22 @@ for(counter in seq_along(variables)) {
 }
 
 i <- 1
-chow <- 
-  (results_qu[[i]]$ssr - (results_qu1[[i]]$ssr + results_qu2[[i]]$ssr)) / (length(variables[[i]]) - 1) /
-  (results_qu1[[i]]$ssr + results_qu2[[i]]$ssr) / (nrow(matrices1[[i]]) + nrow(matrices2[[i]]) - 2 * (length(variables[[i]]) - 1))
+chow <- (results_qu[[i]]$ssr - (results_qu1[[i]]$ssr + results_qu2[[i]]$ssr)) / 
+  (length(variables[[i]]) - 1) /
+  (results_qu1[[i]]$ssr + results_qu2[[i]]$ssr) / 
+  (nrow(matrices1[[i]]) + nrow(matrices2[[i]]) - 
+     2 * (length(variables[[i]]) - 1))
 
-significance <- qf(0.95, (length(variables[[i]]) - 1), (nrow(matrices1[[i]]) + nrow(matrices2[[i]]) - 2 * (length(variables[[i]]) - 1)))
+significance <- qf(0.95, (length(variables[[i]]) - 1), 
+                   (nrow(matrices1[[i]]) + nrow(matrices2[[i]]) - 
+                      2 * (length(variables[[i]]) - 1)))
+
 # chow > significance
 chow
 i <- i + 1
 
 
 # PLM tests ---------------------------------------------------------------
-
-library(plm)
 
 # Hausman
 out_f <- plm::plm(formula_ify(variables[[counter]]), df_plm, 
@@ -54,8 +66,6 @@ pcdtest(formula_ify(variables[[counter]]), df_plm, effect = effect)
 
 
 # spdep tests -------------------------------------------------------------
-
-library(spdep)
 
 # Moran's I
 moran.mc(out_f$residuals, mat2listw(kronecker(diag(dates_len), W_qu)), 1000)
@@ -86,3 +96,7 @@ for(i in dates[1]:dates[len(dates) - 1]) {
     }
   }
 }
+
+
+detach("package:plm")
+detach("package:spdep")

@@ -17,7 +17,8 @@ sdm_panel <- function(
   x, # Data
   W_pre, 
   dates_len, # Number of time periods
-  lag_X = TRUE, tfe = TRUE, cfe = TRUE, 
+  lag_X = TRUE, # To-do
+  tfe = TRUE, cfe = TRUE, 
   rho_a = 1.01, sigma_a = 0.01, sigma_b = 0.01, beta_var = 10 ^ 8, # Priors
   n_iter = 2000,
   n_save = 1000,
@@ -271,7 +272,7 @@ sdm_panel <- function(
 
 # Pace & Barry MC approximation to log|I - rho W| -------------------------
 
-get_ln_det <- function(
+get_ln_det <- function( # To-do: interface with spatialreg
   W, 
   length.out = 200,
   rmin = -1, # set t0 1e-5 for 0 < rho < 1

@@ -136,18 +136,63 @@ source("R/20_data_soy.R")
 # Stores final sf-tibble as "data/data.rds".
 source("R/21_data_fin.R")
 
+rm(list = ls()); gc()
+
 
 # Model -------------------------------------------------------------------
 
+# Set up, calculate and assess models. Fit a custom Bayesian SDM, a CLM using 
+# `plm::plm` and a SAR / SEM using `splm::spml` to models built from "data.rds".
+# Results are stored as RDA files under "data/models_%EFFECT.rda", where effect
+# corresponds to the treatment of fixed effects.
+
+# Functions to aid with model estimation (get data subsets, build weights 
+# matrices, ...) and estimate the SDM. log|I - rho W| is approximated following 
+# Pace & Barry.
 source("R/30_functions_model.R")
 
+# Preparation and options for the model estimation. Contained settings are also
+# required for subsequent assessments.
 source("R/31_model_setup.R")
 
+# Execute the model estimation prepared in the previous step. Results are
+# stored in lists (one per estimation / weight combination), with individual 
+# elements corresponding to the chosen variable subsets. Variations of fixed
+# effects are stored separately.
+# Outputs are RDA files stored as "models_%EFFECT.rda".
 source("R/33_model_calc.R")
 
-
-# Assess results
-
+# Functions to aid in assessing results, i.e. summarise outputs, create tables 
+# and calculate in- and out-of-sample fits.
 source("R/40_functions_assess.R")
 
+# Assess the results created in previous steps. Depends on the settings from 
+# "31_model_setup.R" as well as the RDA files with lists of results.
+# Generates CSV files with results and PNG files of the model fit.
 source("R/41_results_assess.R")
+
+# Perform several tests (Chow, LM, Moran's...). Depends on settings and data from
+# "31_model_setup.R".
+source("R/45_model_tests.R")
+
+rm(list = ls()); gc()
+
+
+# Other -------------------------------------------------------------------
+
+# Crosscheck our studied area with the deforestation drivers identified by 
+# Curtis et al. (2018). Important for the forestloss ~ deforestation argument.
+source("R/70_loss_drivers.R")
+
+# Create a plot of relevant land use from the data of Câmara et al. (2019).
+# The two evaluated years and the legend are plotted separately. The final 
+# version was created using GIMP.
+source("R/71_landuse_plot.R")
+
+# Create a CSV file with summary statistics of the data used.
+source("R/73_summary_table.R")
+
+# Create a PNG file with a heatmap of the RMSEs of models over time.
+source("R/74_rmse_plot.R")
+
+rm(list = ls()); gc()

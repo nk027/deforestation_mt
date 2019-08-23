@@ -3,7 +3,7 @@ library(dplyr)
 library(sf)
 library(ggplot2)
 
-data <- readRDS("data/data_soyed.rds")
+data <- readRDS("data/data.rds")
 load("data/models_twoways.rda")
 
 # date_fit <- max(dates) + 1

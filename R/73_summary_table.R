@@ -1,8 +1,8 @@
 
-library(dplyr)
-library(sf)
+library("dplyr")
+library("sf")
 
-data <- readRDS("data/data_soyed.rds")
+data <- readRDS("data/data.rds")
 
 dates <- seq(2006, 2016)
 
@@ -36,5 +36,8 @@ out <- cbind(
 )
 colnames(out) <- c("Min", "Qu20", "Mean", "Median", "Qu80", "Max")
 
-write.csv(out, 
-          file = paste0("txt/data_summary.csv"))
+write.csv(out, file = paste0("txt/data_summary.csv"))
+
+
+detach("package:dplyr")
+detach("package:sf")
