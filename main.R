@@ -57,11 +57,11 @@ rm(list = ls()); gc()
 # `raster::extract`. Creates a list of extracted dataframes and stores it as 
 # "geo_spei_%TIMESCALE_raw.rds".
 # Very computationally intensive, done via `parallel::parLapply` if available.
-source("R/10_spei_extract.R")
+source("R/13_spei_extract.R")
 
 # Create and tidy a tibble from the list of extracted values. Stores the tidy 
 # tibble in long format as "geo_spei_%TIMESCALE.rds".
-source("R/11_spei_tidy.R")
+source("R/14_spei_tidy.R")
 
 # Transform the SPEI to the format used later on (i.e. two binary variables).
 # Stores the resulting tibble as "spei_%TIMESCALE.rds".
@@ -115,10 +115,23 @@ rm(list = ls()); gc()
 
 # Merge datasets ----------------------------------------------------------
 
+# Merge RDS files from the previous steps, derive variables of interest, explore
+# yields and fill missing values for soy yields.
+# Ultimately create an RDS file under "data/data.rds".
+
+# Merge different IBGE datasets, keep variables of interest and adjust units. 
+# Store the results as "data/tab/tab.rds".
 source("R/18_tab_aggregate.R")
 
+# Wrap up land use, SPEI and IBGE tabular data in a single file. Derive some 
+# variables of interest. Explore yield values of crops.
+# Results are stored as "data/data_raw.rds"
 source("R/19_data_wrap.R")
 
+# Explore and fill missing soy yields from the previous step.
+# Store results as "data/data_soy.rds".
 source("R/20_data_soy.R")
 
+# Add some transformed and derived variables.
+# Stores final sf-tibble as "data/data.rds".
 source("R/21_data_fin.R")
