@@ -135,3 +135,19 @@ source("R/20_data_soy.R")
 # Add some transformed and derived variables.
 # Stores final sf-tibble as "data/data.rds".
 source("R/21_data_fin.R")
+
+
+# Model -------------------------------------------------------------------
+
+source("R/30_functions_model.R")
+
+source("R/31_model_setup.R")
+
+source("R/33_model_calc.R")
+
+
+# Assess results
+
+source("R/40_functions_assess.R")
+
+source("R/41_results_assess.R")

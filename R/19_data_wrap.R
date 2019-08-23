@@ -92,6 +92,14 @@ data <- data %>%
          pasture_ch = pasture_px - lag(pasture_px)) %>% 
   ungroup()
 
+# Changes from km^2 to 100m^2
+data <- data %>% 
+  mutate(forest_ch = forest_ch * 100,
+         cerr_ch = cerr_ch * 100,
+         nature_ch = nature_ch * 100,
+         crop_ch = crop_ch * 100,
+         pasture_ch = pasture_ch * 100)
+
 # Per km^2
 data <- data %>% 
   mutate(forest_px_km2 = forest_px / area_km2,
@@ -105,8 +113,8 @@ data <- data %>%
          crop_ch_km2 = crop_ch / area_km2,
          pasture_ch_km2 = pasture_ch / area_km2,
          pop_km2 = pop / area_km2,
-         cattle_km2 = cattle / area_km2,
-         cattle_dens = cattle / pasture_px,
+         cattle_km2 = cattle / area_km2 / 1000,
+         cattle_dens = cattle / pasture_px / 1000,
          milk_brl_lt = milk_brl / milk_lt,
          milk_brl_cow = milk_brl / milk_cow,
          milk_lt_cow = milk_lt / milk_cow,

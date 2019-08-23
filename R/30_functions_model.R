@@ -1,4 +1,16 @@
 
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  nzchar(system.file(package = "sf")),
+  nzchar(system.file(package = "dplyr")),
+  nzchar(system.file(package = "spdep")),
+  nzchar(system.file(package = "MASS")),
+  nzchar(system.file(package = "Matrix")),
+  nzchar(system.file(package = "matrixcalc"))
+)
+
+
 # SDM panel ---------------------------------------------------------------
 
 sdm_panel <- function(
@@ -10,8 +22,6 @@ sdm_panel <- function(
   n_iter = 2000,
   n_save = 1000,
   n_griddy = 200) {
-  
-  library(MASS)
   
   W <- kronecker(diag(dates_len), W_pre)
   
@@ -70,6 +80,7 @@ sdm_panel <- function(
   
   # Griddy Gibbs ------------------------------------------------------------
   
+  # To-do: Doesn't need to be calculated every time
   list_det <- get_ln_det(W, length.out = n_griddy + 2)
   
   rhos <- list_det$rho[-c(1, n_griddy + 2)]
@@ -96,7 +107,7 @@ sdm_panel <- function(
   cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
   
   
-  # Gibbs Sampler -----------------------------------------------------------
+  # MCMC ------------------------------------------------------------------
   
   curr_beta <- MASS::mvrnorm(1, beta_pr_mean, beta_pr_var)
   curr_sigma <- 1 / rgamma(1, sigma_a / 2, sigma_b / 2)
@@ -163,11 +174,17 @@ sdm_panel <- function(
       rho_post[s] <- curr_rho
       
       # Spatial effects
-      direct_post[, s] <- curr_A_inv_diags / N * curr_beta[1:(k + 1)] +
-        c(0, curr_A_inv_W_diags / N * curr_beta[(k + 2):(2 * k + 1)])
-      total_post[, s] <- curr_A_inv_tots / N * curr_beta[1:(k + 1)] +
-        c(0, curr_A_inv_W_tots / N * curr_beta[(k + 2):(2 * k + 1)])
-      indirect_post[, s] <- total_post[, s] - direct_post[, s]
+      if(lag_X) {
+        direct_post[, s] <- curr_A_inv_diags / N * curr_beta[1:(k + 1)] +
+          c(0, curr_A_inv_W_diags / N * curr_beta[(k + 2):(2 * k + 1)])
+        total_post[, s] <- curr_A_inv_tots / N * curr_beta[1:(k + 1)] +
+          c(0, curr_A_inv_W_tots / N * curr_beta[(k + 2):(2 * k + 1)])
+        indirect_post[, s] <- total_post[, s] - direct_post[, s]
+      } else {
+        direct_post[, s] <- curr_A_inv_diags / N * curr_beta[1:(k + 1)]
+        total_post[, s] <- curr_A_inv_tots / N * curr_beta[1:(k + 1)]
+        indirect_post[, s] <- total_post[, s] - direct_post[, s]
+      }
       
       # R^2
       curr_resid <- as.matrix((diag(N) - curr_rho * W) %*% y - (X %*% curr_beta))
@@ -201,11 +218,6 @@ sdm_panel <- function(
   
   # Posteriors --------------------------------------------------------------
   
-  # beta_post_mean <- apply(beta_post, 1, mean)
-  # sigma_post_mean <- mean(sigma_post)
-  # rho_post_mean <- mean(rho_post)
-  # rho_post_sd <- sd(rho_post)
-  
   direct_post_mean <- apply(direct_post, 1, mean)
   indirect_post_mean <- apply(indirect_post, 1, mean)
   total_post_mean <- apply(total_post, 1, mean)
@@ -221,25 +233,13 @@ sdm_panel <- function(
   AIC <- median(AIC_post)
   BIC <- median(BIC_post)
   
-  # CI
-  # credible_interval <- function(x, prob = 0.05) {
-  #   quantile(x, c(prob, 0.5, 1 - prob))
-  # }
-  
-  # beta_post_ci <- apply(beta_post, 1, credible_interval)
-  # rho_post_ci <- credible_interval(rho_post)
-  # 
-  # direct_post_ci <- apply(direct_post, 1, credible_interval)
-  # indirect_post_ci <- apply(direct_post, 1, credible_interval)
-  # total_post_ci <- apply(direct_post, 1, credible_interval)
-  
   
   # Print -------------------------------------------------------------------
   
   # Output as table, post_mean / post_sd ~ Bayesian t-values
   res_effects <- data.frame(
     variables = c(c("const", colnames(X_pre))),
-    direct = direct_post_mean,
+    direct = direct_post_mean, 
     direct_t = direct_post_mean / direct_post_sd,
     indirect = indirect_post_mean,
     indirect_t = indirect_post_mean / indirect_post_sd
@@ -326,6 +326,9 @@ get_ln_det <- function(
              "std_err" = std_err,
              "ci" = ci)
   
+  detach("package:matrixcalc")
+  
+  return(out)
   # return(cbind(ln_det_mat, alpha))
 }
 
@@ -334,16 +337,12 @@ get_ln_det <- function(
 
 get_matr <- function(x, variables, dates) {
   
-  library(dplyr)
-  
-  matr <- x %>% 
+  x %>% 
     filter(date %in% dates) %>% 
     ungroup() %>%
     sf:::select.sf(variables) %>% 
     sf::`st_geometry<-`(NULL) %>% 
     as.matrix(matr, rownames.force = FALSE)
-  
-  matr
 }
 
 
@@ -372,3 +371,9 @@ get_W <- function(x, type = c("queen", "knear"), k = 5) {
   
 }
 
+
+# Helpers -----------------------------------------------------------------
+
+formula_ify <- function(x) { # To convert this for plm & splm
+  as.formula(paste0(x[1], " ~ ", paste(x[-1], collapse = " + ")), env = globalenv())
+}

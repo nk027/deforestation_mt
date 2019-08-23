@@ -23,6 +23,7 @@ sm_results <- function(x) {
                         "", "", "", ""))
 }
 
+
 bayesian_t <- function(x, ps = c(0.99, 0.95, 0.9)) {
   
   directs <- matrix(NA, nrow = length(ps), ncol = dim(x$direct_post)[1] - 1)
@@ -49,6 +50,7 @@ bayesian_t <- function(x, ps = c(0.99, 0.95, 0.9)) {
   list("direct_p" = !directs, "indirect_p" = !indirects, "rhos" = !rhos)
 }
 
+
 get_hpdi <- function(x, p = 0.95) {
   
   if(is.null(dim(x))) return(coda::HPDinterval(coda::mcmc(x), prob = p))
@@ -58,13 +60,17 @@ get_hpdi <- function(x, p = 0.95) {
   
 }
 
+
 print_vars <- function(x) {
   paste0(x[1], " ~ ", paste(x[-1], collapse = " + "))
 }
 
+
 ssr <- function(x, y, ...) {round(sum((x - y)^2), 3)}
 
+
 rmse <- function(x, y, N = len(x)) {round(sqrt(sum(x - y)^2 / N), 3)}
+
 
 table_ise <- function(x, vars, stars = TRUE) {
   
@@ -104,6 +110,7 @@ table_ise <- function(x, vars, stars = TRUE) {
   )
 }
 
+
 table_ise.plm <- function(x, vars, stars = TRUE) {
   y <- summary(x)
   intercept <- names(x$coefficients)[1] == "(Intercept)"
@@ -122,6 +129,7 @@ table_ise.plm <- function(x, vars, stars = TRUE) {
     "value_t" = c(t1, NA, NA, NA)
   )
 }
+
 
 table_ise.splm <- function(x, vars, stars = TRUE) {
   y <- summary(x)
