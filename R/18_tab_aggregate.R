@@ -140,6 +140,7 @@ tab <- full_join(
   forestry, by = c("code", "name", "date")
 )
 
+# Store
 saveRDS(tab, "data/tab/tab.rds")
 
 
