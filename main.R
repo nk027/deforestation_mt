@@ -120,18 +120,20 @@ rm(list = ls()); gc()
 # Ultimately create an RDS file under "data/data.rds".
 
 # Merge different IBGE datasets, keep variables of interest and adjust units. 
-# Store the results as "data/tab/tab.rds".
+# Store the resulting tibble as "data/tab/tab.rds".
 source("R/18_tab_aggregate.R")
 
 # Wrap up land use, SPEI and IBGE tabular data in a single file. Derive some 
 # variables of interest. Explore yield values of crops.
-# Results are stored as "data/data_raw.rds"
+# Results are stored as sf-tibble under "data/data_raw.rds"
 source("R/19_data_wrap.R")
 
 # Explore and fill missing soy yields from the previous step.
-# Store results as "data/data_soy.rds".
+# Store resulting sf-tibble as "data/data_soy.rds".
 source("R/20_data_soy.R")
 
 # Add some transformed and derived variables.
 # Stores final sf-tibble as "data/data.rds".
 source("R/21_data_fin.R")
+
+rm(list = ls()); gc()
