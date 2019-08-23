@@ -1,4 +1,12 @@
 
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  exists("fixed_effects"), exists("variables"), exists("dates"), # etc., 31
+  exists("prep_fit"), exists("bayesian_fit"), exists("sm_results") # etc., 40
+)
+
+
 # Go over FEs -------------------------------------------------------------
 
 # fe <- c(TRUE, TRUE)
@@ -21,7 +29,9 @@ load(paste0("data/models_", effect, ".rda"))
 # counter <- 1
 for(counter in seq_along(variables)) {
 
+
 # Check out results
+
 cat(print_vars(variables[[counter]]))
 
 sm_results(results_qu[[counter]])
@@ -40,9 +50,8 @@ table <- do.call(cbind,
                     results_err_qu[[counter]], results_err_k5n[[counter]]), 
                table_ise, variables[[counter]]))
 table <- table[, c(1, which(!names(table) == "variables"))]
-write.csv(table, 
-          file = paste0("txt/fit_", effect, "_", 
-                        names(variables)[counter], ".csv"))
+write.csv(table, file = paste0("txt/fit_", effect, "_", 
+                               names(variables)[counter], ".csv"))
 
 
 # Check out fit
@@ -85,7 +94,11 @@ sem_qu_fit <- splm_fit(oos, results_err_qu[[counter]], W_qu,
 sem_k5n_fit <- splm_fit(oos, results_err_k5n[[counter]], W_k5n, 
                         tfe, cfe, tfe_idx = tfe_idx)
 
-png(paste0("plots/fit_resid/", date_fit, "_residual_", effect, "_", names(variables)[counter], ".png"), 
+
+# Plot fit
+
+png(paste0("plots/fit_resid/", date_fit, "_residual_", 
+           effect, "_", names(variables)[counter], ".png"), 
     width = 1200, height = 600)
 print({op <- par(mfrow = c(2, 4), mar = c(2, 2, 2, 0.5))
 plot(oos[, 1] - sdm_qu_fit_mean, xlab = "region", ylab = "residual")
@@ -107,7 +120,8 @@ abline(h = 0); title(paste0("SEM, K5, RMSE = ", rmse(oos[, 1], sem_k5n_fit)))
 par(op)})
 dev.off()
 
-png(paste0("plots/fit_line/", date_fit, "_comparison_", effect, "_", names(variables)[counter], ".png"), 
+png(paste0("plots/fit_line/", date_fit, "_comparison_", 
+           effect, "_", names(variables)[counter], ".png"), 
     width = 1200, height = 600)
 print({op <- par(mfrow = c(2, 4), mar = c(2, 2, 2, 0.5))
 plot(c(-0.3, 0.1), c(-0.3, 0.1), 
