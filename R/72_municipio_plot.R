@@ -22,7 +22,7 @@ ggplot(df) +
     axis.text.x = element_text(hjust = 0)) +
   theme_bw(base_size = 14, base_family = "Arial")
 
-ggsave("plots/municipios.png", width = 20, height = 20, units = "cm")
+ggsave("plots/municipios.tiff", width = 20, height = 20, units = "cm")
 
 
 detach("package:sf")

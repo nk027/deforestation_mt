@@ -148,7 +148,7 @@ ggplot(df, aes(x = variable, y = model)) +
     axis.ticks = element_blank(),
     axis.text.x = element_text(hjust = 0))
 
-ggsave("plots/rmse_plot.png", width = 15, height = 6, units = "cm")
+ggsave("plots/rmse_plot.tiff", width = 15, height = 6, units = "cm")
 # ggsave("plots/rmse_plot_full.png", width = 15, height = 9, units = "cm")
 
 

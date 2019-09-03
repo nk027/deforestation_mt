@@ -189,6 +189,9 @@ source("R/70_loss_drivers.R")
 # version was created using GIMP.
 source("R/71_landuse_plot.R")
 
+# Create a plot of Mato Grosso's municipios.
+source("R/72_municipio_plot.R")
+
 # Create a CSV file with summary statistics of the data used.
 source("R/73_summary_table.R")
 
