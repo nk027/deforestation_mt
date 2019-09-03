@@ -12,7 +12,7 @@ stopifnot(
   require("ggplot2")
 )
 
-load("data/models_twoways_final.rda")
+load("data/models_twoways.rda")
 # load("data/models_time.rda")
 # load("data/models_none.rda")
 

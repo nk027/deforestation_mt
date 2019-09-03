@@ -60,6 +60,7 @@ write.csv(table, file = paste0("txt/fit_", effect, "_",
 
 # Check out fit
 
+# date_fit <- min(dates)
 # date_fit <- max(dates) + 1
 # date_fit <- 2010
 for(date_fit in c(dates, max(dates) + 1)) {

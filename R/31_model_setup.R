@@ -2,6 +2,7 @@
 # Dependencies ------------------------------------------------------------
 
 stopifnot(
+  exists("get_W"), # etc., 30
   file.exists("data/data.rds"),
   require("dplyr"),
   require("sf")
