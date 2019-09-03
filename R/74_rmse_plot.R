@@ -119,8 +119,8 @@ colours = c(rgb(  0, 102, 156, maxColorValue = 255),
 palette = colorRampPalette(colours)
 col_vector = palette(256)
 
-# df <- df %>% 
-#   filter(!model %in% c("SDM-K7", "SAR-K5", "SEM-K5"))
+df <- df %>%
+  filter(!model %in% c("SDM-K7", "SAR-K5", "SEM-K5"))
 
 label = ifelse(is.na(df$value), NA, sprintf("%.1f%%", df$value * 100))
 label = round(df$value, 2)
@@ -131,9 +131,9 @@ ggplot(df, aes(x = variable, y = model)) +
   geom_text(aes(label = label), colour = rgb(64, 64, 64, maxColorValue = 255)) +
   # scale_fill_gradientn(colours = col_vector, na.value = "white") +
   scale_fill_viridis_c() +
-  scale_y_discrete(expand = c(0, 0), limits = rev(toupper(rownames(mat)))) +
-  # scale_y_discrete(expand = c(0, 0), 
-  #                   limits = rev(toupper(rownames(mat[c(1, 3, 4, 6, 8), ])))) +
+  # scale_y_discrete(expand = c(0, 0), limits = rev(toupper(rownames(mat)))) +
+  scale_y_discrete(expand = c(0, 0),
+                    limits = rev(toupper(rownames(mat[c(1, 3, 4, 6, 8), ])))) +
   scale_x_discrete(position = "top", expand = c(0, 0)) +
   labs(title = NULL) + xlab(NULL) + ylab(NULL) +
   coord_equal() +
@@ -144,12 +144,12 @@ ggplot(df, aes(x = variable, y = model)) +
     plot.margin = unit(c(0.5, 1, 0, 0), "lines"),
     panel.background = element_blank(),
     panel.grid = element_blank(),
-    # legend.position = "none",
+    legend.position = "none",
     axis.ticks = element_blank(),
     axis.text.x = element_text(hjust = 0))
 
-# ggsave("plots/rmse_plot.png", width = 15, height = 6, units = "cm")
-ggsave("plots/rmse_plot_full.png", width = 15, height = 9, units = "cm")
+ggsave("plots/rmse_plot.png", width = 15, height = 6, units = "cm")
+# ggsave("plots/rmse_plot_full.png", width = 15, height = 9, units = "cm")
 
 
 detach("package:dplyr")
