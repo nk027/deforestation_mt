@@ -1,3 +1,3 @@
-# The Impacts of Agriculture on Deforestation in Mato Grosso
+# Investigating Spatial Dependence in Deforestation
 
-## A Spatial Econometric Approach
+## Impacts of Agriculture in Mato Grosso
