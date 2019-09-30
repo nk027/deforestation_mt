@@ -57,7 +57,7 @@ bayesian_fit <- function(
     }
     if(cfe) {
       X_beta <- X_beta + 
-        c(0, beta_post_draw[(2 * ncol(x) + dates_len - 1):len(beta_post_draw)])
+        c(0, beta_post_draw[(2 * ncol(x) + dates_len - 1):length(beta_post_draw)])
     }
     
     y_pred[, i] <- (A_inv %*% X_beta)[, 1]
@@ -206,7 +206,7 @@ print_vars <- function(x) {
 ssr <- function(x, y, ...) {round(sum((x - y)^2), 3)}
 
 
-rmse <- function(x, y, N = len(x)) {round(sqrt(sum(x - y)^2 / N), 3)}
+rmse <- function(x, y, N = length(x)) {round(sqrt(sum(x - y)^2 / N), 3)}
 
 
 table_ise <- function(x, vars, stars = TRUE) {
