@@ -92,7 +92,7 @@ data <- data %>%
          pasture_ch = pasture_px - lag(pasture_px)) %>% 
   ungroup()
 
-# Changes from km^2 to 100m^2
+# Changes from km^2 to ha
 data <- data %>% 
   mutate(forest_ch = forest_ch * 100,
          cerr_ch = cerr_ch * 100,
