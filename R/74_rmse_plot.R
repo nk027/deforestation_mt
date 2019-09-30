@@ -19,7 +19,7 @@ load("data/models_twoways.rda")
 
 # RMSE Matrix -------------------------------------------------------------
 
-mat <- matrix(NA, nrow = 8, ncol = len(dates) + 1)
+mat <- matrix(NA, nrow = 8, ncol = length(dates) + 1)
 colnames(mat) <- c(dates, max(dates) + 1)
 rownames(mat) <- paste0(rep(c("sdm-qu", "sdm-k7", "sdm-k5", "sar-qu", "sar-k5", 
                               "sem-qu", "sem-k5", "clm")))#, 2)), 

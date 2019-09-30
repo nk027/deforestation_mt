@@ -32,10 +32,10 @@ variables <- list(
            "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
            "pop_km2_lag", "gdp_cap_lag", "cattle_dens_lag", "soy_filled_lag",
            "spei_wet_lag", "spei_dry_lag"),
-  log = c("forest_ch_km2",
-          "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
-          "pop_km2_lag_log", "gdp_cap_lag_log", "cattle_dens_lag_log", "soy_filled_lag",
-          "spei_wet_lag", "spei_dry_lag"),
+  # log = c("forest_ch_km2",
+  #         "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
+  #         "pop_km2_lag_log", "gdp_cap_lag_log", "cattle_dens_lag_log", "soy_filled_lag",
+  #         "spei_wet_lag", "spei_dry_lag"),
   # base_use = c("forest_ch_km2",
   #              "forest_px_km2_lag2", "pasture_px_km2_lag2", "crop_px_km2_lag2",
   #              "pop_km2_lag", "gdp_cap_lag", "cattle_dens_lag", "soy_filled_lag",
@@ -85,7 +85,9 @@ W_k7n <- Ws[[3]]
 
 # Fixed effects
 fixed_effects <- list( # TFE, CFE
-  c(TRUE, TRUE)
+  c(TRUE, TRUE),
+  c(TRUE, FALSE),
+  c(FALSE, FALSE)
 )
 
 # MCMC options
