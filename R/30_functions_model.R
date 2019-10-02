@@ -19,7 +19,8 @@ sdm_panel <- function(
   dates_len, # Number of time periods
   lag_X = TRUE, # To-do
   tfe = TRUE, cfe = TRUE, 
-  rho_a = 1.01, sigma_a = 0.01, sigma_b = 0.01, beta_var = 10 ^ 8, # Priors
+  rho_a = 1.01, sigma_a = 10, sigma_b = 1, 
+  beta_mean = 0, beta_var = 10 ^ 8, # Priors
   n_iter = 2000,
   n_save = 1000,
   n_griddy = 200) {
@@ -49,7 +50,7 @@ sdm_panel <- function(
   # Priors ------------------------------------------------------------------
   
   # Proper, but uninformative
-  beta_pr_mean <- matrix(0, K, 1)
+  beta_pr_mean <- matrix(beta_mean, K, 1)
   beta_pr_var <- diag(K) * beta_var
   beta_pr_var_inv <- solve(beta_pr_var)
   # plot(density(rnorm(1e6, beta_pr_mean[1], beta_pr_var[1,1] ^ -1)))
