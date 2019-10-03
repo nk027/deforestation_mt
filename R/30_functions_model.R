@@ -213,7 +213,7 @@ sdm_panel <- function(
   full_chain <- cbind(t(beta_post), rho_post)
   mh_draws <- coda::mcmc(full_chain)
   geweke_conv <- coda::geweke.diag(mh_draws)$z
-  cat("Geweke convergence diagnostic indicate conversion: ",
+  cat("Geweke convergence diagnostic indicate convergence: ",
       all(abs(geweke_conv) < 3), ".\n", sep = "")
   converged <- all(abs(geweke_conv) < 3)
   
