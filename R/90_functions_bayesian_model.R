@@ -1,7 +1,12 @@
 
-library("MASS")
-library("Matrix")
-library("matrixcalc")
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  nzchar(system.file(package = "MASS")),
+  nzchar(system.file(package = "Matrix")),
+  nzchar(system.file(package = "matrixcalc"))
+)
+
 
 # SDM panel ---------------------------------------------------------------
 

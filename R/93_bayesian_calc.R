@@ -6,6 +6,7 @@ stopifnot(
   require("dplyr"),
   require("MASS"),
   require("Matrix"),
+  require("matrixcalc"),
   require("plm"),
   require("spatialreg")
 )
@@ -25,6 +26,7 @@ if(tfe) {if(cfe) {effect <- "twoways"} else {effect <- "time"}} else {
   }
 }
 
+matrices <- list()
 sdm_qu <- list()
 sdm_k5 <- list()
 sdm_k7 <- list()
