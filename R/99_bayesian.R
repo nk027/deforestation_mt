@@ -335,8 +335,7 @@ sem_panel <- function(
   sigma_a = 0.01, sigma_b = 0.01, 
   beta_mean = 0, beta_var = 10 ^ 8,
   n_iter = 2000,
-  n_save = 1000,
-  n_griddy = 200) {
+  n_save = 1000) {
   
   W <- kronecker(diag(dates_len), W_pre)
   
@@ -491,9 +490,9 @@ sem_panel <- function(
   
   # Posteriors --------------------------------------------------------------
   
-  beta_post_mean <- apply(beta_post[1:(k + 1)], 1, mean)
+  beta_post_mean <- apply(beta_post[1:(k + 1), ], 1, mean)
 
-  beta_post_sd <- apply(beta_post[1:(k + 1)], 1, sd)
+  beta_post_sd <- apply(beta_post[1:(k + 1), ], 1, sd)
 
   # More pseudo stuff
   R2 <- median(R2_post)
@@ -529,6 +528,147 @@ sem_panel <- function(
     "beta_post" = beta_post,
     "sigma_post" = sigma_post,
     "theta_post" = theta_post,
+    "converged" = converged
+  )
+}
+
+
+clm_panel <- function(
+  x, # Data
+  dates_len, # Number of time periods
+  tfe = TRUE, cfe = TRUE, 
+  sigma_a = 0.01, sigma_b = 0.01, 
+  beta_mean = 0, beta_var = 10 ^ 8,
+  n_iter = 2000,
+  n_save = 1000) {
+  
+  y <- x[, 1] # Dependent in first column
+  X_pre <- x[, -1] # Explanatories in the rest
+  
+  X <- cbind(1, X_pre)
+  
+  if(tfe) {
+    TFE <- kronecker(diag(dates_len), matrix(1, nrow(X_pre) / dates_len, 1))
+    X <- cbind(X, TFE[, -1])
+  }
+  if(cfe) {
+    CFE <- kronecker(matrix(1, dates_len, 1), diag(nrow(X_pre) / dates_len))
+    X <- cbind(X, CFE[, -1])
+  }
+  
+  K <- ncol(X)
+  N <- nrow(X_pre)
+  k <- ncol(X_pre)
+ 
+  beta_pr_mean <- matrix(beta_mean, K, 1)
+  beta_pr_var <- diag(K) * beta_var
+  beta_pr_var_inv <- solve(beta_pr_var) 
+
+  n_burn <- n_iter - n_save
+  
+  beta_post <- matrix(0, K, n_save)
+  sigma_post <- vector("numeric", n_save)
+  
+  R2_post <- R2_bar_post <- RMSE_post <- vector("numeric", n_save)
+  AIC_post <- BIC_post <- vector("numeric", n_save)
+  
+  # Starting values
+  curr_beta <- MASS::mvrnorm(1, beta_pr_mean, beta_pr_var)
+  curr_sigma <- 1 / rgamma(1, sigma_a / 2, sigma_b / 2)
+  
+  XX <- crossprod(X)
+  Xy <- crossprod(X, y)
+  
+  time <- Sys.time()
+  cat("Starting MCMC.\n")
+  for(i in seq_len(n_iter)) {
+    
+    # Beta
+    V <- solve(beta_pr_var_inv + 1 / curr_sigma * XX)
+    b <- V %*% (beta_pr_var %*% beta_pr_mean + 1 / curr_sigma * Xy)
+    curr_beta <- MASS::mvrnorm(1, b, V)
+    
+    # Sigma
+    curr_Xb <- X %*% curr_beta
+    curr_ESS <- crossprod(y - curr_Xb)
+    curr_sigma <- 1 / rgamma(1, sigma_a + N / 2, 
+                             sigma_b + as.double(curr_ESS) / 2)
+    
+    # Store
+    if(i > n_burn) {
+      
+      s <- i - n_burn
+      beta_post[, s] <- as.matrix(curr_beta)
+      sigma_post[s] <- curr_sigma
+
+      # R^2
+      curr_resid <- y - X %*% curr_beta
+      SSR <- crossprod(curr_resid)
+      TSS <- crossprod(y - mean(y))
+      RMSE_post[s] <- sqrt(SSR / N)
+      R2_post[s] <- 1 - SSR / TSS
+      
+      SSR_adj <- SSR / (N - K)
+      TSS_adj <- TSS / (N - 1)
+      R2_bar_post[s] <- 1 - SSR_adj / TSS_adj
+      
+      # AIC & BIC
+      ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+      df_ll <- K + 1
+      BIC_post[s] <- -2 * ll + log(N) * df_ll
+      AIC_post[s] <- -2 * ll + 2 * df_ll
+    }
+  }
+  cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
+  
+  
+  # Geweke convergence diagnostics ------------------------------------------
+  
+  full_chain <- cbind(t(beta_post))
+  mh_draws <- coda::mcmc(full_chain)
+  geweke_conv <- coda::geweke.diag(mh_draws)$z
+  cat("Geweke convergence diagnostic indicate convergence: ",
+      all(abs(geweke_conv) < 3), ".\n", sep = "")
+  converged <- all(abs(geweke_conv) < 3)
+  
+  
+  # Posteriors --------------------------------------------------------------
+  
+  beta_post_mean <- apply(beta_post[1:(k + 1), ], 1, mean)
+  beta_post_sd <- apply(beta_post[1:(k + 1), ], 1, sd)
+  
+  # More pseudo stuff
+  R2 <- median(R2_post)
+  R2_bar <- median(R2_bar_post)
+  RMSE <- median(RMSE_post)
+  
+  AIC <- median(AIC_post)
+  BIC <- median(BIC_post)
+  
+  
+  # Print -------------------------------------------------------------------
+  
+  # Output as table, post_mean / post_sd ~ Bayesian t-values
+  res_effects <- data.frame(
+    variables = c(c("const", colnames(X_pre))),
+    beta = beta_post_mean,
+    t = beta_post_mean / beta_post_sd
+  )
+  
+  res_other <- data.frame(
+    variables = c("R2", "R2_bar", "AIC", "BIC", "RMSE", "Obs"),
+    value = c(R2, R2_bar, AIC, BIC, RMSE, N)
+  )
+  
+  
+  # Save --------------------------------------------------------------------
+  
+  out <- list(
+    "variables" = colnames(X_pre),
+    "res_effects" = res_effects,
+    "res_other" = res_other,
+    "beta_post" = beta_post,
+    "sigma_post" = sigma_post,
     "converged" = converged
   )
 }

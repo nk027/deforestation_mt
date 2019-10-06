@@ -45,8 +45,8 @@ bayesian_fit <- function(
     
     X_beta <- (1 * beta_post_draw[1] + # Constant
                  x[, -1] %*% beta_post_draw[2:(ncol(x))] + # X \beta
-                 W %*% x[, -1] %*% 
-                 beta_post_draw[(1 + ncol(x)):(2 * ncol(x) - 1)]) # WX \theta
+                 if(lag_X) {W %*% x[, -1] %*% # WX \theta
+                 beta_post_draw[(1 + ncol(x)):(2 * ncol(x) - 1)]} else {0}) 
     if(tfe) {X_beta <- X_beta + 
       if(is.null(tfe_idx)) {
         mean(beta_post_draw[(2 * ncol(x)):(2 * ncol(x) + dates_len - 2)])
@@ -240,7 +240,7 @@ table_ise <- function(x, vars, stars = TRUE) {
   data.frame(
     "variables" = c(vars[-1], "Rho", "R2", "SSR"),
     "direct" = round(c(x$res_effects[-1, "direct"], 
-                       mean(x$rho_post), x$res_other[1, 2], x$ssr[1,1]), 3),
+                       mean(x$rho_post), x$res_other[1, 2], x$res_other[5, 2]), 3),
     "direct_t" = c(t1, NA, NA),
     "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA), 3),
     "indirect_t" = c(t2, NA, NA, NA)

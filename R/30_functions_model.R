@@ -74,7 +74,7 @@ sdm_panel <- function(
   sigma_post <- vector("numeric", n_save)
   rho_post <- vector("numeric", n_save)
   
-  R2_post <- R2_bar_post <- vector("numeric", n_save)
+  R2_post <- R2_bar_post <- RMSE_post <- vector("numeric", n_save)
   AIC_post <- BIC_post <- vector("numeric", n_save)
   
   direct_post <- indirect_post <- total_post <- matrix(0, k + 1, n_save)
@@ -193,6 +193,7 @@ sdm_panel <- function(
       SSR <- crossprod(curr_resid)
       TSS <- crossprod(y - mean(y))
       R2_post[s] <- 1 - SSR / TSS
+      RMSE_post[s] <- sqrt(SSR / N)
       
       SSR_adj <- SSR / (N - K)
       TSS_adj <- TSS / (N - 1)
@@ -229,6 +230,7 @@ sdm_panel <- function(
   total_post_sd <- apply(total_post, 1, sd)
   
   # More pseudo stuff
+  RMSE <- median(RMSE_post)
   R2 <- median(R2_post)
   R2_bar <- median(R2_bar_post)
   
@@ -248,8 +250,8 @@ sdm_panel <- function(
   )
   
   res_other <- data.frame(
-    variables = c("R2", "R2_bar", "AIC", "BIC", "Obs"),
-    value = c(R2, R2_bar, AIC, BIC, N)
+    variables = c("R2", "R2_bar", "AIC", "BIC", "RMSE", "Obs"),
+    value = c(R2, R2_bar, AIC, BIC, RMSE, N)
   )
   
   
@@ -264,7 +266,6 @@ sdm_panel <- function(
     "sigma_post" = sigma_post,
     "direct_post" = direct_post,
     "indirect_post" = indirect_post,
-    "ssr" = SSR,
     "converged" = converged
   )
   

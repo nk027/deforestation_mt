@@ -16,9 +16,9 @@ sigma_a = 0.01
 sigma_b = 0.01
 beta_mean = 0
 beta_var = 10 ^ 8
-n_iter = 2000
-n_save = 1000
-n_griddy = 200
+n_iter = 20000
+n_save = 10000
+n_griddy = 2000
 
 source("R/99_bayesian.R")
 
@@ -35,5 +35,7 @@ sar <- sdm_panel(matrices[[counter]],
 sem <- sem_panel(matrices[[counter]], 
                  W_qu, dates_len, tfe = tfe, cfe = cfe,
                  rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                 n_iter = n_iter, n_save = n_save, 
-                 n_griddy = n_griddy)
+                 n_iter = n_iter, n_save = n_save)
+clm <- clm_panel(matrices[[counter]], dates_len, tfe = tfe, cfe = cfe,
+                 sigma_a, sigma_b, beta_mean, beta_var,
+                 n_iter = n_iter, n_save = n_save)
