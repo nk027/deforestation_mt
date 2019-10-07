@@ -42,51 +42,59 @@ for(counter in seq_along(variables)) {
 
 matrices[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
 
-sdm_qu <- sdm_panel(matrices[[counter]],
-                    W_qu, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save,
-                    n_griddy = n_griddy)
-sdm_k5 <- sdm_panel(matrices[[counter]],
-                    W_k5n, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save,
-                    n_griddy = n_griddy)
-sdm_k7 <- sdm_panel(matrices[[counter]],
-                    W_k7n, dates_len, lag_X = TRUE, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save,
-                    n_griddy = n_griddy)
-sar_qu <- sdm_panel(matrices[[counter]],
-                    W_qu, dates_len, lag_X = FALSE, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save,
-                    n_griddy = n_griddy)
-sar_k5 <- sdm_panel(matrices[[counter]],
-                    W_k5n, dates_len, lag_X = FALSE, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save,
-                    n_griddy = n_griddy)
-sar_k7 <- sdm_panel(matrices[[counter]],
-                    W_k7n, dates_len, lag_X = FALSE, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save,
-                    n_griddy = n_griddy)
-sem_qu <- sem_panel(matrices[[counter]],
-                    W_qu, dates_len, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save)
-sem_k5 <- sem_panel(matrices[[counter]],
-                    W_k5n, dates_len, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save)
-sem_k7 <- sem_panel(matrices[[counter]],
-                    W_k7n, dates_len, tfe = tfe, cfe = cfe,
-                    rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                    n_iter = n_iter, n_save = n_save)
-clm <- clm_panel(matrices[[counter]], dates_len, tfe = tfe, cfe = cfe,
-                 sigma_a, sigma_b, beta_mean, beta_var,
-                 n_iter = n_iter, n_save = n_save)
+sdm_qu[[counter]] <- sdm_panel(matrices[[counter]],
+                               W_qu, dates_len, lag_X = TRUE, 
+                               tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save,
+                               n_griddy = n_griddy)
+sdm_k5[[counter]] <- sdm_panel(matrices[[counter]],
+                               W_k5n, dates_len, lag_X = TRUE, 
+                               tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save,
+                               n_griddy = n_griddy)
+sdm_k7[[counter]] <- sdm_panel(matrices[[counter]],
+                               W_k7n, dates_len, lag_X = TRUE, 
+                               tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save, 
+                               n_griddy = n_griddy)
+sar_qu[[counter]] <- sdm_panel(matrices[[counter]],
+                               W_qu, dates_len, lag_X = FALSE, 
+                               tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save,
+                               n_griddy = n_griddy)
+sar_k5[[counter]] <- sdm_panel(matrices[[counter]],
+                               W_k5n, dates_len, lag_X = FALSE, 
+                               tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save,
+                               n_griddy = n_griddy)
+sar_k7[[counter]] <- sdm_panel(matrices[[counter]],
+                               W_k7n, dates_len, lag_X = FALSE, 
+                               tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save,
+                               n_griddy = n_griddy)
+# SEM takes forever
+sem_qu[[counter]] <- sem_panel(matrices[[counter]],
+                               W_qu, dates_len, tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter / 10, n_save = n_save / 10)
+# sem_k5[[counter]] <- sem_panel(matrices[[counter]],
+#                                W_k5n, dates_len, tfe = tfe, cfe = cfe,
+#                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+#                                n_iter = n_iter, n_save = n_save)
+# sem_k7[[counter]] <- sem_panel(matrices[[counter]],
+#                                W_k7n, dates_len, tfe = tfe, cfe = cfe,
+#                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+#                                n_iter = n_iter, n_save = n_save)
+clm[[counter]] <- clm_panel(matrices[[counter]], dates_len, 
+                            tfe = tfe, cfe = cfe,
+                            sigma_a, sigma_b, beta_mean, beta_var,
+                            n_iter = n_iter, n_save = n_save)
 
 }
 
@@ -97,7 +105,7 @@ if(pl_model == "pooling") {effect <- "none"} # Properly name effect now
 save(file = paste0("data/models_bayesian_", effect, ".rda"),
      list = c("sdm_qu", "sdm_k5", "sdm_k7",
               "sar_qu", "sar_k5", "sar_k7",
-              "sem_qu", "sem_k5", "sem_k7",
+              "sem_qu", # "sem_k5", "sem_k7",
               "clm"))
 
 }

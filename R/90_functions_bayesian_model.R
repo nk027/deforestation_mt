@@ -263,6 +263,12 @@ sdm_panel <- function(
     "sigma_post" = sigma_post,
     "direct_post" = direct_post,
     "indirect_post" = indirect_post,
+    "rmse_post" = RMSE_post,
+    "r2_post" = R2_post,
+    "AIC_post" = AIC_post,
+    "BIC_post" = BIC_post,
+    "N" = N,
+    "tfe" = tfe, "cfe" = cfe,
     "converged" = converged
   )
 
@@ -534,6 +540,12 @@ sem_panel <- function(
     "beta_post" = beta_post,
     "sigma_post" = sigma_post,
     "theta_post" = theta_post,
+    "rmse_post" = RMSE_post,
+    "r2_post" = R2_post,
+    "AIC_post" = AIC_post,
+    "BIC_post" = BIC_post,
+    "N" = N,
+    "tfe" = tfe, "cfe" = cfe,
     "converged" = converged
   )
 }
@@ -675,6 +687,12 @@ clm_panel <- function(
     "res_other" = res_other,
     "beta_post" = beta_post,
     "sigma_post" = sigma_post,
+    "rmse_post" = RMSE_post,
+    "r2_post" = R2_post,
+    "AIC_post" = AIC_post,
+    "BIC_post" = BIC_post,
+    "N" = N,
+    "tfe" = tfe, "cfe" = cfe,
     "converged" = converged
   )
 }

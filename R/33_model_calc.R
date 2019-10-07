@@ -47,7 +47,7 @@ for(counter in seq_along(variables)) {
 matrices[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
 
 df_plm <- as.data.frame(cbind(rep(1:(141 - length(municipio_subset)), dates_len), 
-                              rep(1:dates_len, 141 - length(municipio_subset)),
+                              rep(1:dates_len, each = 141 - length(municipio_subset)),
                               matrices[[counter]]))
 
 

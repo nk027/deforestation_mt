@@ -163,6 +163,8 @@ sm_results <- function(x) {
 
 bayesian_t <- function(x, ps = c(0.99, 0.95, 0.9)) {
   
+  if(is.null(x$direct_post)) {return(bayesian_t.betas(x, ps))}
+  
   directs <- matrix(NA, nrow = length(ps), ncol = dim(x$direct_post)[1] - 1)
   for(i in seq_along(ps)) {
     directs[i, ] <- apply(get_hpdi(x$direct_post[-1, ], ps[i]), 1,
@@ -185,6 +187,29 @@ bayesian_t <- function(x, ps = c(0.99, 0.95, 0.9)) {
   names(rhos) <- ps
   
   list("direct_p" = !directs, "indirect_p" = !indirects, "rhos" = !rhos)
+}
+
+bayesian_t.betas <- function(x, ps = c(0.99, 0.95, 0.9)) {
+  
+  betas <- matrix(NA, nrow = length(ps), ncol = length(x$variables))
+  for(i in seq_along(ps)) {
+    betas[i, ] <- apply(get_hpdi(x$beta_post[seq(2, length(x$variables) + 1), ],
+                                 ps[i]), 1, function(x) {0 > x[1] & 0 < x[2]})
+  }
+  dimnames(betas) <- list(ps)
+  out <- list("beta_p" = ! betas)
+  
+  if(!is.null(x$rho_post)) {
+    rhos <- vector("logical", length(ps))
+    for(i in seq_along(ps)) {
+      tmp <- get_hpdi(x$rho_post, ps[i])
+      rhos[i] <- 0 > tmp[1] & 0 < tmp[2]
+    }
+    names(rhos) <- ps
+    out$rhos <- !rhos
+  }
+  
+  out
 }
 
 
@@ -213,6 +238,9 @@ table_ise <- function(x, vars, stars = TRUE) {
   
   if(is(x, "plm")) return(table_ise.plm(x, vars, stars))
   if(is(x, "splm")) return(table_ise.splm(x, vars, stars))
+  # SEM and CLM in Bayesian fashion
+  if(is.null(x$direct_post)) {return(table_ise.betas(x, vars = x$variables, stars))}
+  vars = x$variables
   
   t1 <- c(x$res_effects[-1, "direct_t"], mean(x$rho_post) / sd(x$rho_post))
   t2 <- c(x$res_effects[-1, "indirect_t"])
@@ -238,12 +266,34 @@ table_ise <- function(x, vars, stars = TRUE) {
   }
   
   data.frame(
-    "variables" = c(vars[-1], "Rho", "R2", "SSR"),
+    "variables" = c(vars, "Rho", "R2", "RMSE", "AIC"),
     "direct" = round(c(x$res_effects[-1, "direct"], 
-                       mean(x$rho_post), x$res_other[1, 2], x$res_other[5, 2]), 3),
-    "direct_t" = c(t1, NA, NA),
-    "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA), 3),
-    "indirect_t" = c(t2, NA, NA, NA)
+                       mean(x$rho_post), x$res_other[1, 2], 
+                       x$res_other[5, 2], x$res_other[3, 2]), 3),
+    "direct_t" = c(t1, NA, NA, NA),
+    "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA, NA), 3),
+    "indirect_t" = c(t2, NA, NA, NA, NA)
+  )
+}
+
+table_ise.betas <- function(x, vars = x$variables, stars = TRUE) {
+  
+  b_t <- bayesian_t(x)
+  
+  star <- c("3" = " ***", "2" = " **", "1" = " *", "0" = "")
+  
+  t1 <- star[as.character(colSums(b_t$beta))]
+  if(!is.null(x$rho_post)) {
+    t1 <- c(t1, star[as.character(sum(b_t$rhos))])
+  }
+  
+  data.frame(
+    "variables" = c(vars, if(!is.null(x$rho_post)) {"Rho"} else {NA}, 
+                    "R2", "RMSE", "AIC"),
+    "beta" = round(c(x$res_effects[-1, "beta"], 
+                     if(!is.null(x$rho_post)) {mean(x$rho_post)} else {NA}, 
+                     x$res_other[1, 2], x$res_other[5, 2], x$res_other[3, 2]), 3),
+    "value_t" = c(t1, NA, NA, if(is.null(x$rho_post)) {NA}, NA)
   )
 }
 
