@@ -160,7 +160,16 @@ source("R/31_model_setup.R")
 # elements corresponding to the chosen variable subsets. Variations of fixed
 # effects are stored separately.
 # Outputs are RDA files stored as "models_%EFFECT.rda".
-source("R/33_model_calc.R")
+# source("R/33_model_calc.R")
+
+# After an update you can now calculate all models using a Bayesian approach. 
+# Source (updated) functions to calculate SDM, SAR, SEM and CLM
+source("R/90_functions_bayes.R")
+
+# Execute Bayesian model estimation, based on the setup from before. Note 
+# that the MCMC algorithms tend to take quite a while.
+# Outputs are RDA files stored as "models_bayesian_%EFFECT.rda".
+source("R/93_bayesian_calc.R")
 
 # Functions to aid in assessing results, i.e. summarise outputs, create tables 
 # and calculate in- and out-of-sample fits.
