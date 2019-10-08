@@ -197,7 +197,8 @@ sdm_panel <- function(
       R2_bar_post[s] <- 1 - SSR_adj / TSS_adj
 
       # AIC & BIC
-      ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+      # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+      ll <- ln_det[ind, ] - (curr_ESS / 2 * curr_sigma) + beta_prob(curr_rho, rho_a)
       df_ll <- K + 1
       BIC_post[s] <- -2 * ll + log(N) * df_ll
       AIC_post[s] <- -2 * ll + 2 * df_ll
@@ -481,7 +482,8 @@ sem_panel <- function(
       R2_bar_post[s] <- 1 - SSR_adj / TSS_adj
 
       # AIC & BIC
-      ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+      # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+      ll <- curr_ll
       df_ll <- K + 1
       BIC_post[s] <- -2 * ll + log(N) * df_ll
       AIC_post[s] <- -2 * ll + 2 * df_ll
@@ -631,7 +633,8 @@ clm_panel <- function(
       R2_bar_post[s] <- 1 - SSR_adj / TSS_adj
 
       # AIC & BIC
-      ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+      # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
+      ll <- - (curr_ESS / 2 * curr_sigma)
       df_ll <- K + 1
       BIC_post[s] <- -2 * ll + log(N) * df_ll
       AIC_post[s] <- -2 * ll + 2 * df_ll
