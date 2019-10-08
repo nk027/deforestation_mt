@@ -1,6 +1,4 @@
 
-counter <- 1
-
 plot_dens <- function(
   x, dots = list(), 
   cols = c("#CCCCCC33"),
@@ -22,6 +20,8 @@ plot_dens <- function(
   abline(v = bounds, lty = "dashed", col = "darkgray")
 }
 
+counter <- 2
+
 
 # Table -------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ names(table)[-1] <- paste0(gsub("(.*)[.][0-9]", "\\1", names(table)[-1]), "-",
                            c(rep(c("sdm_qu", "sdm_k5", "sdm_k7",
                                    "sar_qu", "sar_k5", "sar_k7"), each = 4),
                              rep(c("sem_qu", "clm"), each = 2)))
-write.csv(table, file = paste0("txt/fit_", effect, "_", 
+write.csv(table, file = paste0("txt/fit_bayesian_", effect, "_", 
                                names(variables)[counter], ".csv"))
 
 

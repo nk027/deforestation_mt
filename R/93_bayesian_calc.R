@@ -112,6 +112,6 @@ save(file = paste0("data/models_bayesian_", effect, ".rda"),
 
 detach("package:dplyr")
 detach("package:MASS")
-detach("package:Matrix")
 detach("package:plm")
 detach("package:spatialreg")
+detach("package:Matrix")

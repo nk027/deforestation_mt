@@ -266,10 +266,10 @@ table_ise <- function(x, vars, stars = TRUE) {
   }
   
   data.frame(
-    "variables" = c(vars, "Rho", "R2", "RMSE", "AIC"),
+    "variables" = c(vars, "Rho", "R2", "RMSE", "BIC"),
     "direct" = round(c(x$res_effects[-1, "direct"], 
                        mean(x$rho_post), x$res_other[1, 2], 
-                       x$res_other[5, 2], x$res_other[3, 2]), 3),
+                       x$res_other[5, 2], x$res_other[4, 2]), 3),
     "direct_t" = c(t1, NA, NA, NA),
     "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA, NA), 3),
     "indirect_t" = c(t2, NA, NA, NA, NA)
