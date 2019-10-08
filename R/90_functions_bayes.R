@@ -227,12 +227,12 @@ sdm_panel <- function(
   total_post_sd <- apply(total_post, 1, sd)
 
   # More pseudo stuff
-  R2 <- mean(R2_post)
-  R2_bar <- mean(R2_bar_post)
-  RMSE <- mean(RMSE_post)
+  R2 <- median(R2_post)
+  R2_bar <- median(R2_bar_post)
+  RMSE <- median(RMSE_post)
 
-  AIC <- mean(AIC_post)
-  BIC <- mean(BIC_post)
+  AIC <- median(AIC_post)
+  BIC <- median(BIC_post)
 
 
   # Print -------------------------------------------------------------------
@@ -507,12 +507,12 @@ sem_panel <- function(
   beta_post_sd <- apply(beta_post[1:(k + 1), ], 1, sd)
 
   # More pseudo stuff
-  R2 <- mean(R2_post)
-  R2_bar <- mean(R2_bar_post)
-  RMSE <- mean(RMSE_post)
+  R2 <- median(R2_post)
+  R2_bar <- median(R2_bar_post)
+  RMSE <- median(RMSE_post)
 
-  AIC <- mean(AIC_post)
-  BIC <- mean(BIC_post)
+  AIC <- median(AIC_post)
+  BIC <- median(BIC_post)
 
 
   # Print -------------------------------------------------------------------
@@ -656,12 +656,12 @@ clm_panel <- function(
   beta_post_sd <- apply(beta_post[1:(k + 1), ], 1, sd)
 
   # More pseudo stuff
-  R2 <- mean(R2_post)
-  R2_bar <- mean(R2_bar_post)
-  RMSE <- mean(RMSE_post)
+  R2 <- median(R2_post)
+  R2_bar <- median(R2_bar_post)
+  RMSE <- median(RMSE_post)
 
-  AIC <- mean(AIC_post)
-  BIC <- mean(BIC_post)
+  AIC <- median(AIC_post)
+  BIC <- median(BIC_post)
 
 
   # Print -------------------------------------------------------------------
