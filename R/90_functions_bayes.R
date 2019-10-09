@@ -102,7 +102,7 @@ sdm_panel <- function(
   rho_post <- vector("numeric", n_save)
 
   R2_post <- R2_bar_post <- RMSE_post <- vector("numeric", n_save)
-  AIC_post <- BIC_post <- vector("numeric", n_save)
+  AIC_post <- BIC_post <- ll <- vector("numeric", n_save)
 
   direct_post <- indirect_post <- total_post <- matrix(0, k + 1, n_save)
 
@@ -198,10 +198,10 @@ sdm_panel <- function(
 
       # AIC & BIC
       # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
-      ll <- ln_det[ind, ] - (curr_ESS / 2 * curr_sigma) + beta_prob(curr_rho, rho_a)
+      ll[s] <- ln_det[s, ] - currESS / (2 * curr_sigma)
       df_ll <- K + 1
-      BIC_post[s] <- -2 * ll + log(N) * df_ll
-      AIC_post[s] <- -2 * ll + 2 * df_ll
+      BIC_post[s] <- -2 * ll[s] + log(N) * df_ll
+      AIC_post[s] <- -2 * ll[s] + 2 * df_ll
     }
   }
   cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
@@ -228,12 +228,12 @@ sdm_panel <- function(
   total_post_sd <- apply(total_post, 1, sd)
 
   # More pseudo stuff
-  R2 <- mean(R2_post)
-  R2_bar <- mean(R2_bar_post)
-  RMSE <- mean(RMSE_post)
+  R2 <- median(R2_post)
+  R2_bar <- median(R2_bar_post)
+  RMSE <- median(RMSE_post)
 
-  AIC <- mean(AIC_post)
-  BIC <- mean(BIC_post)
+  AIC <- median(AIC_post)
+  BIC <- median(BIC_post)
 
 
   # Print -------------------------------------------------------------------
@@ -268,6 +268,7 @@ sdm_panel <- function(
     "r2_post" = R2_post,
     "AIC_post" = AIC_post,
     "BIC_post" = BIC_post,
+    "ll" = ll,
     "N" = N,
     "tfe" = tfe, "cfe" = cfe,
     "converged" = converged
@@ -406,7 +407,7 @@ sem_panel <- function(
   theta_post <- matrix(0, N, n_save)
 
   R2_post <- R2_bar_post <- RMSE_post <- vector("numeric", n_save)
-  AIC_post <- BIC_post <- vector("numeric", n_save)
+  AIC_post <- BIC_post <- ll <- vector("numeric", n_save)
 
   # Starting values
   curr_beta <- MASS::mvrnorm(1, beta_pr_mean, beta_pr_var)
@@ -483,10 +484,10 @@ sem_panel <- function(
 
       # AIC & BIC
       # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
-      ll <- curr_ll
+      ll[s] <- curr_logdet - curr_ESS / (2 * curr_sigma)
       df_ll <- K + 1
-      BIC_post[s] <- -2 * ll + log(N) * df_ll
-      AIC_post[s] <- -2 * ll + 2 * df_ll
+      BIC_post[s] <- -2 * ll[s] + log(N) * df_ll
+      AIC_post[s] <- -2 * ll[s] + 2 * df_ll
     }
   }
   cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
@@ -509,12 +510,12 @@ sem_panel <- function(
   beta_post_sd <- apply(beta_post[1:(k + 1), ], 1, sd)
 
   # More pseudo stuff
-  R2 <- mean(R2_post)
-  R2_bar <- mean(R2_bar_post)
-  RMSE <- mean(RMSE_post)
+  R2 <- median(R2_post)
+  R2_bar <- median(R2_bar_post)
+  RMSE <- median(RMSE_post)
 
-  AIC <- mean(AIC_post)
-  BIC <- mean(BIC_post)
+  AIC <- median(AIC_post)
+  BIC <- median(BIC_post)
 
 
   # Print -------------------------------------------------------------------
@@ -546,6 +547,7 @@ sem_panel <- function(
     "r2_post" = R2_post,
     "AIC_post" = AIC_post,
     "BIC_post" = BIC_post,
+    "ll" = ll,
     "N" = N,
     "tfe" = tfe, "cfe" = cfe,
     "converged" = converged
@@ -590,7 +592,7 @@ clm_panel <- function(
   sigma_post <- vector("numeric", n_save)
 
   R2_post <- R2_bar_post <- RMSE_post <- vector("numeric", n_save)
-  AIC_post <- BIC_post <- vector("numeric", n_save)
+  AIC_post <- BIC_post <- ll <- vector("numeric", n_save)
 
   # Starting values
   curr_beta <- MASS::mvrnorm(1, beta_pr_mean, beta_pr_var)
@@ -634,10 +636,10 @@ clm_panel <- function(
 
       # AIC & BIC
       # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
-      ll <- - (curr_ESS / 2 * curr_sigma)
+      ll[s] <- -curr_ESS / (2 * curr_sigma)
       df_ll <- K + 1
-      BIC_post[s] <- -2 * ll + log(N) * df_ll
-      AIC_post[s] <- -2 * ll + 2 * df_ll
+      BIC_post[s] <- -2 * ll[s] + log(N) * df_ll
+      AIC_post[s] <- -2 * ll[s] + 2 * df_ll
     }
   }
   cat("Done after ", format(Sys.time() - time), ".\n", sep = "")
@@ -659,12 +661,12 @@ clm_panel <- function(
   beta_post_sd <- apply(beta_post[1:(k + 1), ], 1, sd)
 
   # More pseudo stuff
-  R2 <- mean(R2_post)
-  R2_bar <- mean(R2_bar_post)
-  RMSE <- mean(RMSE_post)
+  R2 <- median(R2_post)
+  R2_bar <- median(R2_bar_post)
+  RMSE <- median(RMSE_post)
 
-  AIC <- mean(AIC_post)
-  BIC <- mean(BIC_post)
+  AIC <- median(AIC_post)
+  BIC <- median(BIC_post)
 
 
   # Print -------------------------------------------------------------------

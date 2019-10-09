@@ -7,7 +7,6 @@ stopifnot(
   require("MASS"),
   require("Matrix"),
   require("matrixcalc"),
-  require("plm"),
   require("spatialreg")
 )
 
@@ -83,10 +82,10 @@ sem_qu[[counter]] <- sem_panel(matrices[[counter]],
                                W_qu, dates_len, tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
                                n_iter = n_iter / 10, n_save = n_save / 10)
-# sem_k5[[counter]] <- sem_panel(matrices[[counter]],
-#                                W_k5n, dates_len, tfe = tfe, cfe = cfe,
-#                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-#                                n_iter = n_iter, n_save = n_save)
+sem_k5[[counter]] <- sem_panel(matrices[[counter]],
+                               W_k5n, dates_len, tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save)
 # sem_k7[[counter]] <- sem_panel(matrices[[counter]],
 #                                W_k7n, dates_len, tfe = tfe, cfe = cfe,
 #                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
@@ -112,6 +111,5 @@ save(file = paste0("data/models_bayesian_", effect, ".rda"),
 
 detach("package:dplyr")
 detach("package:MASS")
-detach("package:plm")
 detach("package:spatialreg")
 detach("package:Matrix")

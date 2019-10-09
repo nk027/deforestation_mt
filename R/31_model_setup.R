@@ -64,9 +64,9 @@ variables <- list(
   #              "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
   #              "pop_km2_lag", "cattle_dens_lag", "soy_filled_lag",
   #              "spei_wet_lag"),
-  # base_vlim1 = c("forest_ch_km2",
-  #                "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
-  #                "pop_km2_lag", "spei_wet_lag"),
+  base_vlim1 = c("forest_ch_km2",
+                 "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
+                 "pop_km2_lag", "spei_wet_lag"),
   base_vlim2 = c("forest_ch_km2",
                  "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
                  "cattle_dens_lag", "soy_filled_lag")
