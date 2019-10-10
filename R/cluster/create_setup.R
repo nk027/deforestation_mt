@@ -76,10 +76,10 @@ fixed_effects <- list( # TFE, CFE
 )
 
 functions <- list(
-  sdm = sdm_panel,
-  sar = sar_panel,
-  sem = sem_panel,
-  clm = clm_panel
+  sdm = sdm,
+  sar = sar,
+  sem = sem,
+  clm = clm
 )
 
 # MCMC
@@ -88,8 +88,8 @@ n_save <- 10000
 n_griddy <- 2000
 # Priors
 rho_a <- 1.01
-sigma_a <- 0.01
-sigma_b <- 0.01
+sigma_a <- 10
+sigma_b <- 1
 beta_mean <- 0
 beta_var <- 10 ^ 8
 
