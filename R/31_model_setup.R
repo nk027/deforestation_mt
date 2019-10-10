@@ -95,7 +95,7 @@ n_iter <- 25000
 n_save <- 10000
 n_griddy <- 2000
 rho_a <- 1.01
-sigma_a <- 0.01
-sigma_b <- 0.01
+sigma_a <- 10
+sigma_b <- 1
 beta_mean <- 0
 beta_var <- 10 ^ 8

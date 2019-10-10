@@ -16,7 +16,7 @@ sdm_panel <- function(
   dates_len, # Number of time periods
   lag_X = TRUE, tfe = TRUE, cfe = TRUE,
   rho_a = 1.01, # Priors
-  sigma_a = 0.01, sigma_b = 0.01,
+  sigma_a = 10, sigma_b = 1,
   beta_mean = 0, beta_var = 10 ^ 8,
   n_iter = 2000,
   n_save = 1000,
@@ -198,7 +198,7 @@ sdm_panel <- function(
 
       # AIC & BIC
       # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
-      ll[s] <- ln_det[s, ] - currESS / (2 * curr_sigma)
+      ll[s] <- ln_det[ind] - curr_ESS / (2 * curr_sigma)
       df_ll <- K + 1
       BIC_post[s] <- -2 * ll[s] + log(N) * df_ll
       AIC_post[s] <- -2 * ll[s] + 2 * df_ll
@@ -346,7 +346,7 @@ sem_panel <- function(
   dates_len, # Number of time periods
   tfe = TRUE, cfe = TRUE,
   rho_a = 1.01, # Priors
-  sigma_a = 0.01, sigma_b = 0.01,
+  sigma_a = 10, sigma_b = 1,
   beta_mean = 0, beta_var = 10 ^ 8,
   n_iter = 2000,
   n_save = 1000) {
@@ -559,7 +559,7 @@ clm_panel <- function(
   x, # Data
   dates_len, # Number of time periods
   tfe = TRUE, cfe = TRUE,
-  sigma_a = 0.01, sigma_b = 0.01,
+  sigma_a = 10, sigma_b = 1,
   beta_mean = 0, beta_var = 10 ^ 8,
   n_iter = 2000,
   n_save = 1000) {
