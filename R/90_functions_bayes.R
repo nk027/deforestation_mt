@@ -16,13 +16,14 @@ sar_panel <- function(
   dates_len, # Number of time periods
   lag_X = FALSE, tfe = TRUE, cfe = TRUE,
   rho_a = 1.01, # Priors
-  sigma_a = 0.01, sigma_b = 0.01,
+  sigma_a = 10, sigma_b = 1,
   beta_mean = 0, beta_var = 10 ^ 8,
   n_iter = 2000,
   n_save = 1000,
   n_griddy = 200
 ) {
-  sdm_panel(...)
+  sdm_panel(x, W_pre, dates_len, lag_X, tfe, cfe, rho_a, sigma_a, sigma_b,
+            beta_mean, beta_var, n_iter, n_save, n_griddy)
 }
 
 sdm_panel <- function(
