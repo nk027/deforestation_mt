@@ -711,6 +711,7 @@ clm_panel <- function(
     "r2_post" = R2_post,
     "AIC_post" = AIC_post,
     "BIC_post" = BIC_post,
+    "ll" = ll,
     "N" = N,
     "tfe" = tfe, "cfe" = cfe,
     "converged" = converged

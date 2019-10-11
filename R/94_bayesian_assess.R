@@ -20,17 +20,20 @@ plot_dens <- function(
   abline(v = bounds, lty = "dashed", col = "darkgray")
 }
 
-counter <- 2
+counter <- 1
 
 
 # Table -------------------------------------------------------------------
 
 table <- do.call(cbind, 
-                 lapply(list(sdm_qu[[counter]], sdm_k5[[counter]], sdm_k7[[counter]],
-                             sar_qu[[counter]], sar_k5[[counter]], sar_k7[[counter]],
-                             sem_qu[[counter]], 
-                             clm[[counter]]), 
-                        table_ise, variables[[counter]]))
+                 lapply(1:8, function(i, run, W) {
+                   table_ise(run[[i]], W[[i]])
+                 },
+                 run = list(sdm_qu[[counter]], sdm_k5[[counter]], sdm_k7[[counter]],
+                            sar_qu[[counter]], sar_k5[[counter]], sar_k7[[counter]],
+                            sem_qu[[counter]], clm[[counter]]),
+                 W = list(W_qu, W_k5n, W_k7n, W_qu, W_k5n, W_k7n, W_qu, W_qu)))
+
 table <- table[, c(1, which(!names(table) == "variables"))]
 names(table)[-1] <- paste0(gsub("(.*)[.][0-9]", "\\1", names(table)[-1]), "-",
                            c(rep(c("sdm_qu", "sdm_k5", "sdm_k7",

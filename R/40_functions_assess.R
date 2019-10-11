@@ -234,45 +234,75 @@ ssr <- function(x, y, ...) {round(sum((x - y)^2), 3)}
 rmse <- function(x, y, N = length(x)) {round(sqrt(sum(x - y)^2 / N), 3)}
 
 
-table_ise <- function(x, vars, stars = TRUE) {
+table_ise <- function(x, W, vars, stars = TRUE) {
   
   if(is(x, "plm")) return(table_ise.plm(x, vars, stars))
   if(is(x, "splm")) return(table_ise.splm(x, vars, stars))
   # SEM and CLM in Bayesian fashion
   if(is.null(x$direct_post)) {return(table_ise.betas(x, vars = x$variables, stars))}
   vars = x$variables
+
+  # Crappy LeSage
+  # t1 <- ifelse(abs(t1) > 2.576, " ***", 
+  #              ifelse(abs(t1) > 1.96, " **",
+  #                     ifelse(abs(t1) > 1.645, " *", "")))
+  # t2 <- ifelse(abs(t2) > 2.576, " ***", 
+  #              ifelse(abs(t2) > 1.96, " **",
+  #                     ifelse(abs(t2) > 1.645, " *", "")))
   
-  t1 <- c(x$res_effects[-1, "direct_t"], mean(x$rho_post) / sd(x$rho_post))
-  t2 <- c(x$res_effects[-1, "indirect_t"])
+  # Dank HPDI
+  b_t <- bayesian_t(x)
+  t1 <- colSums(b_t$direct_p)
+  t2 <- colSums(b_t$indirect_p)
+  t1 <- c(t1, sum(b_t$rhos))
+  
   if(stars) {
-    # Crappy LeSage
-    # t1 <- ifelse(abs(t1) > 2.576, " ***", 
-    #              ifelse(abs(t1) > 1.96, " **",
-    #                     ifelse(abs(t1) > 1.645, " *", "")))
-    # t2 <- ifelse(abs(t2) > 2.576, " ***", 
-    #              ifelse(abs(t2) > 1.96, " **",
-    #                     ifelse(abs(t2) > 1.645, " *", "")))
-    
-    # Dank HPDI
-    b_t <- bayesian_t(x)
-    
     star <- c("3" = " ***", "2" = " **", "1" = " *", "0" = "")
-    
-    t1 <- star[as.character(colSums(b_t$direct_p))]
-    t2 <- star[as.character(colSums(b_t$indirect_p))]
-    
-    # Add rho to directs
-    t1 <- c(t1, star[as.character(sum(b_t$rhos))])
+    t1 <- star[as.character(t1)]
+    t2 <- star[as.character(t2)]
   }
   
+  # Check if there's thetas involved
+  lag_X <- dim(x$beta_post)[1] > nrow(X) / dates_len + dates_len + length(vars) - 1
+  W <- kronecker(diag(dates_len), W)
+  matr <- get_matr(data, variables[[counter]], dates = dates)
+  y <- matr[, 1]
+  X <- cbind(1, matr[, -1])
+  if(lag_X) {X <- cbind(X, W %*% matr[, -1])}
+  TFE <- kronecker(diag(dates_len), matrix(1, nrow(X) / dates_len, 1))
+  X <- cbind(X, TFE[, -1])
+  CFE <- kronecker(matrix(1, dates_len, 1), diag(nrow(X) / dates_len))
+  X <- cbind(X, CFE[, -1])
+  
+  resid <- (diag(x$N) - median(x$rho_post) * W) %*% y - 
+    (X %*% apply(x$beta_post, 1, median))
+  
+  RMSE_p <- sqrt(crossprod(resid) / x$N)
+  RMSE_d <- mean(x$rmse_post)
+  
+  BIC <- -2 * mean(x$ll) + log(x$N) * (ncol(X + 1))
+  AIC <- -2 * mean(x$ll) + 2 * (ncol(X + 1))
+  
+  tmp <- apply(x$beta_post, 2, function(y, b) {sum(abs(y - b))}, b = apply(x$beta_post, 1, mean))
+  tmp <- tmp + abs(x$rho_post - mean(x$rho_post))
+  ll_m <- x$ll[which(tmp == min(tmp))]
+  
+  DIC <- ll_m - 2 * (ll_m - mean(x$ll))
+
+  t_WAIC <- -mean(x$ll)
+  v_WAIC <- sum((x$ll - mean(x$ll)) ^ 2)
+  WAIC <- t_WAIC + v_WAIC / x$N
+  # p_WAIC <- sum((x$ll - mean(x$ll)) ^ 2) / (length(x$ll) - 1)
+  # elppd <- lppd - p_WAIC
+  
   data.frame(
-    "variables" = c(vars, "Rho", "R2", "RMSE", "BIC"),
+    "variables" = c(vars, "Rho", "R2", "RMSE_p", "RMSE_d", "BIC", "AIC", "WAIC"),
     "direct" = round(c(x$res_effects[-1, "direct"], 
                        mean(x$rho_post), x$res_other[1, 2], 
-                       x$res_other[5, 2], x$res_other[4, 2]), 3),
-    "direct_t" = c(t1, NA, NA, NA),
-    "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA, NA), 3),
-    "indirect_t" = c(t2, NA, NA, NA, NA)
+                       RMSE_p, RMSE_d, BIC, AIC, WAIC), 3),
+    "direct_t" = c(t1, NA, NA, NA, NA, NA, NA),
+    "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA, NA, NA, NA, NA), 3),
+    "indirect_t" = c(t2, NA, NA, NA, NA, NA, NA, NA)
   )
 }
 
@@ -287,13 +317,41 @@ table_ise.betas <- function(x, vars = x$variables, stars = TRUE) {
     t1 <- c(t1, star[as.character(sum(b_t$rhos))])
   }
   
+  matr <- get_matr(data, variables[[counter]], dates = dates)
+  y <- matr[, 1]
+  X <- cbind(1, matr[, -1])
+  TFE <- kronecker(diag(dates_len), matrix(1, nrow(X) / dates_len, 1))
+  X <- cbind(X, TFE[, -1])
+  CFE <- kronecker(matrix(1, dates_len, 1), diag(nrow(X) / dates_len))
+  X <- cbind(X, CFE[, -1])
+  
+  resid <- y - (X %*% apply(x$beta_post, 1, median))
+  
+  RMSE_p <- sqrt(crossprod(resid) / x$N)
+  RMSE_d <- mean(x$rmse_post)
+  
+  BIC <- -2 * mean(x$ll) + log(x$N) * (ncol(X + 1))
+  AIC <- -2 * mean(x$ll) + 2 * (ncol(X + 1))
+  
+  tmp <- apply(x$beta_post, 2, function(y, b) {sum(abs(y - b))}, b = apply(x$beta_post, 1, mean))
+  tmp <- tmp + abs(x$rho_post - mean(x$rho_post))
+  ll_m <- x$ll[which(tmp == min(tmp))]
+  
+  DIC <- ll_m - 2 * (ll_m - mean(x$ll))
+  
+  t_WAIC <- -mean(x$ll)
+  v_WAIC <- sum((x$ll - mean(x$ll)) ^ 2)
+  WAIC <- t_WAIC + v_WAIC / x$N
+  
+  
   data.frame(
     "variables" = c(vars, if(!is.null(x$rho_post)) {"Rho"} else {NA}, 
-                    "R2", "RMSE", "AIC"),
+                    "R2", "RMSE_p", "RMSE_d", "BIC", "AIC", "WAIC"),
     "beta" = round(c(x$res_effects[-1, "beta"], 
                      if(!is.null(x$rho_post)) {mean(x$rho_post)} else {NA}, 
-                     x$res_other[1, 2], x$res_other[5, 2], x$res_other[3, 2]), 3),
-    "value_t" = c(t1, NA, NA, if(is.null(x$rho_post)) {NA}, NA)
+                     x$res_other[1, 2], RMSE_p, RMSE_d,
+                     BIC, AIC, WAIC), 3),
+    "value_t" = c(t1, NA, NA, if(is.null(x$rho_post)) {NA}, NA, NA, NA, NA)
   )
 }
 
