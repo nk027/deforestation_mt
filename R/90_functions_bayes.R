@@ -500,7 +500,7 @@ sem_panel <- function(
 
       # AIC & BIC
       # ll <- sum(dnorm(curr_resid, 0, 1, log = TRUE))
-      ll[s] <- curr_logdet - curr_ESS / (2 * curr_sigma)
+      ll[s] <- -curr_ESS / (2 * curr_sigma)
       df_ll <- K + 1
       BIC_post[s] <- -2 * ll[s] + log(N) * df_ll
       AIC_post[s] <- -2 * ll[s] + 2 * df_ll

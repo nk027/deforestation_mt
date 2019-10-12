@@ -29,7 +29,7 @@ bayesian_fit <- function(
   vars, results, W, dates_len,
   lag_X = TRUE, tfe = TRUE, cfe = TRUE, tfe_idx = NULL,
   n_draws = 1000) {
-  
+
   beta_post <- results$beta_post
   rho_post <- results$rho_post
 
@@ -49,15 +49,27 @@ bayesian_fit <- function(
                  beta_post_draw[(1 + ncol(x)):(2 * ncol(x) - 1)]} else {0}) 
     if(tfe) {X_beta <- X_beta + 
       if(is.null(tfe_idx)) {
-        mean(beta_post_draw[(2 * ncol(x)):(2 * ncol(x) + dates_len - 2)])
-        # beta_post_draw[(2 * ncol(x) + dates_len - 2)] # Option 2
+        if(lag_X) {
+          mean(beta_post_draw[(2 * ncol(x)):(2 * ncol(x) + dates_len - 2)])
+          # beta_post_draw[(2 * ncol(x) + dates_len - 2)] # Option 2
+        } else {
+          mean(beta_post_draw[(1 + ncol(x)):(1 + ncol(x) + dates_len - 2)])
+        }
       } else {
-        c(0, beta_post_draw[(2 * ncol(x)):(2 * ncol(x) + dates_len - 2)])[tfe_idx]
+        if(lag_X) {
+          c(0, beta_post_draw[(2 * ncol(x)):(2 * ncol(x) + dates_len - 2)])[tfe_idx]
+        } else {
+          c(0, beta_post_draw[(1 + ncol(x)):(1 + ncol(x) + dates_len - 2)])[tfe_idx]
+        }
       }
     }
     if(cfe) {
       X_beta <- X_beta + 
-        c(0, beta_post_draw[(2 * ncol(x) + dates_len - 1):length(beta_post_draw)])
+        if(lag_X) {
+          c(0, beta_post_draw[(2 * ncol(x) + dates_len - 1):length(beta_post_draw)])
+        } else {
+          c(0, beta_post_draw[(2 * ncol(x) + 1):length(beta_post_draw)])
+        }
     }
     
     y_pred[, i] <- (A_inv %*% X_beta)[, 1]
@@ -66,6 +78,40 @@ bayesian_fit <- function(
   return(y_pred)
 }
 
+bayesian_fit2 <- function(
+  x, 
+  vars, results, dates_len,
+  tfe = TRUE, cfe = TRUE, tfe_idx = NULL,
+  n_draws = 1000) {
+  
+  beta_post <- results$beta_post
+
+  y_pred <- matrix(NA, nrow = nrow(x), ncol = n_draws)
+  rnd <- sample(seq(1, dim(beta_post)[2]), replace = TRUE, n_draws)
+  
+  for(i in 1:n_draws) {
+    beta_post_draw <- beta_post[, rnd[i]]
+
+    X_beta <- (1 * beta_post_draw[1] + # Constant
+                 x[, -1] %*% beta_post_draw[2:(ncol(x))]) # X \beta
+    if(tfe) {X_beta <- X_beta + 
+      if(is.null(tfe_idx)) {
+        mean(beta_post_draw[(1 + ncol(x)):(1 + ncol(x) + dates_len - 2)])
+        # beta_post_draw[(2 * ncol(x) + dates_len - 2)] # Option 2
+      } else {
+        c(0, beta_post_draw[(1 + ncol(x)):(1 + ncol(x) + dates_len - 2)])[tfe_idx]
+      }
+    }
+    if(cfe) {
+      X_beta <- X_beta + 
+        c(0, beta_post_draw[(2 * ncol(x) + 1):length(beta_post_draw)])
+    }
+    
+    y_pred[, i] <- X_beta[, 1]
+  }
+  
+  return(y_pred)
+}
 
 plm_fit <- function(x, results, tfe, cfe, tfe_idx = NULL) {
   
@@ -263,11 +309,11 @@ table_ise <- function(x, W, vars, stars = TRUE) {
   }
   
   # Check if there's thetas involved
-  lag_X <- dim(x$beta_post)[1] > nrow(X) / dates_len + dates_len + length(vars) - 1
   W <- kronecker(diag(dates_len), W)
   matr <- get_matr(data, variables[[counter]], dates = dates)
   y <- matr[, 1]
   X <- cbind(1, matr[, -1])
+  lag_X <- dim(x$beta_post)[1] > nrow(X) / dates_len + dates_len + length(vars) - 1
   if(lag_X) {X <- cbind(X, W %*% matr[, -1])}
   TFE <- kronecker(diag(dates_len), matrix(1, nrow(X) / dates_len, 1))
   X <- cbind(X, TFE[, -1])
@@ -287,7 +333,7 @@ table_ise <- function(x, W, vars, stars = TRUE) {
   tmp <- tmp + abs(x$rho_post - mean(x$rho_post))
   ll_m <- x$ll[which(tmp == min(tmp))]
   
-  DIC <- ll_m - 2 * (ll_m - mean(x$ll))
+  DIC <- -2 * ll_m + 4 * (ll_m - mean(x$ll))
 
   t_WAIC <- -mean(x$ll)
   v_WAIC <- sum((x$ll - mean(x$ll)) ^ 2)
@@ -296,13 +342,13 @@ table_ise <- function(x, W, vars, stars = TRUE) {
   # elppd <- lppd - p_WAIC
   
   data.frame(
-    "variables" = c(vars, "Rho", "R2", "RMSE_p", "RMSE_d", "BIC", "AIC", "WAIC"),
+    "variables" = c(vars, "Rho", "R2", "RMSE_p", "RMSE_d", "BIC", "AIC", "DIC", "WAIC"),
     "direct" = round(c(x$res_effects[-1, "direct"], 
                        mean(x$rho_post), x$res_other[1, 2], 
-                       RMSE_p, RMSE_d, BIC, AIC, WAIC), 3),
-    "direct_t" = c(t1, NA, NA, NA, NA, NA, NA),
-    "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA, NA, NA, NA, NA), 3),
-    "indirect_t" = c(t2, NA, NA, NA, NA, NA, NA, NA)
+                       RMSE_p, RMSE_d, BIC, AIC, DIC, WAIC), 3),
+    "direct_t" = c(t1, NA, NA, NA, NA, NA, NA, NA),
+    "indirect" = round(c(x$res_effects[-1, "indirect"], NA, NA, NA, NA, NA, NA, NA, NA), 3),
+    "indirect_t" = c(t2, NA, NA, NA, NA, NA, NA, NA, NA)
   )
 }
 
@@ -334,10 +380,9 @@ table_ise.betas <- function(x, vars = x$variables, stars = TRUE) {
   AIC <- -2 * mean(x$ll) + 2 * (ncol(X + 1))
   
   tmp <- apply(x$beta_post, 2, function(y, b) {sum(abs(y - b))}, b = apply(x$beta_post, 1, mean))
-  tmp <- tmp + abs(x$rho_post - mean(x$rho_post))
   ll_m <- x$ll[which(tmp == min(tmp))]
   
-  DIC <- ll_m - 2 * (ll_m - mean(x$ll))
+  DIC <- -2 * ll_m + 4 * (ll_m - mean(x$ll))
   
   t_WAIC <- -mean(x$ll)
   v_WAIC <- sum((x$ll - mean(x$ll)) ^ 2)
@@ -346,12 +391,12 @@ table_ise.betas <- function(x, vars = x$variables, stars = TRUE) {
   
   data.frame(
     "variables" = c(vars, if(!is.null(x$rho_post)) {"Rho"} else {NA}, 
-                    "R2", "RMSE_p", "RMSE_d", "BIC", "AIC", "WAIC"),
+                    "R2", "RMSE_p", "RMSE_d", "BIC", "AIC", "DIC", "WAIC"),
     "beta" = round(c(x$res_effects[-1, "beta"], 
                      if(!is.null(x$rho_post)) {mean(x$rho_post)} else {NA}, 
                      x$res_other[1, 2], RMSE_p, RMSE_d,
-                     BIC, AIC, WAIC), 3),
-    "value_t" = c(t1, NA, NA, if(is.null(x$rho_post)) {NA}, NA, NA, NA, NA)
+                     BIC, AIC, DIC, WAIC), 3),
+    "value_t" = c(t1, NA, NA, if(is.null(x$rho_post)) {NA}, NA, NA, NA, NA, NA)
   )
 }
 
