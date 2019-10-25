@@ -85,8 +85,8 @@ W_k7n <- Ws[[3]]
 
 # Fixed effects
 fixed_effects <- list( # TFE, CFE
-  c(TRUE, TRUE)#,
-  # c(TRUE, FALSE),
+  # c(TRUE, TRUE)#,
+  c(TRUE, FALSE),
   # c(FALSE, FALSE)
 )
 

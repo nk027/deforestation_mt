@@ -438,3 +438,54 @@ table_ise.splm <- function(x, vars, stars = TRUE) {
     "value_t" = c(t1, NA, NA)
   )
 }
+
+
+get_hpdis <- function(x, ps = c(0.99, 0.95, 0.9)) {
+  
+  if(is.null(x$direct_post)) { # SEM & CLM
+    betas <- matrix(NA, nrow = length(ps) * 2 + 1, ncol = length(x$variables))
+    for(i in seq_along(ps)) {
+      betas[c(i, nrow(betas) - i + 1), ] <- 
+        t(get_hpdi(x$beta_post[seq(2, length(x$variables) + 1), ], ps[i]))
+    }
+    betas[length(ps) + 1, ] <- 
+      t(get_hpdi(x$beta_post[seq(2, length(x$variables) + 1), ], 0))[1, ]
+    rownames(betas) <- c(ps, 0.5, 1 - rev(ps))
+    
+    out <- list("betas" = betas)
+    
+    if(!is.null(x$rho_post)) {
+      rhos <- matrix(NA, nrow = length(ps) * 2 + 1, ncol = 1)
+      for(i in seq_along(ps)) {
+        rhos[c(i, nrow(rhos) - i + 1), ] <- t(get_hpdi(x$rho_post, ps[i]))
+      }
+      rhos[length(ps) + 1, ] <- t(get_hpdi(x$rho_post, 0))[1, ]
+      rownames(rhos) <- c(ps, 0.5, 1 - rev(ps))
+      out$rhos <- rhos
+    }
+    return(out)
+  }
+  
+  directs <- matrix(NA, nrow = length(ps) * 2 + 1, ncol = dim(x$direct_post)[1] - 1)
+  for(i in seq_along(ps)) {
+    directs[c(i, nrow(directs) - i + 1), ] <- t(get_hpdi(x$direct_post[-1, ], ps[i]))
+  }
+  directs[length(ps) + 1, ] <- t(get_hpdi(x$direct_post[-1, ], 0))[1, ]
+  
+  indirects <- matrix(NA, nrow = length(ps) * 2 + 1, ncol = dim(x$indirect_post)[1] - 1)
+  for(i in seq_along(ps)) {
+    indirects[c(i, nrow(indirects) - i + 1), ] <- t(get_hpdi(x$indirect_post[-1, ], ps[i]))
+  }
+  indirects[length(ps) + 1, ] <- t(get_hpdi(x$indirect_post[-1, ], 0))[1, ]
+  
+  rhos <- matrix(NA, nrow = length(ps) * 2 + 1, ncol = 1)
+  for(i in seq_along(ps)) {
+    rhos[c(i, nrow(rhos) - i + 1), ] <- t(get_hpdi(x$rho_post, ps[i]))
+  }
+  rhos[length(ps) + 1, ] <- t(get_hpdi(x$rho_post, 0))[1, ]
+  
+  rownames(directs) <- rownames(indirects) <- rownames(rhos) <- c(ps, 0.5, 1 - rev(ps))
+  
+  out <- list("directs" = directs, "indirects" = indirects, "rhos" = rhos)
+  return(out)
+}

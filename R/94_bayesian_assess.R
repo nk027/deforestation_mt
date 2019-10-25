@@ -133,3 +133,15 @@ for(i in seq(1, -1 + length(variables[[counter]]))) {
             cols = c("#CCCCCC33", "#FFFF0033", "#FF00CC33"))
 }
 par(op); dev.off()
+
+
+# Get HPDIs ---------------------------------------------------------------
+
+ci_sdm_qu <- lapply(get_hpdis(sdm_qu[[1]], c(0.99, 0.95)), t)
+write.csv(cbind(rbind(ci_sdm_qu[[1]], ci_sdm_qu[[3]]), rbind(ci_sdm_qu[[2]], NA)), "txt/ci/sdm_qu.csv")
+ci_sdm_k7 <- lapply(get_hpdis(sdm_k7[[1]], c(0.99, 0.95)), t)
+write.csv(cbind(rbind(ci_sdm_k7[[1]], ci_sdm_k7[[3]]), rbind(ci_sdm_k7[[2]], NA)), "txt/ci/sdm_k7.csv")
+ci_sar_qu <- lapply(get_hpdis(sar_qu[[1]], c(0.99, 0.95)), t)
+write.csv(cbind(rbind(ci_sar_qu[[1]], ci_sar_qu[[3]]), rbind(ci_sar_qu[[2]], NA)), "txt/ci/sar_qu.csv")
+write.csv(do.call(rbind, lapply(get_hpdis(sem_qu[[1]], c(0.99, 0.95)), t)), "txt/ci/sem_qu.csv")
+write.csv(lapply(get_hpdis(clm[[1]], c(0.99, 0.95)), t), "txt/ci/clm.csv")
