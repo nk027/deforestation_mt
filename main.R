@@ -161,7 +161,7 @@ source("R/33_functions_bayes.R")
 # Execute Bayesian model estimation, based on the setup from before. Note
 # that the MCMC algorithms tend to take quite a while.
 # Outputs are RDA files stored as "models_bayesian_%EFFECT.rda".
-source("R/34_bayesian_calc.R")
+source("R/34_calc_bayesian.R")
 
 # Functions to aid in assessing results, i.e. summarise outputs, create tables
 # and calculate in- and out-of-sample fits.
@@ -170,10 +170,10 @@ source("R/40_functions_assess.R")
 # Assess the results created in previous steps. Depends on the settings from
 # "31_model_setup.R" as well as the RDA files with lists of results.
 # Generates CSV files with results and PNG files of the model fit.
-source("R/41_results_assess.R")
+source("R/41_assess_bayes.R")
 
-# Perform several tests (Chow, LM, Moran's...). Depends on settings and data from
-# "31_model_setup.R".
+# Perform several tests (Chow, LM, Moran's...). Depends on settings and data
+# from "31_model_setup.R".
 source("R/45_model_tests.R")
 
 rm(list = ls()); gc()
@@ -197,6 +197,6 @@ source("R/72_municipio_plot.R")
 source("R/73_summary_table.R")
 
 # Create a PNG file with a heatmap of the RMSEs of models over time.
-source("R/74_rmse_plot.R")
+source("R/75_rmse_plot.R")
 
 rm(list = ls()); gc()

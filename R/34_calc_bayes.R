@@ -94,7 +94,7 @@ if(pl_model == "pooling") {effect <- "none"} # Properly name effect now
 save(file = paste0("data/models_bayesian_", effect, ".rda"),
      list = c("sdm_qu", "sdm_k5", "sdm_k7",
               "sar_qu", "sar_k5", "sar_k7",
-              "sem_qu", # "sem_k5", "sem_k7",
+              "sem_qu", "sem_k5", "sem_k7",
               "clm"))
 
 }
