@@ -25,7 +25,7 @@ rm(list = ls()); gc()
 
 # Prepare land use change data --------------------------------------------
 
-# Read in TIF raster files from "data/landsat", merge them with the SHP map 
+# Read in TIF raster files from "data/landsat", merge them with the SHP map
 # of political boundaries found in "data/municipios" and create a tidy tibble.
 # Intermediate and final outputs are stored in "data/geo".
 
@@ -48,18 +48,18 @@ rm(list = ls()); gc()
 
 # Prepare SPEI data -------------------------------------------------------
 
-# Read in NCDF raster files from "data/spei", merge them with IDs from the maps 
+# Read in NCDF raster files from "data/spei", merge them with IDs from the maps
 # of political boundaries found in "data/municipios" and create a tidy tibble.
-# Intermediate and final outputs are stored in "data/geo". The desired 
+# Intermediate and final outputs are stored in "data/geo". The desired
 # SPEI timescale is set in the scripts.
 
-# Read in NCDFs and merge them with the SHP file using weighted 
-# `raster::extract`. Creates a list of extracted dataframes and stores it as 
+# Read in NCDFs and merge them with the SHP file using weighted
+# `raster::extract`. Creates a list of extracted dataframes and stores it as
 # "geo_spei_%TIMESCALE_raw.rds".
 # Very computationally intensive, done via `parallel::parLapply` if available.
 source("R/13_spei_extract.R")
 
-# Create and tidy a tibble from the list of extracted values. Stores the tidy 
+# Create and tidy a tibble from the list of extracted values. Stores the tidy
 # tibble in long format as "geo_spei_%TIMESCALE.rds".
 source("R/14_spei_tidy.R")
 
@@ -79,31 +79,31 @@ rm(list = ls()); gc()
 
 source("R/16_functions_read.R")
 
-# Read in ODS files with crop data from "data/sidra" and merge them with each 
+# Read in ODS files with crop data from "data/sidra" and merge them with each
 # other.
-# The files are split to contain areas and quantities (i.e. value and weight). 
-# Numbered files contain different periods, where #1 is dropped as it is too 
+# The files are split to contain areas and quantities (i.e. value and weight).
+# Numbered files contain different periods, where #1 is dropped as it is too
 # early to be useful. Worksheets contain planted (1) and harvested (2) area.
 # Creates two files - "crop_quant.rds" and "crop_value.rds".
 source("R/17_crops_read.R")
 
 # Read in ODS files with forestry data from "data/sidra".
 # The files are split into actual forestry and vegetable data. Columns contain
-# totals and subtotals, making subsetting necessary. Worksheets contain 
+# totals and subtotals, making subsetting necessary. Worksheets contain
 # quantities (1) and values (2).
-# Creates four files - "forestry_quant.rds", "forestry_value.rds", 
+# Creates four files - "forestry_quant.rds", "forestry_value.rds",
 # "veggies_quant.rds" and "veggies_value.rds".
 source("R/17_forestry_read.R")
 
 # Read in ODS files with livestock data from "data/sidra".
-# The files are split into animal produce, with worksheets containing 
+# The files are split into animal produce, with worksheets containing
 # quantities (1) and values (2), general herd sizes and the herd size of milk
 # cows.
 # Creates four files - "animal_quant.rds", "animal_value.rds", "herd_sizes.rds"
 # and "milk_cows.rds".
 source("R/17_livestock_read.R")
 
-# Read in ODS files with socioeconomic data from "data/sidra" and merge them 
+# Read in ODS files with socioeconomic data from "data/sidra" and merge them
 # with each other.
 # The files are split into GDP, population estimates and population censuses for
 # 2007 and 2010.
@@ -119,11 +119,11 @@ rm(list = ls()); gc()
 # yields and fill missing values for soy yields.
 # Ultimately create an RDS file under "data/data.rds".
 
-# Merge different IBGE datasets, keep variables of interest and adjust units. 
+# Merge different IBGE datasets, keep variables of interest and adjust units.
 # Store the resulting tibble as "data/tab/tab.rds".
 source("R/18_tab_aggregate.R")
 
-# Wrap up land use, SPEI and IBGE tabular data in a single file. Derive some 
+# Wrap up land use, SPEI and IBGE tabular data in a single file. Derive some
 # variables of interest. Explore yield values of crops.
 # Results are stored as sf-tibble under "data/data_raw.rds"
 source("R/19_data_wrap.R")
@@ -141,41 +141,33 @@ rm(list = ls()); gc()
 
 # Model -------------------------------------------------------------------
 
-# Set up, calculate and assess models. Fit a custom Bayesian SDM, a CLM using 
+# Set up, calculate and assess models. Fit a custom Bayesian SDM, a CLM using
 # `plm::plm` and a SAR / SEM using `splm::spml` to models built from "data.rds".
 # Results are stored as RDA files under "data/models_%EFFECT.rda", where effect
 # corresponds to the treatment of fixed effects.
 
-# Functions to aid with model estimation (get data subsets, build weights 
-# matrices, ...) and estimate the SDM. log|I - rho W| is approximated following 
-# Pace & Barry.
+# Functions to aid with model estimation (get data subsets, build weights
+# matrices, ...).
 source("R/30_functions_model.R")
 
 # Preparation and options for the model estimation. Contained settings are also
 # required for subsequent assessments.
 source("R/31_model_setup.R")
 
-# Execute the model estimation prepared in the previous step. Results are
-# stored in lists (one per estimation / weight combination), with individual 
-# elements corresponding to the chosen variable subsets. Variations of fixed
-# effects are stored separately.
-# Outputs are RDA files stored as "models_%EFFECT.rda".
-# source("R/33_model_calc.R")
-
-# After an update you can now calculate all models using a Bayesian approach. 
+# After an update you can now calculate all models using a Bayesian approach.
 # Source (updated) functions to calculate SDM, SAR, SEM and CLM
 source("R/90_functions_bayes.R")
 
-# Execute Bayesian model estimation, based on the setup from before. Note 
+# Execute Bayesian model estimation, based on the setup from before. Note
 # that the MCMC algorithms tend to take quite a while.
 # Outputs are RDA files stored as "models_bayesian_%EFFECT.rda".
 source("R/93_bayesian_calc.R")
 
-# Functions to aid in assessing results, i.e. summarise outputs, create tables 
+# Functions to aid in assessing results, i.e. summarise outputs, create tables
 # and calculate in- and out-of-sample fits.
 source("R/40_functions_assess.R")
 
-# Assess the results created in previous steps. Depends on the settings from 
+# Assess the results created in previous steps. Depends on the settings from
 # "31_model_setup.R" as well as the RDA files with lists of results.
 # Generates CSV files with results and PNG files of the model fit.
 source("R/41_results_assess.R")
@@ -189,12 +181,12 @@ rm(list = ls()); gc()
 
 # Other -------------------------------------------------------------------
 
-# Crosscheck our studied area with the deforestation drivers identified by 
+# Crosscheck our studied area with the deforestation drivers identified by
 # Curtis et al. (2018). Important for the forestloss ~ deforestation argument.
 source("R/70_loss_drivers.R")
 
 # Create a plot of relevant land use from the data of Câmara et al. (2019).
-# The two evaluated years and the legend are plotted separately. The final 
+# The two evaluated years and the legend are plotted separately. The final
 # version was created using GIMP.
 source("R/71_landuse_plot.R")
 

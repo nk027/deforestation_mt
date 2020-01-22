@@ -13,7 +13,6 @@ stopifnot(
 
 # Go over FEs -------------------------------------------------------------
 
-# fe <- c(TRUE, TRUE)
 for(fe in fixed_effects) {
 
 tfe <- fe[1]; cfe <- fe[2]
@@ -26,71 +25,62 @@ if(tfe) {if(cfe) {effect <- "twoways"} else {effect <- "time"}} else {
 }
 
 matrices <- list()
-sdm_qu <- list()
-sdm_k5 <- list()
-sdm_k7 <- list()
-sar_qu <- list()
-sar_k5 <- list()
-sar_k7 <- list()
-sem_qu <- list()
-sem_k5 <- list()
-sem_k7 <- list()
-clm <- list()
+sdm_qu <- sdm_k5 <- sdm_k7 <- sar_qu <- sar_k5 <- sar_k7 <-
+  sem_qu <- sem_k5 <- sem_k7 <- clm <- list()
 
 for(counter in seq_along(variables)) {
 
 matrices[[counter]] <- get_matr(data, variables[[counter]], dates = dates)
 
 sdm_qu[[counter]] <- sdm_panel(matrices[[counter]],
-                               W_qu, dates_len, lag_X = TRUE, 
+                               W_qu, dates_len, lag_X = TRUE,
                                tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
                                n_iter = n_iter, n_save = n_save,
                                n_griddy = n_griddy)
 sdm_k5[[counter]] <- sdm_panel(matrices[[counter]],
-                               W_k5n, dates_len, lag_X = TRUE, 
+                               W_k5n, dates_len, lag_X = TRUE,
                                tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
                                n_iter = n_iter, n_save = n_save,
                                n_griddy = n_griddy)
 sdm_k7[[counter]] <- sdm_panel(matrices[[counter]],
-                               W_k7n, dates_len, lag_X = TRUE, 
+                               W_k7n, dates_len, lag_X = TRUE,
                                tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-                               n_iter = n_iter, n_save = n_save, 
+                               n_iter = n_iter, n_save = n_save,
                                n_griddy = n_griddy)
 sar_qu[[counter]] <- sdm_panel(matrices[[counter]],
-                               W_qu, dates_len, lag_X = FALSE, 
+                               W_qu, dates_len, lag_X = FALSE,
                                tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
                                n_iter = n_iter, n_save = n_save,
                                n_griddy = n_griddy)
 sar_k5[[counter]] <- sdm_panel(matrices[[counter]],
-                               W_k5n, dates_len, lag_X = FALSE, 
+                               W_k5n, dates_len, lag_X = FALSE,
                                tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
                                n_iter = n_iter, n_save = n_save,
                                n_griddy = n_griddy)
 sar_k7[[counter]] <- sdm_panel(matrices[[counter]],
-                               W_k7n, dates_len, lag_X = FALSE, 
+                               W_k7n, dates_len, lag_X = FALSE,
                                tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
                                n_iter = n_iter, n_save = n_save,
                                n_griddy = n_griddy)
-# SEM takes forever
 sem_qu[[counter]] <- sem_panel(matrices[[counter]],
                                W_qu, dates_len, tfe = tfe, cfe = cfe,
                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
                                n_iter = n_iter / 10, n_save = n_save / 10)
-# sem_k5[[counter]] <- sem_panel(matrices[[counter]],
-#                                W_k5n, dates_len, tfe = tfe, cfe = cfe,
-#                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-#                                n_iter = n_iter, n_save = n_save)
-# sem_k7[[counter]] <- sem_panel(matrices[[counter]],
-#                                W_k7n, dates_len, tfe = tfe, cfe = cfe,
-#                                rho_a, sigma_a, sigma_b, beta_mean, beta_var,
-#                                n_iter = n_iter, n_save = n_save)
-clm[[counter]] <- clm_panel(matrices[[counter]], dates_len, 
+sem_k5[[counter]] <- sem_panel(matrices[[counter]],
+                               W_k5n, dates_len, tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save)
+sem_k7[[counter]] <- sem_panel(matrices[[counter]],
+                               W_k7n, dates_len, tfe = tfe, cfe = cfe,
+                               rho_a, sigma_a, sigma_b, beta_mean, beta_var,
+                               n_iter = n_iter, n_save = n_save)
+clm[[counter]] <- clm_panel(matrices[[counter]], dates_len,
                             tfe = tfe, cfe = cfe,
                             sigma_a, sigma_b, beta_mean, beta_var,
                             n_iter = n_iter, n_save = n_save)

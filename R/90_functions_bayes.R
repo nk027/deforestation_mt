@@ -66,10 +66,6 @@ sdm_panel <- function(
   beta_pr_mean <- matrix(beta_mean, K, 1)
   beta_pr_var <- diag(K) * beta_var
   beta_pr_var_inv <- solve(beta_pr_var)
-  # plot(density(rnorm(1e6, beta_pr_mean[1], beta_pr_var[1,1] ^ -1)))
-
-  # Inverse Gamma prior on sigma
-  # plot(density(1 / rgamma(1e6, sigma_a / 2, sigma_b / 2)))
 
   # Beta prior on rho
   beta_prob <- function(rho, a) {
@@ -77,7 +73,6 @@ sdm_panel <- function(
       ((1 + rho) ^ (a - 1) * (1 - rho) ^ (a - 1)) /
       (2 ^ (2 * a - 1))
   }
-  # plot(beta_prob(seq(-1, 1, length.out = 1e6), rho_a), type = "l")
 
 
   # Griddy Gibbs ------------------------------------------------------------
@@ -165,7 +160,8 @@ sdm_panel <- function(
     den <- ln_det + z + log(beta_prob(rhos, rho_a))
     den_adj <- den - max(den)
     ex <- exp(den_adj)
-    i_sum <- sum((rhos[-1] + rhos[-length(rhos)]) * (ex[-1] - ex[-length(ex)]) / 2)
+    i_sum <- sum((rhos[-1] + rhos[-length(rhos)]) *
+      (ex[-1] - ex[-length(ex)]) / 2)
     z <- abs(ex / i_sum)
     dens <- cumsum(z)
     rnd <- runif(1) * sum(z)
@@ -476,8 +472,6 @@ sem_panel <- function(
       curr_logdet <- prop_logdet
       n_acc <- n_acc + 1
     }
-    # Adjust candidate distribution
-    # or not
 
     # Store
     if(i > n_burn) {
