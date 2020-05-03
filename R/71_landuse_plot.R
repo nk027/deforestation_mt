@@ -1,6 +1,14 @@
 
-library("raster")
-library("sf")
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  require("raster"),
+  require("sf")
+)
+
+r01 <- raster("data/landsat/mt_2001_v3_1.tif")
+r17 <- raster("data/landsat/mt_2017_v3_1.tif")
+shp <- rgdal::readOGR("data/municipios/")
 
 
 # Colours to apply to the plot --------------------------------------------
@@ -43,10 +51,6 @@ dev.off()
 
 
 # Raster ------------------------------------------------------------------
-
-r01 <- raster("data/landsat/mt_2001_v3_1.tif")
-r17 <- raster("data/landsat/mt_2017_v3_1.tif")
-shp <- rgdal::readOGR("data/municipios/")
 
 png("plots/2001.png", width = 1600, height = 1440)
 op <- par(mar = c(2, 2, 2, 0.5))

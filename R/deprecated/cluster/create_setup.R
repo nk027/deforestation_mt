@@ -112,4 +112,4 @@ for(i_fe in seq_along(fixed_effects)) {
 }
 
 rm(i, j, i_fe, i_var, i_W, i_funs, get_W, get_matr)
-save.image("data/setup_cluster.R")
+save.image("data/setup_cluster.Rda")

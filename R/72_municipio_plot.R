@@ -1,9 +1,16 @@
 
-library("sf")
-library("dplyr")
-library("ggplot2")
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  require("dplyr"),
+  require("sf"),
+  require("ggplot2")
+)
 
 x <- read_sf("data/municipios/")
+
+
+# Plots -------------------------------------------------------------------
 
 df <- x %>% 
   transmute(id = as.integer(CD_GEOCMU)) %>% 

@@ -8,3 +8,4 @@ plots/*
 txt/*.csv
 txt/base/*
 txt/proper/*
+txt/ci/*

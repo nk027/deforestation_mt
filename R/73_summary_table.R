@@ -1,10 +1,11 @@
 
-library("dplyr")
-library("sf")
+# Dependencies ------------------------------------------------------------
 
-data <- readRDS("data/data.rds")
-
-dates <- seq(2006, 2016)
+stopifnot(
+  exists("data"), exists("dates"), # etc., 31
+  require("dplyr"),
+  require("sf")
+)
 
 
 # Summarise data ---------------------------------------------------------

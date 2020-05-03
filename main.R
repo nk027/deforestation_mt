@@ -146,35 +146,7 @@ rm(list = ls()); gc()
 # Results are stored as RDA files under "data/models_%EFFECT.rda", where effect
 # corresponds to the treatment of fixed effects.
 
-# Functions to aid with model estimation (get data subsets, build weights
-# matrices, ...).
-source("R/30_functions_model.R")
 
-# Preparation and options for the model estimation. Contained settings are also
-# required for subsequent assessments.
-source("R/31_model_setup.R")
-
-# After an update you can now calculate all models using a Bayesian approach.
-# Source (updated) functions to calculate SDM, SAR, SEM and CLM
-source("R/33_functions_bayes.R")
-
-# Execute Bayesian model estimation, based on the setup from before. Note
-# that the MCMC algorithms tend to take quite a while.
-# Outputs are RDA files stored as "models_bayesian_%EFFECT.rda".
-source("R/34_calc_bayesian.R")
-
-# Functions to aid in assessing results, i.e. summarise outputs, create tables
-# and calculate in- and out-of-sample fits.
-source("R/40_functions_assess.R")
-
-# Assess the results created in previous steps. Depends on the settings from
-# "31_model_setup.R" as well as the RDA files with lists of results.
-# Generates CSV files with results and PNG files of the model fit.
-source("R/41_assess_bayes.R")
-
-# Perform several tests (Chow, LM, Moran's...). Depends on settings and data
-# from "31_model_setup.R".
-source("R/45_model_tests.R")
 
 rm(list = ls()); gc()
 
@@ -182,7 +154,7 @@ rm(list = ls()); gc()
 # Other -------------------------------------------------------------------
 
 # Crosscheck our studied area with the deforestation drivers identified by
-# Curtis et al. (2018). Important for the forestloss ~ deforestation argument.
+# Curtis et al. (2018). Important for the forest-loss ~ deforestation argument.
 source("R/70_loss_drivers.R")
 
 # Create a plot of relevant land use from the data of Câmara et al. (2019).

@@ -1,4 +1,13 @@
 
+# Dependencies ------------------------------------------------------------
+
+stopifnot(
+  require("dplyr")
+)
+
+
+# Functions ---------------------------------------------------------------
+
 plot_dens <- function(
   x, dots = list(), 
   cols = c("#CCCCCC33"),
@@ -20,10 +29,10 @@ plot_dens <- function(
   abline(v = bounds, lty = "dashed", col = "darkgray")
 }
 
-counter <- 1
-
 
 # Table -------------------------------------------------------------------
+
+counter <- 1
 
 table <- do.call(cbind, 
                  lapply(1:8, function(i, run, W) {

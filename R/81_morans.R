@@ -2,7 +2,7 @@
 # Dependencies ------------------------------------------------------------
 
 stopifnot(
-  # Needs 31
+  # Needs parts of 55
   exists("data"), exists("dates"), exists("dates_len"), exists("W_qu"),
   require("spdep")
 )
