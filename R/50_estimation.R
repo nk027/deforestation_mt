@@ -68,6 +68,7 @@ sar <- function(
   sigma_draw <- 1 / rgamma(1, sigma_a / 2, sigma_b / 2)
   j <- as.integer(grid[["n_rho"]] / 2L)
   rho_draw <- grid[["rhos"]][j] # Middle
+  Ay <- (Matrix:::.sparseDiagonal(N) - rho_draw * W) %*% y
   
   XX <- crossprod(X)
   Xy <- crossprod(X, y)
@@ -80,16 +81,15 @@ sar <- function(
     # Beta
     V <- solve(beta_pr_var_inv + 1 / sigma_draw * XX)
     b <- V %*% (beta_pr_var %*% beta_pr_mean +
-        1 / sigma_draw * crossprod(X, grid[["Ay"]][j, ]))
+        1 / sigma_draw * crossprod(X, Ay))
     # beta_draw <- as.numeric(mvtnorm::rmvnorm(1L, mean = b, sigma = as.matrix(V)))
     beta_draw <- as.numeric(rmvn(1L, mean = b, sigma = V))
     
     # Sigma
-    ESS_draw <- as.double(crossprod(grid[["Ay"]][j, ] - X %*% beta_draw))
+    ESS_draw <- as.double(crossprod(Ay - X %*% beta_draw))
     sigma_draw <- 1 / rgamma(1, sigma_a + N / 2, sigma_b + ESS_draw / 2)
-    
+
     # Rho
-    V <- solve(beta_pr_var_inv + 1 / sigma_draw * XX)
     b0 <- V %*% (beta_pr_var_inv %*% beta_pr_mean + 1 / sigma_draw * Xy)
     bd <- V %*% (beta_pr_var_inv %*% beta_pr_mean + 1 / sigma_draw * XWy)
     
@@ -114,6 +114,7 @@ sar <- function(
       j <- which(grid[["rhos"]] == rho_draw)
     }
     rho_draw <- grid[["rhos"]][j]
+    Ay <- (Matrix:::.sparseDiagonal(N) - rho_draw * W) %*% y
     
     # Store
     if(i > 0 && i %% n_thin == 0) {
@@ -148,7 +149,7 @@ sar <- function(
       "rho_a" = rho_a
     ),
     "meta" = list(
-      "timer" = timer, "y" = y, "X" = X, "W", "LX" = LX, "N" = N, "K" = K,
+      "timer" = timer, "y" = y, "X" = X, "W" = W, "LX" = LX, "N" = N, "K" = K,
       "tfe" = tfe, "ife" = ife,
       "n_draw" = n_draw, "n_burn" = n_burn, "n_save" = n_save,
       "n_thin" = n_thin

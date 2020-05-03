@@ -26,31 +26,33 @@ get_weights <- function(x, type = c("queen", "knear"), k = 5) {
 }
 
 
-effects.sar <- function(x, n_draw, names) {
+effects.sar <- function(x, n_draw = 100, names) {
   
   if(missing(n_draw)) {n_draw <- x$meta$n_save}
   draws <- sample(x$meta$n_save, n_draw, replace = FALSE)
   
   rhos <- x$rho[draws]
   betas <- x$beta[draws, ]
-  k <- x$meta$k
   W <- x$meta$W
   N <- x$meta$N
   LX <- x$meta$LX
   index <- colnames(x$beta)
+  k <- sum(colnames(x$beta) == "beta") + 1
   
   eff_dir <- eff_ind <- matrix(NA, nrow = n_draw, ncol = k)
   dimnames(eff_dir)[[2]] <- dimnames(eff_ind)[[2]] <-
-    if(!missing(names)) {names} else {index}
+    if(!missing(names)) {names} else {index[seq(k)]}
   
   for(i in seq_len(n_draw)) {
     B <- solve(Matrix::.sparseDiagonal(N) - rhos[i] * W)
-    eff_dir[i, ] <- sum(diag(B)) / N * betas[i, seq_len(k)] + if(LX) {
-      c(0, sum(diag(B %*% W)) / N * betas[i, index == "theta"])
-    } else {0}
-    eff_tot <- sum(B) / N * betas[i, seq_len(k)] + if(LX) {
-      c(0, sum(B %*% W) / N * betas[i, index == "theta"])
-    } else {0}
+    eff_dir[i, ] <- sum(diag(B)) / N * betas[i, index %in% c("alpha", "beta")] + 
+      if(LX) {
+        c(0, sum(diag(B %*% W)) / N * betas[i, index == "theta"])
+      } else {0}
+    eff_tot <- sum(B) / N * betas[i, index %in% c("alpha", "beta")] + 
+      if(LX) {
+        c(0, sum(B %*% W) / N * betas[i, index == "theta"])
+      } else {0}
     eff_ind[i, ] <- eff_tot - eff_dir[i, ]
   }
   
@@ -91,7 +93,7 @@ DIC.sar <- DIC.clm <- function(x) {
 }
 
 
-predict.sar <- function(x, n_draw, newdata) {
+predict.sar <- function(x, n_draw = 100, newdata) {
   
   if(missing(n_draw)) {n_draw <- x$meta$n_save}
   draws <- sample(x$meta$n_save, n_draw, replace = FALSE)
@@ -178,12 +180,13 @@ rmse.sar <- rmse.clm <- function(x, n_draw) {
 
 hpdi <- function(x, ...) {UseMethod("hpdi", x)}
 
-hpdi.sar <- function(x, probs = c(0.9, 0.95, 0.99), n_draw, names) {
+hpdi.sar <- function(x, probs = c(0.9, 0.95, 0.99), n_draw = 100, names) {
   
   effs <- effects(x, n_draw, names)
   colnames(effs$direct) <- paste0(colnames(effs$direct), "_dir")
   colnames(effs$indirect) <- paste0(colnames(effs$indirect), "_ind")
-  coefs <- cbind(rho = x$rho, effs$direct, effs$indirect)
+  coefs <- cbind(effs$direct, effs$indirect,
+    rho = x$rho[sample(x$meta$n_save, nrow(effs$direct), replace = FALSE)])
   
   return(.hpdi(coefs, probs))
 }

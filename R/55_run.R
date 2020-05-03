@@ -72,7 +72,7 @@ Ws <- list(
 
 # Prep sampler ------------------------------------------------------------
 
-n_rho <- 1000
+n_rho <- 5000
 n_draw <- 10000L
 n_burn <- 2000L
 sigma_a <- 10
@@ -86,13 +86,13 @@ rho_a <- 1.01
 
 model <- "base"
 weights <- "qu"
-regrid <- FALSE
+re_grid <- FALSE
 
-# for(model in names(variables)) {
+for(model in names(variables)) {
   
 x <- get_matrix(data, variables[[model]], dates)
 
-if(!exists("rho_grid") || regrid) {
+if(!exists("rho_grid") || re_grid) {
   rho_grid <- get_grid(NULL, W_pre = Ws[[weights]], 
     y = get_matrix(data, "forest_ch_km2", dates), 
     N = nrow(x), n_rho = n_rho, type = "eigen")
@@ -126,4 +126,5 @@ out_clm <- clm(x, LX = FALSE,
 
 save(out_sdm, out_sar, out_slx, out_clm, 
   file = paste0("data/est_", model, "_", weights, ".rda"))
+
 }

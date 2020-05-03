@@ -60,6 +60,8 @@ get_grid <- function(
     "eigen", "Matrix_J", "spam", "LU", "MC", "cheb", "moments"),
   spline = TRUE) {
   
+  start_time <- Sys.time()
+  
   type <- match.arg(type)
   if(type != "exact") {
     ldet_env <- new.env()
@@ -81,7 +83,7 @@ get_grid <- function(
   for(i in seq_along(rhos)) {
     A[[i]] <- Matrix:::.sparseDiagonal(N) - rhos[i] * W
   }
-  
+
   # Cheaper log|A| if W is created via a Kronecker product
   if(is.null(W_pre)) {
     ldets <- if(type == "exact") {
@@ -100,20 +102,28 @@ get_grid <- function(
     ldets <- log(exp(ldets) ^ as.integer(N / nrow(W_pre)))
   }
   
+  cat("Finished log-det after ", 
+    format(round(Sys.time() - start_time, 2)), ".\n", sep = "")
+  
   if(spline) {
     n_rho <- n_rho * 3
     spl <- spline(y = ldets, x = rhos, n = n_rho)
     ldets <- spl[["y"]]
     rhos <- spl[["x"]]
+    cat("Finished spline after ", 
+      format(round(Sys.time() - start_time, 2)), ".\n", sep = "")
   }
   
-  Ay <- Matrix(0, n_rho, N)
-  for(i in seq_along(rhos)) {
-    if(spline) {
-      A_i <- Matrix:::.sparseDiagonal(N) - rhos[i] * W
-    } else {A_i <- A[[i]]}
-    Ay[i, ] <- A_i %*% y
-  }
+  # Ay <- Matrix(0, n_rho, N)
+  # for(i in seq_along(rhos)) {
+  #   if(spline) {
+  #     A_i <- Matrix:::.sparseDiagonal(N) - rhos[i] * W
+  #   } else {A_i <- A[[i]]}
+  #   Ay[i, ] <- A_i %*% y
+  # }
   
-  list("rhos" = rhos, "ldets" = ldets, "Ay" = Ay, "n_rho" = n_rho)
+  list(
+    "rhos" = rhos, "ldets" = ldets, 
+    # "Ay" = Ay, 
+    "n_rho" = n_rho)
 }
