@@ -44,10 +44,11 @@ variables <- list(
     "spei_wet", "spei_dry"),
   contemp = c("forest_ch_km2",
     "forest_px_km2", "pasture_px_km2", "crop_px_km2",
-    "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
+    "pasture_px_km2_lag", "crop_px_km2_lag",
     "pop_km2_log", "gdp_cap_lag",
     "pop_km2_lag_log", "gdp_cap_lag_log",
     "cattle_dens_log", "soy_filled",
+    "cattle_dens_lag_log", "soy_filled_lag",
     "spei_wet_lag", "spei_dry_lag", 
     "spei_wet", "spei_dry"),
   no_yields = c("forest_ch_km2",
@@ -58,8 +59,7 @@ variables <- list(
     "forest_px_km2_lag",
     "pop_km2_lag_log", "gdp_cap_lag_log",
     "cattle_dens_lag_log", "soy_filled_lag",
-    "spei_wet", "spei_dry")
-)
+    "spei_wet", "spei_dry"))
 
 # Weights
 Ws <- list(

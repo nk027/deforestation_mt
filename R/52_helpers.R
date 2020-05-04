@@ -80,11 +80,13 @@ logLik.clm <- function(x, fun = mean) {
 }
 
 
-deviance.sar <- deviance.clm <- function(x) {-2 * x$ll}
+deviance.sar <- deviance.clm <- function(x, fun) {
+  if(missing(fun)) {-2 * x$ll} else {-2 * logLik(x, fun)}
+}
 
-AIC.sar <- AIC.clm <- function(x) {deviance(x) + 2 * x$meta$K}
+AIC.sar <- AIC.clm <- function(x, fun) {deviance(x, fun) + 2 * x$meta$K}
 
-BIC.sar <- BIC.clm <- function(x) {deviance(x) + x$meta$K * log(x$meta$N)}
+BIC.sar <- BIC.clm <- function(x, fun) {deviance(x, fun) + x$meta$K * log(x$meta$N)}
 
 DIC <- function(x) {UseMethod("DIC", x)}
 
@@ -135,7 +137,7 @@ predict.clm <- function(x, n_draw, newdata) {
 }
 
 
-residuals.sar <- function(x, n_draw) {
+residuals.sar <- function(x, n_draw = 100) {
   
   if(missing(n_draw)) {n_draw <- x$meta$n_save}
   draws <- sample(x$meta$n_save, n_draw, replace = FALSE)
@@ -154,7 +156,7 @@ residuals.sar <- function(x, n_draw) {
 }
 
 
-residuals.clm <- function(x, n_draw) {
+residuals.clm <- function(x, n_draw = 100) {
   
   if(missing(n_draw)) {n_draw <- x$meta$n_save}
   draws <- sample(x$meta$n_save, n_draw, replace = FALSE)
