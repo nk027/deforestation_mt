@@ -37,9 +37,19 @@ variables <- list(
     "pop_km2_lag_log", "gdp_cap_lag_log",
     "cattle_dens_lag_log", "soy_filled_lag",
     "spei_wet", "spei_dry"),
+  base_lag2 = c("forest_ch_km2",
+    "forest_px_km2_lag2", "pasture_px_km2_lag2", "crop_px_km2_lag2",
+    "pop_km2_lag_log", "gdp_cap_lag_log",
+    "cattle_dens_lag_log", "soy_filled_lag",
+    "spei_wet", "spei_dry"),
   no_pop = c("forest_ch_km2",
     "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
     "gdp_cap_lag_log",
+    "cattle_dens_lag_log", "soy_filled_lag",
+    "spei_wet", "spei_dry"),
+  no_inc = c("forest_ch_km2",
+    "forest_px_km2_lag", "pasture_px_km2_lag", "crop_px_km2_lag",
+    "pop_km2_lag_log",
     "cattle_dens_lag_log", "soy_filled_lag",
     "spei_wet", "spei_dry"),
   contemp = c("forest_ch_km2",
@@ -57,6 +67,12 @@ variables <- list(
     "spei_wet", "spei_dry"),
   no_land = c("forest_ch_km2",
     "forest_px_km2_lag",
+    "pop_km2_lag_log", "gdp_cap_lag_log",
+    "cattle_dens_lag_log", "soy_filled_lag",
+    "spei_wet", "spei_dry"),
+  all_land = c("forest_ch_km2",
+    "forest_px_km2_lag", "pasture_px_km2_lag", 
+    "crop_px_km2_lag", "cerr_px_km2_lag",
     "pop_km2_lag_log", "gdp_cap_lag_log",
     "cattle_dens_lag_log", "soy_filled_lag",
     "spei_wet", "spei_dry"))
@@ -78,14 +94,14 @@ n_burn <- 2000L
 sigma_a <- 10
 sigma_b <- 1
 beta_mean <- 0
-beta_var <- 10 ^ 8
+beta_var <- 10 ^ 6
 rho_a <- 1.01
 
 
 # Execute -----------------------------------------------------------------
 
 model <- "base"
-weights <- "qu"
+weights <- "k7"
 re_grid <- FALSE
 
 for(model in names(variables)) {

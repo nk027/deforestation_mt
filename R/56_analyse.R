@@ -25,6 +25,7 @@ mode <- function(x) {
 weights <- "qu"
 model <- "base"
 
+# Get asterisks from HPDI
 for(model in names(variables)) {
   
 vars <- variables[[model]][-1]
@@ -63,6 +64,7 @@ write.csv(tbl, paste0("txt/result_", model, "_", weights, ".csv"))
 }
 
 
+# Get values
 for(model in names(variables)) {
 
 vars <- variables[[model]][-1]
@@ -99,3 +101,24 @@ tbl <- rbind(tbl, ics)
 write.csv(tbl, paste0("txt/result-f_", model, "_", weights, ".csv"))
 
 }
+
+
+# Get HPDI
+model <- "base"
+weights <- "qu"
+
+vars <- variables[[model]][-1]
+load(file = paste0("data/est_", model, "_", weights, ".rda"))
+
+tbl <- list(
+  "sdm" = hpdi(out_sdm),
+  "sar" = hpdi(out_sar),
+  "slx" = hpdi(out_slx),
+  "clm" = hpdi(out_clm))
+
+rownames(tbl[[1]]) <- c("c", vars, "c_ind", paste0(vars, "_ind"), "rho")
+rownames(tbl[[2]]) <- c("c", vars, "c_ind", paste0(vars, "_ind"), "rho")
+rownames(tbl[[3]]) <- c("c", vars, paste0(vars, "_ind"))
+rownames(tbl[[4]]) <- c("c", vars)
+
+saveRDS(tbl, "data/result_hpdi.rds")

@@ -104,12 +104,18 @@ predict.sar <- function(x, n_draw = 100, newdata) {
   rhos <- x$rho[draws]
   betas <- x$beta[draws, ]
   W <- x$meta$W[seq(N), seq(N)]
-  A <- Matrix::.sparseDiagonal(N) - rhos[i] * W
   X <- build_X(newdata, const = TRUE,
-    tfe = x$meta$tfe, ife = x$meta$ife, n_time = 1, W = W)
+    tfe = x$meta$tfe, ife = x$meta$ife, n_time = 1, 
+    W = if(x$meta$LX) {W} else {NULL})
+  if(x$meta$tfe) {
+    X <- cbind(X[, colnames(X) != "ife"], 
+      matrix(0, nrow = nrow(X), ncol = sum(colnames(betas) == "tfe")),
+      X[, colnames(X) == "ife"])
+  }
   
   pred <- matrix(NA, nrow = N, ncol = n_draw)
   for(i in seq_len(n_draw)) {
+    A <- Matrix::.sparseDiagonal(N) - rhos[i] * W
     pred[, i] <- as.numeric(solve(A, X %*% betas[i, ]))
   }
   
@@ -127,8 +133,13 @@ predict.clm <- function(x, n_draw, newdata) {
   W <- x$meta$W[seq(N), seq(N)]
   X <- build_X(newdata, const = TRUE,
     tfe = x$meta$tfe, ife = x$meta$ife, n_time = 1, W = W)
+  if(x$meta$tfe) {
+    X <- cbind(X[, colnames(X) != "ife"], 
+      matrix(0, nrow = nrow(X), ncol = sum(colnames(betas) == "tfe")),
+      X[, colnames(X) == "ife"])
+  }
   
-  pred <- matrix(NA, nrow = x$meta$N, ncol = n_draw)
+  pred <- matrix(NA, nrow = N, ncol = n_draw)
   for(i in seq_len(n_draw)) {
     pred[, i] <- as.numeric(X %*% betas[i, ])
   }
