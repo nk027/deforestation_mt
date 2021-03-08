@@ -115,7 +115,7 @@ out_clm <- clm(x, LX = FALSE,
 
 save(out_sdm, out_sar, out_slx, out_clm,
   file = paste0("data/est_", names(model)[[1]], "_", weights,
-    if(agr_interact) {"_int"}, if(time_interact) {"_split"}, , ".rda"))
+    if(agr_interact) {"_int"}, if(time_interact) {"_split"}, ".rda"))
 
 
 # Estimate ----------------------------------------------------------------
@@ -129,12 +129,25 @@ summary.sar <- summary.clm <- function(x,
     hpd <- HPDinterval(mcmc(y), prob = p)
     c("low" = hpd[1], "mean" = mean(y), "up" = hpd[2])
   }))
-  if(!missing(var_names)) {
+  if(!is.null(var_names)) {
     rn <- rownames(out)
     rownames(out)[rn == "beta"] <- paste0(var_names, "_dir")
     rownames(out)[rn == "theta"] <- paste0(var_names, "_ind")
   }
   cbind(out, sign(out[, 1]) == sign(out[, 3]))
+}
+te.sar <- function(x, var_names = x$meta$var_names, p = 0.95) {
+  rhos <- c(mean(x$rho), HPDinterval(mcmc(x$rho), p = p))[c(2, 1, 3)]
+  betas <- t(apply(x$beta, 2, function(y) {
+    hpd <- HPDinterval(mcmc(y), prob = p)
+    c("low" = hpd[1], "mean" = mean(y), "up" = hpd[2])
+  }))
+  total <- matrix(NA_real_, nrow(betas), ncol(betas))
+  for(i in seq_along(rhos)) {
+    B <- solve(diag(x$meta$N) - rhos[i] * x$meta$W)
+    total[, i] <- sum(B) / x$meta$N * betas[, i]
+  }
+  total
 }
 plot.sar <- plot.clm <- function(x,
   var_names = x$meta$var_names, p = 0.95) {
@@ -148,7 +161,8 @@ plot.sar <- plot.clm <- function(x,
   }
   par(op)
 }
-summary(out_sdm, var_names)
+summary(out_sdm)
+eff <- effects.sar(out_sdm)
 plot(out_sdm, var_names)
 
 summary(out_sar, var_names)
