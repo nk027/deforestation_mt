@@ -168,6 +168,9 @@ source("R/72_municipio_plot.R")
 # Create a CSV file with summary statistics of the data used.
 source("R/73_summary_table.R")
 
+# Create a plot of Mato Gross's location in Brazil and biomes.
+source("R/74_variable_plot.R")
+
 # Create variable plots to summarise the data used.
 source("R/75_variable_plot.R")
 

@@ -225,3 +225,51 @@ hpdi_zero <- function(x) {
   return(structure(paste0(ifelse(not_zero > 0, sign, 0), "_", not_zero, "*"),
     names = names(not_zero)))
 }
+
+
+summary.sar <- summary.clm <- function(x,
+  var_names = x$meta$var_names, p = 0.95) {
+
+  pos <- !colnames(x$beta) %in% c("ife", "tfe")
+  out <- t(apply(x$beta[, pos], 2, function(y) {
+    hpd <- HPDinterval(mcmc(y), prob = p)
+    c("low" = hpd[1], "mean" = mean(y), "up" = hpd[2])
+  }))
+  if(!is.null(var_names)) {
+    rn <- rownames(out)
+    rownames(out)[rn == "beta"] <- paste0(var_names, "_dir")
+    rownames(out)[rn == "theta"] <- paste0(var_names, "_ind")
+  }
+  cbind(out, sign(out[, 1]) == sign(out[, 3]))
+}
+
+
+te.sar <- function(x, var_names = x$meta$var_names, p = 0.95) {
+
+  rhos <- c(mean(x$rho), HPDinterval(mcmc(x$rho), p = p))[c(2, 1, 3)]
+  betas <- t(apply(x$beta, 2, function(y) {
+    hpd <- HPDinterval(mcmc(y), prob = p)
+    c("low" = hpd[1], "mean" = mean(y), "up" = hpd[2])
+  }))
+  total <- matrix(NA_real_, nrow(betas), ncol(betas))
+  for(i in seq_along(rhos)) {
+    B <- solve(diag(x$meta$N) - rhos[i] * x$meta$W)
+    total[, i] <- sum(B) / x$meta$N * betas[, i]
+  }
+  total
+}
+
+
+plot.sar <- plot.clm <- function(x,
+  var_names = x$meta$var_names, p = 0.95) {
+
+  x_sm <- summary(x, var_names, p)
+  op <- par(mfrow = c(5, 5), mar = c(2, 2, 2, 0.5))
+  for(i in seq(nrow(x_sm))) {
+    densplot(mcmc(x$beta[, i]), main = rownames(x_sm)[i])
+    abline(v = 0, col = "#800080")
+    abline(v = x_sm[i, c(1, 3)], col = "darkgray", lty = 3)
+    abline(v = x_sm[i, 2], col = "#008080", lty = 2)
+  }
+  par(op)
+}

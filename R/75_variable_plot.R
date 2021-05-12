@@ -1,5 +1,6 @@
 
 library("tmap")
+library("dplyr")
 
 data <- readRDS("data/data.rds")
 
@@ -16,7 +17,9 @@ tm <- data %>% filter(date %in% 2006:2017) %>%
   tm_layout(legend.outside = TRUE, outer.margins = 0,
     legend.text.size = 0.45, bg.color = "transparent",
     legend.outside.position = "right", legend.outside.size = .175)
-# print(tm)
+
+print(tm)
+
 tmap_save(tm, "outputs/forest_change.png",
   height = 4, width = 5, bg = "transparent")
 tmap_save(tm, "outputs/forest_change.pdf",
