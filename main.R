@@ -168,7 +168,13 @@ source("R/72_municipio_plot.R")
 # Create a CSV file with summary statistics of the data used.
 source("R/73_summary_table.R")
 
-# Create a PNG file with a heatmap of the RMSEs of models over time.
-source("R/75_rmse_plot.R")
+# Create variable plots to summarise the data used.
+source("R/75_variable_plot.R")
+
+# Create a Sankey of land use flows.
+source("R/79_sankey.R")
+
+
+
 
 rm(list = ls()); gc()

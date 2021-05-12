@@ -70,3 +70,4 @@ p <- plotly::plot_ly(
     )
   )
 p
+plotly_IMAGE(p, format = "pdf", out_file = "output.pdf")

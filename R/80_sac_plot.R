@@ -1,5 +1,5 @@
 
-library(ggplot2)
+library("ggplot2")
 
 x <- 1:10
 y <- 1:10
@@ -16,7 +16,7 @@ ggplot(data, aes(x, y)) +
   scale_fill_viridis_c() +
   theme(legend.position = "none")
 
-ggsave("plots/spatial_autocorrelation_1.png", 
+ggsave("plots/spatial_autocorrelation_1.png",
        width = 8, height = 8, units = "cm")
 
 ggplot(data, aes(x, y)) +
@@ -25,7 +25,7 @@ ggplot(data, aes(x, y)) +
   scale_fill_viridis_c() +
   theme(legend.position = "none")
 
-ggsave("plots/spatial_autocorrelation_2.png", 
+ggsave("plots/spatial_autocorrelation_2.png",
        width = 8, height = 8, units = "cm")
 
 detach("package:ggplot2")

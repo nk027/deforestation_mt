@@ -123,8 +123,9 @@ sar <- function(
       beta_store[(i / n_thin), ] <- beta_draw
       sigma_store[(i / n_thin)] <- sigma_draw
       rho_store[(i / n_thin)] <- rho_draw
-      ll[(i / n_thin)] <- grid[["ldets"]][j] - ESS_draw / (2 * sigma_draw) +
-        beta_prob(rho_draw, rho_a)
+      ll[(i / n_thin)] <- grid[["ldets"]][j] - (N / 2) * log(2 * pi) -
+        (N / 2) * log(sigma_draw) - as.double(crossprod(Ay - X %*% beta_draw) /
+        (2 * sigma_draw))
     }
 
     if(verbose) {setTxtProgressBar(pb, (i + n_burn))}
@@ -245,7 +246,8 @@ clm <- function(
 
       beta_store[(i / n_thin), ] <- beta_draw
       sigma_store[(i / n_thin)] <- sigma_draw
-      ll[(i / n_thin)] <- -ESS_draw / (2 * sigma_draw)
+      ll[(i / n_thin)] <- -(N / 2) * log(2 * pi) - (N / 2) * log(sigma_draw) -
+        as.double(crossprod(y - X %*% beta_draw) / (2 * sigma_draw))
     }
 
     if(verbose) {setTxtProgressBar(pb, (i + n_burn))}

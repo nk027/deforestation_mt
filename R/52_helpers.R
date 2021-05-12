@@ -68,31 +68,22 @@ logLik.sar <- function(x, fun = mean) {
   A <- Matrix::.sparseDiagonal(x$meta$N) - rho * x$meta$W
   ldet <- log(det(A))
   ESS <- as.numeric(crossprod(A %*% x$meta$y - x$meta$X %*% beta))
+  N <- x$meta$N
 
-  ldet - ESS / (2 * sigma) + beta_prob(rho, x$priors$rho_a)
+  ldet - ((N / 2) * log(2 * pi)) - (N / 2) * log(sigma) - (ESS / (2 * sigma))
 }
+
 
 logLik.clm <- function(x, fun = mean) {
   beta <- apply(x$beta, 2, fun)
   sigma <- fun(x$sigma)
+  N <- x$meta$N
 
-  -as.numeric(crossprod(x$meta$y - x$meta$X %*% beta)) / (2 * sigma)
+  -(N / 2) * log(2 * pi) - (N / 2) * log(sigma) - as.numeric(crossprod(x$meta$y - x$meta$X %*% beta)) / (2 * sigma)
 }
 
 
-deviance.sar <- deviance.clm <- function(x, fun) {
-  if(missing(fun)) {-2 * x$ll} else {-2 * logLik(x, fun)}
-}
-
-AIC.sar <- AIC.clm <- function(x, fun) {deviance(x, fun) + 2 * x$meta$K}
-
-BIC.sar <- BIC.clm <- function(x, fun) {deviance(x, fun) + x$meta$K * log(x$meta$N)}
-
-DIC <- function(x) {UseMethod("DIC", x)}
-
-DIC.sar <- DIC.clm <- function(x) {
-  2 * mean(deviance(x)) - 2 * logLik(x, fun = mean)
-}
+BIC.sar <- BIC.clm <- function(x, fun) {-2 * logLik(x) + x$meta$K * log(x$meta$N)}
 
 
 predict.sar <- function(x, n_draw = 100, newdata) {

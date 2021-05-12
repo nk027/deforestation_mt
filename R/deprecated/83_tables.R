@@ -56,7 +56,7 @@ stars[is.na(stars)] <- 0
 
 for(j in seq(2, ncol(tbl))) {
   for(i in seq(nrow(stars))) {
-    tbl[i + 1, j] <- paste0(tbl[i + 1, j], " ", 
+    tbl[i + 1, j] <- paste0(tbl[i + 1, j], " ",
       paste0(rep("*", as.numeric(stars[i, j])), collapse = ""))
   }
 }

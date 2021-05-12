@@ -52,9 +52,22 @@ re_grid <- FALSE
 agr_interact <- FALSE
 time_interact <- FALSE
 
+# Estimate all
+todo <- expand.grid(data.frame(
+  "agr_interact" = c(TRUE, FALSE),
+  "time_interact" = c(TRUE, FALSE)
+))
+todo$weight <- "qu"
+# Lazy for k5 here
+todo <- rbind(todo, c(TRUE, TRUE, "k5"))
+
+
 # Estimate ----------------------------------------------------------------
 
-
+# for(i in seq_len(nrow(todo))) {
+#   weight <- todo[i, "weight"]
+#   agr_interact <- todo[i, "agr_interact"]
+#   time_interact <- todo[i, "time_interact"]
 
 x <- get_matrix(data,
   if(agr_interact) {c(model[[1]], "biome_a")} else {model[[1]]}, dates)
@@ -117,8 +130,10 @@ save(out_sdm, out_sar, out_slx, out_clm,
   file = paste0("data/est_", names(model)[[1]], "_", weights,
     if(agr_interact) {"_int"}, if(time_interact) {"_split"}, ".rda"))
 
+# }
 
-# Estimate ----------------------------------------------------------------
+
+# Analyse -----------------------------------------------------------------
 
 library("coda")
 
@@ -199,27 +214,34 @@ mt <- st_union(map %>% filter(mt))
 biome <- st_read("data/biomes_brazil") %>%
   select(name = Name) %>% st_transform(st_crs(mt))
 biome_mt <- st_intersection(biome, mt)
-
+#fbb4ae
+#b3cde3
+#ccebc5
+#decbe4
+cols <- c("#8dd3c7", "#ffffb3", "#e3e3e3", "#bebada")
+cols <- c("#ccebc5", "#fbb4ae", "#decbe4", "#b3cde3")
+names(cols) <- c("Amazônia", "Cerrado", "Other", "Pantanal")
 tm <- tm_shape(bra) +
   tm_borders() +
-tm_shape(biome_mt) +
-  tm_fill("name", alpha = 1, title = "Biome", legend.show = FALSE,
-    palette = c("#8dd3c7", "#ffffb3", "#bebada")) +
-tm_shape(biome %>%
-  mutate(name = ifelse(grepl("Cerr|Pant|Amaz", name), name, "Other"))) +
-  tm_fill("name", alpha = 0.5, legend.show = FALSE,
-    palette = c("#8dd3c7", "#ffffb3", "#e3e3e3", "#bebada")) +
-tm_add_legend(type = "fill", size = 3,
-  col = c("#8dd3c7", "#ffffb3", "#e3e3e3", "#bebada"),
-  labels = c("Amazônia", "Cerrado", "Other", "Pantanal"), title = "Biome") +
-tm_shape(mt) +
-  tm_borders(lwd = 2) +
-  tm_scale_bar(c(0, 500, 1000), position = "left", text.size = 0.9) +
-tm_layout(outer.margins = 0, bg.color = "transparent",
-  legend.outside.position = "right",
-  legend.text.size = 0.9, legend.title.size = 1.2)
-# print(tm)
+  tm_shape(biome_mt) +
+    tm_fill("name", alpha = 1, title = "Biome", legend.show = FALSE,
+      palette = cols[-3]) +
+  tm_shape(biome %>%
+    mutate(name = ifelse(grepl("Cerr|Pant|Amaz", name), name, "Other"))) +
+    tm_fill("name", alpha = 0.5, legend.show = FALSE,
+      palette = cols) +
+  tm_add_legend(type = "fill", size = 3,
+    col = cols,
+    labels = names(cols), title = "Biome") +
+  tm_shape(mt) +
+    tm_borders(lwd = 2) +
+    tm_scale_bar(c(0, 500, 1000), position = "left", text.size = 1.2) +
+  tm_layout(frame = FALSE,
+    outer.margins = 0, bg.color = "transparent",
+    legend.outside.position = "right",
+    legend.text.size = 1.2, legend.title.size = 1.8)
+print(tm)
 tmap_save(tm, "outputs/brazil_location.png",
-  height = 4, width = 5, bg = "transparent")
+  height = 5, width = 6, bg = "transparent")
 tmap_save(tm, "outputs/brazil_location.pdf",
-  height = 4, width = 5, bg = "transparent")
+  height = 5, width = 6, bg = "transparent")

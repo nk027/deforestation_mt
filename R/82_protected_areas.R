@@ -6,6 +6,7 @@ library("ggspatial")
 x <- st_read("/home/luckeneder/mining_geographies/input/WDPA/mt.shp")
 
 y <- readRDS("data/data.rds")
+
 y <- y[y$date == 2010, ]
 x <- st_transform(x, crs = st_crs(y))
 
