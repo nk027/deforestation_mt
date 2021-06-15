@@ -128,6 +128,6 @@ out_clm <- clm(x, LX = FALSE,
 
 save(out_sdm, out_sar, out_slx, out_clm,
   file = paste0("data/est_", names(model)[[1]], "_", weights,
-    if(agr_interact) {"_int"}, if(time_interact) {"_split"}, ".rda"))
+    if(agr_interact) {"_biome"}, if(time_interact) {"_time"}, ".rda"))
 
 }
