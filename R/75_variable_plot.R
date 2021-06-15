@@ -16,6 +16,7 @@ tm <- data %>% filter(date %in% 2006:2017) %>%
   tm_facets(by = "date") +
   tm_layout(legend.outside = TRUE, outer.margins = 0,
     legend.text.size = 0.45, bg.color = "transparent",
+    fontfamily = "Helvetica",
     legend.outside.position = "right", legend.outside.size = .175)
 
 print(tm)

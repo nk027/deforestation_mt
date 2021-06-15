@@ -1,5 +1,6 @@
 
 library("tmap")
+library("sf")
 library("dplyr")
 
 map <- st_read("data/municipios") %>%
@@ -32,7 +33,7 @@ tm <- tm_shape(bra) +
     tm_scale_bar(c(0, 500, 1000), position = "left", text.size = 1.2) +
   tm_layout(frame = FALSE,
     outer.margins = 0, bg.color = "transparent",
-    legend.outside.position = "right",
+    legend.outside.position = "right", fontfamily = "Helvetica",
     legend.text.size = 1.2, legend.title.size = 1.8)
 
 print(tm)
