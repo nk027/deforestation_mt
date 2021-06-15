@@ -64,10 +64,10 @@ todo <- rbind(todo, c(TRUE, TRUE, "k5"))
 
 # Estimate ----------------------------------------------------------------
 
-# for(i in seq_len(nrow(todo))) {
-#   weight <- todo[i, "weight"]
-#   agr_interact <- todo[i, "agr_interact"]
-#   time_interact <- todo[i, "time_interact"]
+for(i in seq_len(nrow(todo))) {
+  weight <- todo[i, "weight"]
+  agr_interact <- todo[i, "agr_interact"]
+  time_interact <- todo[i, "time_interact"]
 
 x <- get_matrix(data,
   if(agr_interact) {c(model[[1]], "biome_a")} else {model[[1]]}, dates)
@@ -130,5 +130,4 @@ save(out_sdm, out_sar, out_slx, out_clm,
   file = paste0("data/est_", names(model)[[1]], "_", weights,
     if(agr_interact) {"_int"}, if(time_interact) {"_split"}, ".rda"))
 
-# }
-
+}

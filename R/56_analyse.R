@@ -18,7 +18,10 @@ source("R/52_helpers.R")
 
 data <- readRDS("data/data.rds")
 
-models <- load("data/est_extended_qu.rda")
+paths <- paste0("data/est_extended_qu", c("", "_int", "_split"), ".rda")
+p <- paths[1]
+for(p in paths) {
+models <- load(p)
 
 summary(out_sdm)
 summary(out_sar)
@@ -28,7 +31,8 @@ summary(out_clm)
 plot(out_sdm)
 
 eff_sdm <- effects(out_sdm, n_draw = 10000)
-
+saveRDS(eff_sdm, paste0("outputs/", gsub(".*/(.*).rda", "\\1.rds", p)))
+}
 
 # Magnitude results -----
 
