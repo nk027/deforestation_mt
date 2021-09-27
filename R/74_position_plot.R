@@ -80,6 +80,7 @@ map_sa <- rbind(
 #   st_transform(crs = sirgas)
 # Instead, we use the maps from <ftp://geoftp.ibge.gov.br/>
 map_bra <- st_read("data/states") %>%
+  mutate(MT = NM_ESTADO == "MATO GROSSO") %>%
   st_transform(crs = sirgas)
 map_mt <- st_read("data/municipios") %>%
   filter(CD_GEOCMU > 5050000 & CD_GEOCMU < 5200000) %>%

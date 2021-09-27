@@ -22,15 +22,15 @@ for(j in seq(ncol(x))) {
   x[[j]] <- ifelse(!x[[j]] %in% c(1, 2, 3, 4), 5, x[[j]])
 }
 
-flow1 <- x %>% group_by(start = val_01, end = val_06) %>% summarise(count = n())
+flow1 <- x %>% group_by(start = val_01, end = val_05) %>% summarise(count = n())
 flow1$end <- flow1$end + 5
-flow2 <- x %>% group_by(start = val_06, end = val_09) %>% summarise(count = n())
+flow2 <- x %>% group_by(start = val_05, end = val_09) %>% summarise(count = n())
 flow2$start <- flow2$start + 5
 flow2$end <- flow2$end + 5 * 2
-flow3 <- x %>% group_by(start = val_09, end = val_12) %>% summarise(count = n())
+flow3 <- x %>% group_by(start = val_09, end = val_13) %>% summarise(count = n())
 flow3$start <- flow3$start + 5 * 2
 flow3$end <- flow3$end + 5 * 3
-flow4 <- x %>% group_by(start = val_12, end = val_17) %>% summarise(count = n())
+flow4 <- x %>% group_by(start = val_13, end = val_17) %>% summarise(count = n())
 flow4$start <- flow4$start + 5 * 3
 flow4$end <- flow4$end + 5 * 4
 flow <- rbind(flow1, flow2, flow3, flow4)
@@ -43,7 +43,7 @@ colour <- rep(c("#aaaaaa", "#C18FE3", "#10773e", "#E8D313", "#eeeeee"), 5) # Cer
 labels <- c("Cerrado", "Croplands", "Forest", "Pasture", "Other")
 
 labels <- paste0(labels, " '",
-  rep(c("01", "06", "09", "12", "17"), each = length(labels)))
+  rep(c("01", "05", "09", "13", "17"), each = length(labels)))
 
 
 library("plotly")
@@ -116,3 +116,11 @@ p <- networkD3::sankeyNetwork(
   nodeWidth = 48, fontSize = 16, fontFamily = "Helvetica",
   iterations = 0)
 p
+
+# Then we grab the SVG using size-adjusted Chromium
+# wmctrl -r Chromium -e 0,0,0,1440,900
+# Manually fix the height and width in the SVG (1440px * 800px)
+# Convert to PDF
+# cairosvg sankey.svg -o sankey.pdf
+# And crop to relevant parts
+# pdfcrop sankey.pdf sankey.pdf
