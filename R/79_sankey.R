@@ -38,39 +38,14 @@ flow <- flow %>% filter(start != end - 5)
 
 saveRDS(flow, "data/lu_flows.rds")
 flow <- readRDS("data/lu_flows.rds")
+flow <- flow %>% mutate(count = count * (231.6564) ^ 2 / 1e6)
+# 1 px is 231.6564m^2, convert to 1 km^2
 
 colour <- rep(c("#aaaaaa", "#C18FE3", "#10773e", "#E8D313", "#eeeeee"), 5) # Cerrado: "#C48410"
 labels <- c("Cerrado", "Croplands", "Forest", "Pasture", "Other")
 
 labels <- paste0(labels, " '",
   rep(c("01", "05", "09", "13", "17"), each = length(labels)))
-
-
-library("plotly")
-
-p <- plotly::plot_ly(
-  type = "sankey",
-  orientation = "h",
-  node = list(
-    label = labels,
-    color = colour,
-    pad = 5,
-    thickness = 50,
-    line = list(color = "black", width = 0.5)
-  ),
-  link = list( # 0 Indexed
-    source = flow[[1]] - 1,
-    target = flow[[2]] - 1,
-    value = flow[[3]],
-    color = paste0(colour, "44")[flow[[1]]]
-  )
-) %>%
-  plotly::layout(
-    title = "",
-    font = list(size = 16)
-  )
-p
-
 
 library("networkD3")
 library("sankeyD3")
@@ -84,8 +59,8 @@ nodes <- nodes[c(3, 4, 2, 1, 5) + rep(c(0, 5, 10, 15, 20), each = 5), ]
 flow$id_source <- match(flow$start, nodes$id) - 1
 flow$id_target <- match(flow$end, nodes$id) - 1
 flow$group <- nodes$name[match(flow$start, nodes$id)]
-# Change count from 232m^2 to 1km^2
-flow$count <- flow$count * 231.6564 ^ 2 / 1e6
+# Change count from 232m^2 to 1km^2 # Done above -- bug!
+# flow$count <- flow$count * 231.6564 ^ 2 / 1e6
 
 d3_cols <- paste0(unique(nodes$colour), "88", collapse = '", "')
 # d3_colour <- paste('d3.scaleOrdinal(["', d3_colour, '"])')
@@ -106,16 +81,6 @@ p <- sankeyNetwork(
 p
 
 saveNetwork(p, file = "outputs/sankey.html")
-
-p <- networkD3::sankeyNetwork(
-  Links = flow, Nodes = nodes,
-  Source = "id_source", Target = "id_target", NodeID = "name",
-  LinkGroup = "group",
-  Value = "count", units = "km²",
-  colourScale = d3_colour,
-  nodeWidth = 48, fontSize = 16, fontFamily = "Helvetica",
-  iterations = 0)
-p
 
 # Then we grab the SVG using size-adjusted Chromium
 # wmctrl -r Chromium -e 0,0,0,1440,900

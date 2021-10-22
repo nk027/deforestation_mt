@@ -1,59 +1,16 @@
 
-library("tmap")
-library("sf")
-library("dplyr")
-library("grid")
+# Dependencies ------------------------------------------------------------
 
-map <- st_read("data/municipios") %>%
-  mutate(mt = CD_GEOCMU > 5050000 & CD_GEOCMU < 5200000)
-bra <- st_union(map)
-mt <- st_union(map %>% filter(mt))
-biome <- st_read("data/biomes_brazil") %>%
-  select(name = Name) %>% st_transform(st_crs(mt))
-biome_mt <- st_intersection(biome, mt)
-biome <- biome %>% mutate(name = ifelse(name == "Amazônia", "Amazon", name))
-biome_mt <- biome_mt %>% mutate(name = ifelse(name == "Amazônia", "Amazon", name))
-
-cols <- c("#8dd3c7", "#ffffb3", "#e3e3e3", "#bebada")
-cols <- c("#ccebc5", "#fbb4ae", "#decbe4", "#b3cde3")
-names(cols) <- c("Amazon", "Cerrado", "Other", "Pantanal")
-
-tm <- tm_shape(bra) +
-  tm_borders() +
-  tm_shape(biome_mt) +
-    tm_fill("name", alpha = 1, title = "Biome", legend.show = FALSE,
-      palette = cols[-3]) +
-  tm_shape(biome %>%
-    mutate(name = ifelse(grepl("Cerr|Pant|Amaz", name), name, "Other"))) +
-    tm_fill("name", alpha = 0.5, legend.show = FALSE,
-      palette = cols) +
-  tm_add_legend(type = "fill", size = 3,
-    col = cols[c(1, 2, 4, 3)],
-    labels = names(cols[c(1, 2, 4, 3)]), title = "Biome") +
-  tm_shape(mt) +
-    tm_borders(lwd = 2) +
-    tm_scale_bar(c(0, 500, 1000), position = "left", text.size = 1.2) +
-  tm_layout(frame = FALSE,
-    outer.margins = 0, bg.color = "transparent",
-    legend.outside.position = "right", fontfamily = "Helvetica",
-    legend.text.size = 1.2, legend.title.size = 1.8)
-
-print(tm)
-
-tmap_save(tm, "outputs/brazil_location.png",
-  height = 5, width = 6, bg = "transparent")
-tmap_save(tm, "outputs/brazil_location.pdf",
-  height = 5, width = 6, bg = "transparent")
-
-
-# Update ---
-
-library("tmap")
-library("sf")
-library("dplyr")
-library("grid")
+stopifnot(
+  require("tmap"),
+  require("sf"),
+  require("dplyr")
+)
 
 sirgas <- "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs"
+
+
+# Data --------------------------------------------------------------------
 
 # Obtained from <gadm.org>
 map_sa <- rbind(
@@ -90,6 +47,9 @@ map_bio <- st_read("data/biomes_brazil") %>%
   mutate(name = ifelse(name == "Amazônia", "Amazon", name)) %>%
   mutate(name = ifelse(grepl("Cerr|Pant|Amaz", name), name, "Other"))
 
+
+# Setup -------------------------------------------------------------------
+
 bbx <- st_bbox(filter(map_bra))
 bbx[3] <- bbx[3] - 5 # Cut out Atlantic islands
 bbx_mt <- st_bbox(map_mt)
@@ -97,6 +57,9 @@ bbx_mt <- st_bbox(map_mt)
 # cols <- c("#ccebc5", "#fbb4ae", "#eeeeee", "#b3cde3")
 cols <- c("#16A455", "#DBAF02", "#eeeeee", "#2D4391")
 names(cols) <- c("Amazon", "Cerrado", "Other", "Pantanal")
+
+
+# Maps --------------------------------------------------------------------
 
 p1 <- tm_shape(map_bio, bbox = bbx) +
   tm_graticules(labels.size = 1.2, lwd = 0.25, n.y = 3, n.x = 3) +
@@ -154,3 +117,8 @@ p2 <- tm_shape(st_intersection(map_bio, map_mt),
 tmap_save(p2, "outputs/brazil_2.png", dpi = 300,
   height = 2000, width = 2200, bg = "transparent",
   insets_tm = list(p2i), insets_vp = list(vp2))
+
+
+detach("package:tmap")
+detach("package:sf")
+detach("package:dplyr")
